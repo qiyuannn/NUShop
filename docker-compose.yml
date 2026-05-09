@@ -1,0 +1,18 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres
+
+    environment:
+      POSTGRES_USER: qiyuan
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: orbital
+    
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - orbital:/var/lib/postgresql/data
+
+volumes:
+  orbital:

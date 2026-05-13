@@ -8,6 +8,11 @@ import (
 
 type LoginRequest struct {
 	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type AccountCreationRequest struct {
+	Username string `json:"username"`
 	Email string `json:"email"`
 	Password string `json:"password"`
 }
@@ -20,7 +25,7 @@ type User struct {
 	Created_on time.Time `json:"created_on"`
 }
 
-type Listings struct {
+type Listing struct {
 	ID uuid.UUID `json:"id"`
 	Seller_id uuid.UUID `json:"seller_id"`
 	Title string `json:"title"`

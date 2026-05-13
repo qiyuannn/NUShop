@@ -1,3 +1,4 @@
+// handlers for all account related stuff
 package handlers
 
 import (
@@ -5,6 +6,7 @@ import (
 	"backend/models"
 	"backend/response"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -19,16 +21,16 @@ import (
 // 23502 - not null
 
 func CreateUser(c *gin.Context) {
-	var request models.LoginRequest
+	var request models.AccountCreationRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
-		response.Error(c, err, http.StatusBadRequest, "INVALID_REQUEST", "invalid request body")
+		c.Error(response.ErrBadRequest(err))
 		return
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
 	if err != nil {
-		response.Error(c, err, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
+		c.Error(response.ErrInternalServerError(err))
 		return
 	}
 
@@ -40,12 +42,12 @@ func CreateUser(c *gin.Context) {
 	if err != nil {
 		if pgErr, ok := err.(*pgconn.PgError); ok {
 			if pgErr.Code == "23505" {
-				response.Error(c, err, http.StatusConflict, "USERNAME_EXISTS", "username already exists")
+				c.Error(response.ErrStatusConflict(err))
 				return 
 			}
 		}
 
-		response.Error(c, err, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
+		c.Error(response.ErrInternalServerError(err))
 		return
 	}
 
@@ -59,7 +61,7 @@ func Login(c *gin.Context) {
 	var request models.LoginRequest
 
 	if err := c.ShouldBindJSON(&request); err != nil {
-		response.Error(c, err, http.StatusBadRequest, "INVALID_REQUEST", "invalid request body")
+		c.Error(response.ErrBadRequest(err))
 		return
 	}
 
@@ -69,18 +71,18 @@ func Login(c *gin.Context) {
 		"SELECT username, password_hash FROM users WHERE username = $1 ",
 		request.Username,
 	).Scan(&user.Username, &user.Password_hash); err != nil {
-		response.Error(c, err, http.StatusUnauthorized, "UNAUTHORISED", "wrong username/password")
+		c.Error(response.ErrUnauthorised(err))
 		return
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password_hash), []byte(request.Password)); err != nil {
-		response.Error(c, err, http.StatusUnauthorized, "UNAUTHORISED", "wrong username/password")
+		c.Error(response.ErrUnauthorised(err))
 		return
 	}
 
 	token, err := GenerateJWT(user.Username)
 	if err != nil {
-		response.Error(c, err, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
+		c.Error(response.ErrInternalServerError(err))
 		return
 	}
 
@@ -99,6 +101,6 @@ func GenerateJWT(username string) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
 
-	return token.SignedString([]byte("austin so gay"))
+	return token.SignedString([]byte(os.Getenv("secret")))
 }
 

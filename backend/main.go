@@ -2,6 +2,7 @@ package main
 
 import (
 	"backend/database"
+	"backend/response"
 	"log"
 	"os"
 
@@ -11,6 +12,8 @@ import (
 func main() {
 	db.Connect()
 	router := gin.Default()
+	router.Use(response.ErrorHandler())
+
 
 	port := os.Getenv("PORT") 
 	if port == "" {

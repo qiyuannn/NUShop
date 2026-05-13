@@ -2,6 +2,7 @@ package main
 
 import (
 	"backend/database"
+	"backend/handlers"
 	"backend/response"
 	"log"
 	"os"
@@ -13,6 +14,7 @@ func main() {
 	db.Connect()
 	router := gin.Default()
 	router.Use(response.ErrorHandler())
+	router.GET("/categories", handlers.GetCategories)
 
 
 	port := os.Getenv("PORT") 

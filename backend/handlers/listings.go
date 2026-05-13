@@ -15,9 +15,12 @@ import (
 )
 
 type ListingsQuery struct{
+	SellerID uuid.UUID `form:"seller_id"`
 	Search string `form:"search"`
+	MinPrice int64 `form:"min_price" binding:"gte=0,ltefield=MaxPrice"`
+	MaxPrice int64 `form:"max_price" binding:"gte=0,gtefield=MinPrice"` 
 	Category string `form:"category"`
-	Limit int `form:"limit,default=20" binding:"min=1,max=100"`
+	Limit int `form:"limit,default=20" binding:"gte=1,lte=100"`
 
 	CursorTime time.Time `form:"cursor_time"`
 	CursorID uuid.UUID `form:"cursor_id"`
@@ -34,9 +37,26 @@ func getListings(c *gin.Context) {
 	args := []interface{}{}
 	argsIndex := 1
 
+	if query.SellerID != uuid.Nil {
+		conditions = append(conditions, "seller_id = $" + strconv.Itoa(argsIndex))
+		args = append(args, query.SellerID)
+		argsIndex ++
+	}
+
 	if query.Search != "" {
 		conditions = append(conditions, "title ILIKE $" + strconv.Itoa(argsIndex))
 		args = append(args, "%" + query.Search + "%")
+		argsIndex ++
+	}
+	if query.MinPrice > 0 {
+		conditions = append(conditions, "price >= $" + strconv.Itoa(argsIndex))
+		args = append(args, query.MinPrice)
+		argsIndex ++
+	}
+
+	if query.MaxPrice != 0 {
+		conditions = append(conditions, "price <= $" + strconv.Itoa(argsIndex))
+		args = append(args, query.MaxPrice)
 		argsIndex ++
 	}
 
@@ -54,7 +74,7 @@ func getListings(c *gin.Context) {
 	}
 
 	if !query.CursorTime.IsZero() && query.CursorID != uuid.Nil {
-		conditions = append(conditions, "(created_on, id) > ($" + strconv.Itoa(argsIndex) + ",$" + strconv.Itoa(argsIndex + 1) + ")")
+		conditions = append(conditions, "(created_on, id) < ($" + strconv.Itoa(argsIndex) + ",$" + strconv.Itoa(argsIndex + 1) + ")")
 		args = append(args, query.CursorTime, query.CursorID)
 		argsIndex += 2
 	}
@@ -65,7 +85,7 @@ func getListings(c *gin.Context) {
 		sqlQuery += " WHERE " + strings.Join(conditions, " AND ")
 	}
 	
-	sqlQuery += " ORDER BY created_on ASC, id ASC"
+	sqlQuery += " ORDER BY created_on DESC, id DESC"
 	
 	sqlQuery += " LIMIT " + strconv.Itoa(query.Limit + 1)
 

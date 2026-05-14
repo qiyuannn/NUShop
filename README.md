@@ -1,9 +1,33 @@
-postgresql:
-  docker compose up -d postgres
-  docker compose run --rm migrate (sql migration) // only need to run when db schema changes
+# PostgreSQL
+## start Postgres
+```bash
+docker compose up -d postgres
+```
+## sql migration
+```bash
+docker compose run --rm migrate
+```
+Only need to run when database schema changes 
 
-  to open psql terminal:
-    bash: docker exec -it postgres psql -U user -d orbital
+---
+## open psql terminal 
+```bash
+docker exec -it postgres psql -U user -d orbital
+```
+psql commands
+---
+### describe table structure
+```sql
+\d table_name
+```
+### quit
+```sql
+\q
+```
 
-go:
-  go run .
+# Go
+## start go
+```bash
+go run .
+```
+

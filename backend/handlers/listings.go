@@ -14,7 +14,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type ListingsQuery struct{
+type getListingsQuery struct{
 	SellerID uuid.UUID `form:"seller_id"`
 	Search string `form:"search"`
 	MinPrice int64 `form:"min_price" binding:"gte=0,ltefield=MaxPrice"`
@@ -27,7 +27,7 @@ type ListingsQuery struct{
 }
 
 func getListings(c *gin.Context) {
-	var query ListingsQuery
+	var query getListingsQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
 		c.Error(response.ErrBadRequest(err))
 		return 

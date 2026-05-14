@@ -27,13 +27,13 @@ type User struct {
 
 type Listing struct {
 	ID uuid.UUID `json:"id"`
-	Seller_id uuid.UUID `json:"seller_id"`
+	SellerID uuid.UUID `json:"seller_id"`
 	Title string `json:"title"`
 	Description string `json:"description"`
-	Price int64 `json:"price"`
-	Quantity int64 `json:"quantity"`
+	Price int64 `json:"price" binding:"gte=0"`
+	Quantity int64 `json:"quantity" binding:"gte=0"`
 	Category uuid.UUID `json:"category"`
-	Created_on time.Time `json:"created_on"`
+	CreatedOn time.Time `json:"created_on"`
 }
 
 type Category struct {

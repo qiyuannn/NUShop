@@ -12,6 +12,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 type getListingsQuery struct{
@@ -26,7 +28,15 @@ type getListingsQuery struct{
 	CursorID uuid.UUID `form:"cursor_id"`
 }
 
-func getListings(c *gin.Context) {
+type CreateListingBody struct {
+	Title string `json:"title"`
+	Description string `json:"description"`
+	Price int64 `json:"price" binding:"gte=0"`
+	Quantity int64 `json:"quantity" binding:"gte=0"`
+	Category uuid.UUID `json:"category"`
+}
+
+func GetListings(c *gin.Context) {
 	var query getListingsQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
 		c.Error(response.ErrBadRequest(err))
@@ -106,7 +116,7 @@ func getListings(c *gin.Context) {
 
 	for rows.Next() {
 		var l models.Listing
-		if err := rows.Scan(&l.ID, &l.Seller_id, &l.Title, &l.Description, &l.Price, &l.Quantity, &l.Category, &l.Created_on); err != nil {
+		if err := rows.Scan(&l.ID, &l.SellerID, &l.Title, &l.Description, &l.Price, &l.Quantity, &l.Category, &l.CreatedOn); err != nil {
 			c.Error(response.ErrInternalServerError(err))
 			return
 		}
@@ -118,8 +128,8 @@ func getListings(c *gin.Context) {
 		return
 	}
 
-	var hasMore bool = len(listings) > query.Limit
-	var meta response.Meta = response.Meta{
+	hasMore := len(listings) > query.Limit
+	meta := response.Meta{
 		HasMore: hasMore,
 	}
 
@@ -130,11 +140,184 @@ func getListings(c *gin.Context) {
 	if len(listings) > 0 {
 		last := listings[len(listings) - 1]
 		meta.CursorID = last.ID
-		meta.CursorTimeStamp = last.Created_on
+		meta.CursorTimeStamp = last.CreatedOn
 	}
 
 	c.JSON(http.StatusOK, response.Response{
 		Data: listings,
 		Meta: &meta,
+	})
+}
+
+func DeleteListing(c *gin.Context) {
+	userIDValue, ok := c.Get("user_id")
+	if !ok {
+		c.Error(response.ErrUnauthorised(errors.New("user not logged in")))
+		return
+	}
+	userID, ok := userIDValue.(uuid.UUID)
+	if !ok {
+		c.Error(response.ErrInternalServerError(errors.New("invalid auth context")))
+		return
+	}
+
+	listingIDValue := c.Param("postID")
+	listingID, err := uuid.Parse(listingIDValue)
+	if err != nil {
+		c.Error(response.ErrBadRequest(err))
+		return 
+	}
+
+	var deletedID uuid.UUID
+	if err := db.Pool.QueryRow(
+		c.Request.Context(),
+		"DELETE FROM listings WHERE id = $1 AND seller_id = $2 RETURNING id ",
+		listingID, userID,
+	).Scan(&deletedID); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			c.Error(response.ErrNotFound(err))
+			return
+		}
+
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+
+	response.Success(c, http.StatusOK, gin.H{
+		"listing_id": listingID,
+		"message": "listing deleted",
+	})
+}
+
+func CreateListing(c *gin.Context) {
+	userIDValue, ok := c.Get("user_id")
+	if !ok {
+		c.Error(response.ErrUnauthorised(errors.New("user not logged in")))
+		return
+	}
+	userID, ok := userIDValue.(uuid.UUID)
+	if !ok {
+		c.Error(response.ErrInternalServerError(errors.New("invalid auth context")))
+		return
+	}
+
+	var listing CreateListingBody
+	if err := c.ShouldBindJSON(&listing); err != nil {
+		c.Error(response.ErrBadRequest(err))
+		return
+	}
+	
+	var insertedListing models.Listing
+	if err := db.Pool.QueryRow(
+		c.Request.Context(),
+		`INSERT INTO listings (seller_id, title, description, price, quantity, category_id) 
+		VALUES ($1, $2, $3, $4, $5, $6) 
+		RETURNING id, seller_id, title, description, price, quantity, category_id, created_on`,
+		userID, listing.Title, listing.Description, listing.Price, listing.Quantity, listing.Category,
+	).Scan(&insertedListing.ID, &insertedListing.SellerID, &insertedListing.Title,
+		&insertedListing.Description, &insertedListing.Price, &insertedListing.Quantity, 
+		&insertedListing.Category, &insertedListing.CreatedOn,
+		); err != nil {
+		if pgErr, ok := err.(*pgconn.PgError); ok {
+			switch pgErr.Code {
+				case "23502": 
+					c.Error(response.ErrBadRequest(errors.New("db not null violation")))
+					return
+				case "23503":
+					c.Error(response.ErrBadRequest(errors.New("foreign key violation")))
+					return
+				case "23514":
+					c.Error(response.ErrBadRequest(errors.New("invalid data")))
+					return
+			}
+		} 
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+
+	response.Success(c, http.StatusCreated, gin.H{
+		"listing": insertedListing,
+		"message": "created",
+	})
+}
+
+func updateListing(c *gin.Context){
+	userIDValue, ok := c.Get("user_id")
+	if !ok {
+		c.Error(response.ErrUnauthorised(errors.New("user not logged in")))
+		return
+	}
+	userID, ok := userIDValue.(uuid.UUID)
+	if !ok {
+		c.Error(response.ErrInternalServerError(errors.New("invalid auth context")))
+		return
+	}
+
+	var listing CreateListingBody
+	if err := c.ShouldBindJSON(&listing); err != nil {
+		c.Error(response.ErrBadRequest(err))
+		return
+	}
+
+	idVal := c.Param("id")
+	id, err := uuid.Parse(idVal)
+	if err != nil {
+		c.Error(response.ErrBadRequest(errors.New("invalid post id")))
+		return
+	}
+
+	var updatedListing models.Listing
+
+	if err := db.Pool.QueryRow(
+		c.Request.Context(),
+		`UPDATE listings SET
+		title = $1,
+		description = $2,
+		price = $3,
+		quantity = $4,
+		category_id = $5
+		WHERE id = $6 AND seller_id = $7 
+		RETURNING id, seller_id, title, description, price, quantity, category_id, created_on`,
+		listing.Title,
+		listing.Description,
+		listing.Price,
+		listing.Quantity,
+		listing.Category,
+		id,
+		userID,
+	).Scan(
+		&updatedListing.ID,
+		&updatedListing.SellerID,
+		&updatedListing.Title,
+		&updatedListing.Description,
+		&updatedListing.Price,
+		&updatedListing.Quantity,
+		&updatedListing.Category,
+		&updatedListing.CreatedOn,
+	); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			c.Error(response.ErrNotFound(errors.New("listing does not exist")))
+			return
+		}
+		if pgErr, ok := err.(*pgconn.PgError); ok {
+			switch pgErr.Code {
+				case "23502": 
+					c.Error(response.ErrBadRequest(errors.New("db not null violation")))
+					return
+				case "23503":
+					c.Error(response.ErrBadRequest(errors.New("foreign key violation")))
+					return
+				case "23514":
+					c.Error(response.ErrBadRequest(errors.New("invalid data")))
+					return
+			}
+		} 
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+
+	response.Success(c, http.StatusOK, gin.H{
+		"listing": updatedListing,
+		"message": "updated listing",
 	})
 }

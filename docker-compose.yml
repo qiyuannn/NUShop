@@ -14,5 +14,16 @@ services:
     volumes:
       - orbital:/var/lib/postgresql/data
 
+  migrate: 
+    image: migrate/migrate
+
+    volumes:
+      - ./migrations:/migrations
+
+    depends_on:
+      - postgres
+
+    command: "-path=/migrations -database='postgres://user:password@postgres:5432/orbital?sslmode=disable' up"
+
 volumes:
   orbital:

@@ -1,8 +1,8 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TABLE listings (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    seller_id UUID REFERENCES users(id) 
+    uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    seller_id UUID REFERENCES users(uuid) 
         ON DELETE CASCADE 
         NOT NULL,
     title TEXT NOT NULL,
@@ -11,13 +11,13 @@ CREATE TABLE listings (
         NOT NULL,
     quantity BIGINT CHECK (quantity >= 0)
         NOT NULL,
-    category_id UUID DEFAULT '00000000-0000-0000-0000-000000000000'
-        REFERENCES categories(id) 
+    category_uuid UUID DEFAULT '00000000-0000-0000-0000-000000000000'
+        REFERENCES categories(uuid) 
         ON DELETE SET DEFAULT
         NOT NULL,
     created_on TIMESTAMPTZ DEFAULT now()
         NOT NULL
 );
 
-CREATE INDEX idx_listings_created_id
-    ON listings (created_on, id);
+CREATE INDEX idx_listings_created_uuid
+    ON listings (created_on, uuid);

@@ -116,7 +116,7 @@ func GetListings(c *gin.Context) {
 
 	for rows.Next() {
 		var l models.Listing
-		if err := rows.Scan(&l.ID, &l.SellerID, &l.Title, &l.Description, &l.Price, &l.Quantity, &l.Category, &l.CreatedOn); err != nil {
+		if err := rows.Scan(&l.UUID, &l.SellerUUID, &l.Title, &l.Description, &l.Price, &l.Quantity, &l.CategoryUUID, &l.CreatedOn); err != nil {
 			c.Error(response.ErrInternalServerError(err))
 			return
 		}
@@ -139,7 +139,7 @@ func GetListings(c *gin.Context) {
 	
 	if len(listings) > 0 {
 		last := listings[len(listings) - 1]
-		meta.CursorID = last.ID
+		meta.CursorID = last.UUID
 		meta.CursorTimeStamp = last.CreatedOn
 	}
 
@@ -161,7 +161,7 @@ func DeleteListing(c *gin.Context) {
 		return
 	}
 
-	listingIDValue := c.Param("postID")
+	listingIDValue := c.Param("id")
 	listingID, err := uuid.Parse(listingIDValue)
 	if err != nil {
 		c.Error(response.ErrBadRequest(err))
@@ -214,9 +214,9 @@ func CreateListing(c *gin.Context) {
 		VALUES ($1, $2, $3, $4, $5, $6) 
 		RETURNING id, seller_id, title, description, price, quantity, category_id, created_on`,
 		userID, listing.Title, listing.Description, listing.Price, listing.Quantity, listing.Category,
-	).Scan(&insertedListing.ID, &insertedListing.SellerID, &insertedListing.Title,
+	).Scan(&insertedListing.UUID, &insertedListing.SellerUUID, &insertedListing.Title,
 		&insertedListing.Description, &insertedListing.Price, &insertedListing.Quantity, 
-		&insertedListing.Category, &insertedListing.CreatedOn,
+		&insertedListing.CategoryUUID, &insertedListing.CreatedOn,
 		); err != nil {
 		if pgErr, ok := err.(*pgconn.PgError); ok {
 			switch pgErr.Code {
@@ -241,7 +241,7 @@ func CreateListing(c *gin.Context) {
 	})
 }
 
-func updateListing(c *gin.Context){
+func UpdateListing(c *gin.Context){
 	userIDValue, ok := c.Get("user_id")
 	if !ok {
 		c.Error(response.ErrUnauthorised(errors.New("user not logged in")))
@@ -286,13 +286,13 @@ func updateListing(c *gin.Context){
 		id,
 		userID,
 	).Scan(
-		&updatedListing.ID,
-		&updatedListing.SellerID,
+		&updatedListing.UUID,
+		&updatedListing.SellerUUID,
 		&updatedListing.Title,
 		&updatedListing.Description,
 		&updatedListing.Price,
 		&updatedListing.Quantity,
-		&updatedListing.Category,
+		&updatedListing.CategoryUUID,
 		&updatedListing.CreatedOn,
 	); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

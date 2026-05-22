@@ -6,34 +6,25 @@ import (
 	"github.com/google/uuid"
 )
 
-type LoginRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-type AccountCreationRequest struct {
-	Username string `json:"username"`
-	Email string `json:"email"`
-	Password string `json:"password"`
-}
 
 type User struct {
-	ID uuid.UUID `json:"id"`
-	Username string `json:"username"`
+	UUID uuid.UUID `json:"uuid"`
+	FirstName string `json:"firstName"`
+	LastName string `json:"lastName"`
 	Email string `json:"email"`
-	Password_hash string `json:"password_hash"`
-	Created_on time.Time `json:"created_on"`
+	PasswordHash string `json:"passwordHash"`
+	CreatedOn time.Time `json:"createdOn"`
 }
 
 type Listing struct {
-	ID uuid.UUID `json:"id"`
-	SellerID uuid.UUID `json:"seller_id"`
+	UUID uuid.UUID `json:"uuid"`
+	SellerUUID uuid.UUID `json:"sellerUUID"`
 	Title string `json:"title"`
 	Description string `json:"description"`
 	Price int64 `json:"price" binding:"gte=0"`
 	Quantity int64 `json:"quantity" binding:"gte=0"`
-	Category uuid.UUID `json:"category"`
-	CreatedOn time.Time `json:"created_on"`
+	CategoryUUID uuid.UUID `json:"categoryUUID"`
+	CreatedOn time.Time `json:"createdOn"`
 }
 
 type Category struct {

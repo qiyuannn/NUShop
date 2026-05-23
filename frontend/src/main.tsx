@@ -5,13 +5,22 @@ import "./index.css"
 import App from "./App.tsx"
 import { ThemeProvider } from "@/components/theme-provider.tsx"
 import { BrowserRouter } from "react-router-dom"
+import { SidebarProvider } from "./components/ui/sidebar.tsx"
+import { TooltipProvider } from "./components/ui/tooltip.tsx"
+import { AuthProvider } from "./context/auth.tsx"
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <SidebarProvider>
+        <AuthProvider>
+        <TooltipProvider>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </TooltipProvider>
+        </AuthProvider>
+      </SidebarProvider>
     </ThemeProvider>
   </StrictMode>
 )

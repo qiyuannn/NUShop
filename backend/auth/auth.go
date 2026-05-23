@@ -20,7 +20,7 @@ func AuthHandler() gin.HandlerFunc {
 			return
 		}
 
-		tokenStr := strings.TrimPrefix(header, "Bearer")
+		tokenStr := strings.TrimPrefix(header, "Bearer ")
 		if tokenStr == "" {
 			c.Error(response.ErrUnauthorised(errors.New("token missing")))
 			c.Abort()
@@ -40,7 +40,7 @@ func AuthHandler() gin.HandlerFunc {
 }
 
 func verifyToken(tokenStr string) (*jwt.RegisteredClaims, error){
-	secret := os.Getenv("secret")
+	secret := os.Getenv("AccessTokenSecret")
 
 	claims := &jwt.RegisteredClaims{}
 
@@ -65,7 +65,6 @@ func verifyToken(tokenStr string) (*jwt.RegisteredClaims, error){
 	if !token.Valid {
 		return nil, errors.New("invalid token")
 	}
-
 
 	return claims, nil
 }

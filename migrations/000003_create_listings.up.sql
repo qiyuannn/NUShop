@@ -15,7 +15,7 @@ CREATE TABLE listings (
         REFERENCES categories(uuid) 
         ON DELETE SET DEFAULT
         NOT NULL,
-    created_on TIMESTAMPTZ DEFAULT now()
+    created_on TIMESTAMPTZ DEFAULT NOW()
         NOT NULL
 );
 

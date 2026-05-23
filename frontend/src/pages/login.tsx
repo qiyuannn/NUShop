@@ -1,15 +1,16 @@
-import { Link } from "react-router-dom";
-import { Field, FieldDescription, FieldGroup, FieldLabel, FieldLegend, FieldSeparator, FieldSet } from "../ui/field";
-import { InputGroup, InputGroupButton, InputGroupInput } from "../ui/input-group";
-import { Input } from "../ui/input";
+import { Link, useNavigate } from "react-router-dom";
+import { Field, FieldDescription, FieldGroup, FieldLabel, FieldLegend, FieldSeparator, FieldSet } from "../components/ui/field";
+import { InputGroup, InputGroupButton, InputGroupInput } from "../components/ui/input-group";
+import { Input } from "../components/ui/input";
 import React from "react";
 import { EyeIcon, EyeOffIcon, ShoppingBag } from "lucide-react";
-import { Button } from "../ui/button";
-import { Spinner } from "../ui/spinner";
+import { Button } from "../components/ui/button";
+import { Spinner } from "../components/ui/spinner";
+import { useAuth } from "@/context/auth";
 
 export function LoginPage() {
     return(
-        <div className="flex justify-center items-center min-h-svh">
+        <div className="flex justify-center items-center min-h-svh min-w-svw">
             <div className="w-full max-w-sm">
                 <LoginForm/>
             </div>
@@ -25,6 +26,8 @@ export function LoginForm() {
     })
     const [loading, setLoading] = React.useState(false)
     const [err, setErr] = React.useState<string|null>(null)
+    const {setUser, setToken} = useAuth();
+    const nav = useNavigate()
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData((p)=>({...p, [e.target.id]: e.target.value}))
@@ -43,8 +46,12 @@ export function LoginForm() {
             })
             const json = await res.json()
             if (!res.ok) {
+                console.log()
                 throw new Error(json?.error?.code ?? "INTERNAL_ERROR")
-            }
+            } 
+            setUser(json.data.user)
+            setToken(json.data.token)
+            nav("/")
         } catch (err) {
             setErr(err instanceof Error? err.message: "INTERNAL_ERROR")
         } finally {
@@ -90,7 +97,7 @@ export function LoginForm() {
                 </FieldGroup>
                 <FieldSeparator>Or</FieldSeparator>
                 <FieldDescription className="text-center">
-                    <Link to="">Continue as guest</Link>
+                    <Link to="/">Continue as guest</Link>
                 </FieldDescription>
             </FieldSet>
         </form>

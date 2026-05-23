@@ -1,15 +1,15 @@
 import { Link } from "react-router-dom";
-import { Field, FieldDescription, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "../ui/field";
+import { Field, FieldDescription, FieldGroup, FieldLabel, FieldLegend, FieldSeparator, FieldSet } from "../components/ui/field";
 import { EyeIcon, EyeOffIcon, ShoppingBag } from "lucide-react";
-import { Input } from "../ui/input";
-import { InputGroup, InputGroupButton, InputGroupInput } from "../ui/input-group";
+import { Input } from "../components/ui/input";
+import { InputGroup, InputGroupButton, InputGroupInput } from "../components/ui/input-group";
 import React from "react";
-import { Button } from "../ui/button";
-import { Spinner } from "../ui/spinner";
+import { Button } from "../components/ui/button";
+import { Spinner } from "../components/ui/spinner";
 
 export function SignupPage() {
     return (
-        <div className="flex justify-center items-center min-h-svh">
+        <div className="flex min-w-svw justify-center items-center min-h-svh">
             <div className="min-w-md">
                 <SignupForm/>
             </div>
@@ -121,6 +121,10 @@ export function SignupForm() {
                 <Field>
                     <Button type="submit">{loading? <Spinner/>: "Create account"}</Button>
                 </Field>
+                <FieldSeparator>Or</FieldSeparator>
+                <FieldDescription className="text-center">
+                    <Link to="/">Continue as guest</Link>
+                </FieldDescription>
             </FieldSet>
         </form>
     )

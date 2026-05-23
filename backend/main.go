@@ -1,6 +1,7 @@
 package main
 
 import (
+	"backend/auth"
 	"backend/database"
 	"backend/handlers"
 	"backend/response"
@@ -14,7 +15,7 @@ import (
 
 func main() {
 	err := godotenv.Load(); if err != nil { log.Fatal(err) }
-	if len(os.Getenv("secret")) < 64 {
+	if len(os.Getenv("AcessTokenSecret")) < 64 || len(os.Getenv("RefreshTokenSecret")) < 64{
 		log.Fatal("missing/invalid secret")
 	}
 
@@ -26,10 +27,15 @@ func main() {
 		AllowOrigins: []string{"http://localhost:8080", "http://localhost:5173"},
 		AllowMethods: []string{"GET", "PUT", "POST", "DELETE"},
 		AllowHeaders: []string{"Origin", "Content-Type", "Authorisation"},
+		AllowCredentials: true,
 	}))
 	
 	router.Use(response.ErrorHandler())
 	private := router.Group("/")
+	//Auth
+	router.POST("/auth/refresh", auth.RefreshToken)
+	router.PUT("/auth/logout", auth.Logout)
+
 	//Account Handlers
 	router.POST("/login", handlers.Login)
 	router.POST("/create_user", handlers.CreateUser)

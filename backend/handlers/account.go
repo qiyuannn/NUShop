@@ -2,17 +2,16 @@
 package handlers
 
 import (
+	"backend/auth"
 	db "backend/database"
 	"backend/models"
 	"backend/response"
 	"errors"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -34,6 +33,15 @@ type AccountCreationRequest struct {
 	LastName string `json:"lastName"`
 	Email string `json:"email" binding:"email"`
 	Password string `json:"password"`
+}
+
+type UserResponse struct {
+	UUID uuid.UUID `json:"uuid"`
+	FirstName string `json:"firstName"`
+	LastName string `json:"lastName"`
+	Email string `json:"email"`
+	CreatedOn time.Time `json:"createdOn"`
+	Token string `json:"token"`
 }
 
 func CreateUser(c *gin.Context) {
@@ -109,6 +117,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
+
 	var user models.User
 	if err := db.Pool.QueryRow(
 		c.Request.Context(),
@@ -133,7 +142,6 @@ func Login(c *gin.Context) {
 			c.Error(response.ErrUnauthorised(err))
 			return
 		}
-		log.Fatal("here")
 		c.Error(response.ErrInternalServerError(err))
 		return 
 	}
@@ -143,30 +151,52 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token, err := GenerateJWT(user.UUID)
+	token, err := auth.GenerateAcessToken(user.UUID)
 	if err != nil {
 		c.Error(response.ErrInternalServerError(err))
+		log.Fatal("here")
 		return
 	} 
 
-	response.Success(c, http.StatusOK, gin.H{
-		"token": token,
-		"message": "login success",
-	})
-}
-
-func GenerateJWT(userID uuid.UUID) (string, error) {
-	secret := os.Getenv("secret")
-
-	claims := jwt.RegisteredClaims{
-		Issuer: "NUShop",
-		Subject: userID.String(),
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 72)),
-		IssuedAt: jwt.NewNumericDate(time.Now()),
+	refreshTokenUUID := uuid.NewString()
+	refreshToken, err := auth.GenerateRefreshToken(user.UUID, refreshTokenUUID)
+	if err != nil {
+		c.Error(response.ErrInternalServerError(err))
+		return
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	if _, err := db.Pool.Exec(
+		c.Request.Context(),
+		`INSERT INTO refresh_tokens (
+		uuid, userUUID) VALUES ($1, $2)`,
+		refreshTokenUUID, user.UUID,
+	); err != nil {
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
 
-	return token.SignedString([]byte(secret))
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name: "refresh_token",
+		Value: refreshToken,
+		Path: "/",
+		MaxAge: 7 * 24 * 60 * 60,
+		HttpOnly: true,
+		Secure: false,
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	resp := UserResponse{
+		UUID: user.UUID,
+		FirstName: user.FirstName,
+		LastName: user.LastName,
+		Email: user.Email,
+		CreatedOn: user.CreatedOn,
+		Token: token,
+	}
+
+	response.Success(c, http.StatusOK, gin.H{
+		"user": resp,
+		"message": "login success",
+	})
 }
 

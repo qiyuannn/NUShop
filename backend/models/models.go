@@ -25,9 +25,10 @@ type Listing struct {
 	Quantity int64 `json:"quantity" binding:"gte=0"`
 	CategoryUUID uuid.UUID `json:"categoryUUID"`
 	CreatedOn time.Time `json:"createdOn"`
+	Images []string `json:"images"`
 }
 
 type Category struct {
-	ID uuid.UUID `json:"id"`
+	ID uuid.UUID `json:"uuid"`
 	Name string `json:"name"`
 }

@@ -1,0 +1,7 @@
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+CREATE TABLE images (
+  uuid UUID PRIMARY KEY,
+  listingUUID UUID NOT NULL REFERENCES listings(uuid),
+  image_url TEXT NOT NULL
+)

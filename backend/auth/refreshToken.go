@@ -47,7 +47,6 @@ func RefreshToken(c *gin.Context) {
 		jwt.WithExpirationRequired(),
 		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}),
 	)
-
 	if err != nil || !refreshToken.Valid{
 		c.Error(response.ErrUnauthorised(err))
 		return
@@ -125,6 +124,8 @@ func RefreshToken(c *gin.Context) {
 	}
 	//return accesstoken
 	response.Success(c, http.StatusCreated, gin.H{
+		"replaced": t.Uuid,
+		"tokenID" : newTokenUUID,
 		"token": newAccessToken,
 	})
 }

@@ -12,7 +12,7 @@ import (
 func GetCategories(c *gin.Context) {
 	rows, err := db.Pool.Query(
 		c.Request.Context(),
-		`SELECT id, name FROM categories ORDER BY name ASC`,
+		`SELECT uuid, name FROM categories ORDER BY name ASC`,
 	)
 
 	if err != nil {
@@ -40,7 +40,7 @@ func GetCategories(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.Response{
-		Data: categories,
+	response.Success(c, http.StatusOK, gin.H{
+		"categories": categories, 
 	})
 }

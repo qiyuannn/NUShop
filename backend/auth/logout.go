@@ -39,11 +39,11 @@ func Logout(c *gin.Context){
 	) 
 	if err != nil {
 		c.Error(response.ErrInternalServerError(err))
-
 		http.SetCookie(c.Writer, &http.Cookie{
 			Name: "refresh_token",
 			Path: "/",
 			Expires: time.Unix(0,0),
+			HttpOnly: true,
 			MaxAge: -1,
 		})
 		return
@@ -54,7 +54,7 @@ func Logout(c *gin.Context){
 	if res, err := db.Pool.Exec(
 		c.Request.Context(),
 		`UPDATE refresh_tokens SET
-		revoked_at = $1
+		revoked_on = $1
 		WHERE uuid = $2`,
 		time.Now(), tokenUUID,
 	); err != nil || res.RowsAffected() != 1 {
@@ -63,6 +63,7 @@ func Logout(c *gin.Context){
 			Name: "refresh_token",
 			Path: "/",
 			Expires: time.Unix(0,0),
+			HttpOnly: true,
 			MaxAge: -1,
 		})
 		return

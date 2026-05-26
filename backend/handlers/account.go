@@ -191,11 +191,11 @@ func Login(c *gin.Context) {
 		LastName: user.LastName,
 		Email: user.Email,
 		CreatedOn: user.CreatedOn,
-		Token: token,
 	}
 
 	response.Success(c, http.StatusOK, gin.H{
 		"user": resp,
+		"token": token,
 		"message": "login success",
 	})
 }

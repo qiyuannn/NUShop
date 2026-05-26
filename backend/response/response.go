@@ -69,12 +69,20 @@ func ErrorHandler() gin.HandlerFunc {
 		if len(c.Errors) == 0 || c.Writer.Written() { return }
 
 		err := c.Errors.Last().Err
-
-		log.Printf("[error] Method=%s Path=%s Error=%v",
-			c.Request.Method,
-			c.Request.RequestURI,
-			err,
-		)
+		var ae *AppError
+		if errors.As(err, &ae) {
+			log.Printf("[error] Method=%s Path=%s Error=%v",
+				c.Request.Method,
+				c.Request.RequestURI,
+				ae.Err,
+			)
+		} else {
+			log.Printf("[error] Method=%s Path=%s Error=%v",
+				c.Request.Method,
+				c.Request.RequestURI,
+				err,
+			)
+		}
 
 		var appErr *AppError
 

@@ -36,7 +36,78 @@ type CreateListingBody struct {
 	Category uuid.UUID `json:"category"`
 }
 
-func GetListings(c *gin.Context) {
+func GetListing(c *gin.Context) {
+	param := c.Param("listingID")
+
+	var listing models.Listing
+	if err := db.Pool.QueryRow(
+		c.Request.Context(),
+		`SELECT 
+		uuid,
+		sellerUUID,
+		title,
+		description,
+		price,
+		quantitiy,
+		category_uuid,
+		created_on
+		FROM listings WHERE uuid=$1`,
+		param,
+	).Scan(
+		&listing.UUID,
+		&listing.SellerUUID,
+		&listing.Title,
+		&listing.Description,
+		&listing.Price,
+		&listing.Quantity,
+		&listing.CategoryUUID,
+		&listing.CreatedOn,
+	); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			c.Error(response.ErrNotFound(err))
+			return 
+		}
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+
+	rows, err := db.Pool.Query(
+		c.Request.Context(),
+		`SELECT 
+		image_url
+		FROM images
+		WHERE listingUUID = $1`,
+		param,
+	)
+	if err != nil {
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+	defer rows.Close()
+
+	var images []string
+	for rows.Next() {
+		var image_url string
+		if err := rows.Scan(&image_url); err!= nil {
+			c.Error(response.ErrInternalServerError(err))
+			return
+		}
+		images = append(images, image_url)
+	}
+	if err := rows.Err(); err != nil {
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+
+	listing.Images = images
+
+	response.Success(c, http.StatusOK, gin.H{
+		"listing": listing,
+		"message": "listing fetch successful",
+	})
+}
+
+func GetListings(c *gin.Context) { // multiple
 	var query getListingsQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
 		c.Error(response.ErrBadRequest(err))

@@ -27,19 +27,20 @@ func AuthHandler() gin.HandlerFunc {
 			return
 		}
 
-		claims, err := verifyToken(tokenStr); if err != nil {
+		claims, err := verifyToken(tokenStr)
+		if err != nil {
 			c.Error(response.ErrUnauthorised(err))
 			c.Abort()
 			return
 		}
 
 		c.Set("userID", claims.Subject)
-		
+
 		c.Next()
 	}
 }
 
-func verifyToken(tokenStr string) (*jwt.RegisteredClaims, error){
+func verifyToken(tokenStr string) (*jwt.RegisteredClaims, error) {
 	secret := os.Getenv("AccessTokenSecret")
 
 	claims := &jwt.RegisteredClaims{}
@@ -59,7 +60,7 @@ func verifyToken(tokenStr string) (*jwt.RegisteredClaims, error){
 		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}),
 	)
 
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
 	if !token.Valid {

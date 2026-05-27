@@ -90,10 +90,22 @@ export function CreateListingForm() {
   const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    const form = new FormData()
+    form.append("title", formData.title)
+    form.append("category", formData.category)
+    form.append("description", formData.description)
+    form.append("price", formData.price)
+    form.append("quantity", formData.quantity)
+    form.append("condition", formData.condition)
+
+    for (const file of formData.files) {
+      form.append("file", file)
+    }
+
     try {
       const res = await apiFetch("http://localhost:8080/listings", {
         method: "POST",
-        body: JSON.stringify(formData),
+        body: form
       });
       const json = await res.json();
       if (!res.ok) {
@@ -137,7 +149,7 @@ export function CreateListingForm() {
                   </SelectTrigger>
                   <SelectContent position="popper">
                     {categories.map((category) => (
-                      <SelectItem value={category.name} key={category.uuid}>
+                      <SelectItem value={category.uuid} key={category.uuid}>
                         {category.name}
                       </SelectItem>
                     ))}
@@ -207,7 +219,7 @@ export function CreateListingForm() {
                 <Input
                   type="file"
                   className="hidden"
-                  accept="images/*"
+                  accept="image/*"
                   multiple
                   onChange={handleFileChange}
                 />

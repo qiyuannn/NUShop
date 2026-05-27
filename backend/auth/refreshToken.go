@@ -15,15 +15,15 @@ import (
 )
 
 type RefreshTokenStruct struct {
-	Uuid uuid.UUID 
-	UserUUID uuid.UUID 
-	ExpOn time.Time
-	CreatedOn time.Time
-	RevokedOn *time.Time
+	Uuid       uuid.UUID
+	UserUUID   uuid.UUID
+	ExpOn      time.Time
+	CreatedOn  time.Time
+	RevokedOn  *time.Time
 	ReplacedBy *uuid.UUID
 }
 
-func RefreshToken(c *gin.Context) { 
+func RefreshToken(c *gin.Context) {
 	refreshTokenStr, err := c.Cookie("refresh_token")
 	if err != nil {
 		c.Error(response.ErrNotFound(err))
@@ -47,7 +47,7 @@ func RefreshToken(c *gin.Context) {
 		jwt.WithExpirationRequired(),
 		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}),
 	)
-	if err != nil || !refreshToken.Valid{
+	if err != nil || !refreshToken.Valid {
 		c.Error(response.ErrUnauthorised(err))
 		return
 	}
@@ -55,7 +55,7 @@ func RefreshToken(c *gin.Context) {
 	var t RefreshTokenStruct
 	if err := db.Pool.QueryRow(
 		c.Request.Context(),
-		`SELECT uuid, userUUID, exp_on, created_on, revoked_on, replaced_by
+		`SELECT uuid, user_uuid, exp_on, created_on, revoked_on, replaced_by
 		FROM refresh_tokens WHERE uuid = $1`,
 		claims.ID,
 	).Scan(&t.Uuid, &t.UserUUID, &t.ExpOn, &t.CreatedOn, &t.RevokedOn, &t.ReplacedBy); err != nil {
@@ -84,7 +84,7 @@ func RefreshToken(c *gin.Context) {
 	if _, err := db.Pool.Exec(
 		c.Request.Context(),
 		`INSERT INTO refresh_tokens (
-		uuid, userUUID) VALUES ($1, $2)`,
+		uuid, user_uuid) VALUES ($1, $2)`,
 		newTokenUUID, t.UserUUID,
 	); err != nil {
 		c.Error(response.ErrInternalServerError(err))
@@ -107,15 +107,15 @@ func RefreshToken(c *gin.Context) {
 
 	//replace cookie
 	http.SetCookie(c.Writer, &http.Cookie{
-		Name: "refresh_token",
-		Value: newToken,
-		Path: "/",
-		MaxAge: 7 * 24 * 60 * 60,
+		Name:     "refresh_token",
+		Value:    newToken,
+		Path:     "/",
+		MaxAge:   7 * 24 * 60 * 60,
 		HttpOnly: true,
-		Secure: false,
+		Secure:   false,
 		SameSite: http.SameSiteLaxMode,
 	})
-	
+
 	//generate new accesstoken
 	newAccessToken, err := GenerateAcessToken(t.UserUUID)
 	if err != nil {
@@ -125,7 +125,7 @@ func RefreshToken(c *gin.Context) {
 	//return accesstoken
 	response.Success(c, http.StatusCreated, gin.H{
 		"replaced": t.Uuid,
-		"tokenID" : newTokenUUID,
-		"token": newAccessToken,
+		"tokenID":  newTokenUUID,
+		"token":    newAccessToken,
 	})
 }

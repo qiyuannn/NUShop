@@ -12,9 +12,9 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func Logout(c *gin.Context){
+func Logout(c *gin.Context) {
 	rTokenStr, err := c.Cookie("refresh_token")
-	if err!= nil {
+	if err != nil {
 		response.Success(c, http.StatusOK, gin.H{
 			"message": "refresh token expired",
 		})
@@ -36,15 +36,15 @@ func Logout(c *gin.Context){
 		jwt.WithIssuer("NUShop"),
 		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}),
 		jwt.WithIssuedAt(),
-	) 
+	)
 	if err != nil {
 		c.Error(response.ErrInternalServerError(err))
 		http.SetCookie(c.Writer, &http.Cookie{
-			Name: "refresh_token",
-			Path: "/",
-			Expires: time.Unix(0,0),
+			Name:     "refresh_token",
+			Path:     "/",
+			Expires:  time.Unix(0, 0),
 			HttpOnly: true,
-			MaxAge: -1,
+			MaxAge:   -1,
 		})
 		return
 	}
@@ -60,20 +60,20 @@ func Logout(c *gin.Context){
 	); err != nil || res.RowsAffected() != 1 {
 		c.Error(response.ErrInternalServerError(err))
 		http.SetCookie(c.Writer, &http.Cookie{
-			Name: "refresh_token",
-			Path: "/",
-			Expires: time.Unix(0,0),
+			Name:     "refresh_token",
+			Path:     "/",
+			Expires:  time.Unix(0, 0),
 			HttpOnly: true,
-			MaxAge: -1,
+			MaxAge:   -1,
 		})
 		return
 	}
 
 	http.SetCookie(c.Writer, &http.Cookie{
-		Name: "refresh_token",
-		Path: "/",
-		Expires: time.Unix(0,0),
-		MaxAge: -1,
+		Name:    "refresh_token",
+		Path:    "/",
+		Expires: time.Unix(0, 0),
+		MaxAge:  -1,
 	})
 	response.Success(c, http.StatusOK, gin.H{
 		"mesage": "refresh token deleted",

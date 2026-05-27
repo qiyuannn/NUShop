@@ -1,4 +1,4 @@
-package handlers
+package categories
 
 import (
 	db "backend/database"
@@ -41,6 +41,6 @@ func GetCategories(c *gin.Context) {
 	}
 
 	response.Success(c, http.StatusOK, gin.H{
-		"categories": categories, 
+		"categories": categories,
 	})
 }

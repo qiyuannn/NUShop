@@ -7,30 +7,29 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type Response struct {
-	Data any `json:"data,omitempty"`
-	Error *ErrorInfo `json:"error,omitempty"`
-	Meta *Meta `json:"meta,omitempty"`
+	Data   any        `json:"data,omitempty"`
+	Error  *ErrorInfo `json:"error,omitempty"`
+	Cursor *Cursor    `json:"cursor,omitempty"`
 }
 
 type ErrorInfo struct {
-	Code string `json:"code"`
+	Code    string `json:"code"`
 	Message string `json:"message"`
 }
 
-type Meta struct {
+type Cursor struct {
 	CursorTimeStamp time.Time `json:"cursor_timestamp,omitempty"`
-	CursorID uuid.UUID `json:"cursor_id,omitempty"`
-	HasMore bool `json:"has_more"`
+	CursorID        string `json:"cursor_id,omitempty"`
+	HasMore         bool      `json:"has_more"`
 }
 
 type AppError struct {
-	Err error
-	Status int
-	Code string
+	Err     error
+	Status  int
+	Code    string
 	Message string
 }
 
@@ -44,20 +43,20 @@ func Success(c *gin.Context, status int, data any) {
 	})
 }
 
-//Structured Errors
-func ErrInternalServerError(err error) (*AppError) {
+// Structured Errors
+func ErrInternalServerError(err error) *AppError {
 	return &AppError{Err: err, Status: http.StatusInternalServerError, Code: "INTERNAL_ERROR", Message: "internal server error"}
 }
-func ErrNotFound(err error) (*AppError) {
+func ErrNotFound(err error) *AppError {
 	return &AppError{Err: err, Status: http.StatusNotFound, Code: "NOT_FOUND", Message: "resource not found"}
 }
-func ErrBadRequest(err error) (*AppError) {
+func ErrBadRequest(err error) *AppError {
 	return &AppError{Err: err, Status: http.StatusBadRequest, Code: "INVALID_REQUEST", Message: "invalid request"}
 }
-func ErrStatusConflict(err error) (*AppError) {
+func ErrStatusConflict(err error) *AppError {
 	return &AppError{Err: err, Status: http.StatusConflict, Code: "STATUS_CONFLICT", Message: "conflict"}
 }
-func ErrUnauthorised(err error) (*AppError) {
+func ErrUnauthorised(err error) *AppError {
 	return &AppError{Err: err, Status: http.StatusUnauthorized, Code: "UNAUTHORISED", Message: "unauthorised"}
 }
 
@@ -66,7 +65,9 @@ func ErrorHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()
 
-		if len(c.Errors) == 0 || c.Writer.Written() { return }
+		if len(c.Errors) == 0 || c.Writer.Written() {
+			return
+		}
 
 		err := c.Errors.Last().Err
 		var ae *AppError
@@ -89,7 +90,7 @@ func ErrorHandler() gin.HandlerFunc {
 		if errors.As(err, &appErr) {
 			c.JSON(appErr.Status, Response{
 				Error: &ErrorInfo{
-					Code: appErr.Code,
+					Code:    appErr.Code,
 					Message: appErr.Message,
 				},
 			})
@@ -98,7 +99,7 @@ func ErrorHandler() gin.HandlerFunc {
 
 		c.JSON(http.StatusInternalServerError, Response{
 			Error: &ErrorInfo{
-				Code: "INTERNAL_ERROR",
+				Code:    "INTERNAL_ERROR",
 				Message: "something went wrong",
 			},
 		})

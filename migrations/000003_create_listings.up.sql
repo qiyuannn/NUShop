@@ -2,7 +2,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TABLE listings (
     uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    seller_id UUID REFERENCES users(uuid) 
+    seller_uuid UUID REFERENCES users(uuid) 
         ON DELETE CASCADE 
         NOT NULL,
     title TEXT NOT NULL,
@@ -11,6 +11,7 @@ CREATE TABLE listings (
         NOT NULL,
     quantity BIGINT CHECK (quantity >= 0)
         NOT NULL,
+    condition TEXT NOT NULL,
     category_uuid UUID DEFAULT '00000000-0000-0000-0000-000000000000'
         REFERENCES categories(uuid) 
         ON DELETE SET DEFAULT

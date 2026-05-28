@@ -90,22 +90,22 @@ export function CreateListingForm() {
   const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const form = new FormData()
-    form.append("title", formData.title)
-    form.append("category", formData.category)
-    form.append("description", formData.description)
-    form.append("price", formData.price)
-    form.append("quantity", formData.quantity)
-    form.append("condition", formData.condition)
+    const form = new FormData();
+    form.append("title", formData.title);
+    form.append("category", formData.category);
+    form.append("description", formData.description);
+    form.append("price", formData.price);
+    form.append("quantity", formData.quantity);
+    form.append("condition", formData.condition);
 
     for (const file of formData.files) {
-      form.append("file", file)
+      form.append("file", file);
     }
 
     try {
       const res = await apiFetch("http://localhost:8080/listings", {
         method: "POST",
-        body: form
+        body: form,
       });
       const json = await res.json();
       if (!res.ok) {

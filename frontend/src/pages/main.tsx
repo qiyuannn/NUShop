@@ -13,7 +13,7 @@ export default function Main() {
         <AppHeader />
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 p-3">
           {listings.map((_, index) => (
-            <ListingCard key={index} />
+            <ListingCard id={"id"} key={index} />
           ))}
         </div>
       </SidebarInset>

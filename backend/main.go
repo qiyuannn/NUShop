@@ -19,7 +19,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if len(os.Getenv("AcessTokenSecret")) < 64 || len(os.Getenv("RefreshTokenSecret")) < 64 {
+	if len(os.Getenv("AccessTokenSecret")) < 64 || len(os.Getenv("RefreshTokenSecret")) < 64 {
 		log.Fatal("missing/invalid secret")
 	}
 

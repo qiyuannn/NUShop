@@ -2,10 +2,10 @@ import { Link } from "react-router-dom";
 import { Item, ItemContent, ItemDescription, ItemHeader, ItemTitle } from "./ui/item";
 import { Separator } from "./ui/separator";
 
-export function ListingCard() {
+export function ListingCard({id} : {id: string}) {
   return (
     <Item asChild variant="outline">
-      <Link to="">
+      <Link to={`/listing/${id}`}>
         <ItemHeader>
           <img
             src="https://images.unsplash.com/photo-1610280777472-54133d004c8c?q=80&w=640&auto=format&fit=crop"

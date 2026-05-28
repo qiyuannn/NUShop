@@ -43,6 +43,7 @@ func AuthHandler() gin.HandlerFunc {
 func verifyToken(tokenStr string) (*jwt.RegisteredClaims, error) {
 	secret := os.Getenv("AccessTokenSecret")
 
+
 	claims := &jwt.RegisteredClaims{}
 
 	token, err := jwt.ParseWithClaims(
@@ -52,7 +53,7 @@ func verifyToken(tokenStr string) (*jwt.RegisteredClaims, error) {
 			if token.Method.Alg() != jwt.SigningMethodHS256.Alg() {
 				return nil, errors.New("invalid token")
 			}
-			return []byte(os.Getenv(secret)), nil
+			return []byte(secret), nil
 		},
 		jwt.WithExpirationRequired(),
 		jwt.WithIssuer("NUShop"),

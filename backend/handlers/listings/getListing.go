@@ -120,7 +120,10 @@ func GetListings(c *gin.Context) { //multiple
 	}
 
 	if query.Search != "" {
-		conditions = append(conditions, "title ILIKE $"+strconv.Itoa(argsIndex))
+		conditions = append(
+			conditions,
+			"title ILIKE $"+strconv.Itoa(argsIndex),
+		)
 		args = append(args, "%"+query.Search+"%")
 		argsIndex++
 	}

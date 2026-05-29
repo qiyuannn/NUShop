@@ -38,7 +38,7 @@ export function AppSidebar() {
                   <SquareChartGantt />
                   Manage listings
                 </SidebarMenuButton>
-                <SidebarMenuButton onClick={() => navigate("")} tooltip="Create listing" disabled>
+                <SidebarMenuButton onClick={() => navigate("/create")} tooltip="Create listing">
                   <CopyPlus />
                   Create listing
                 </SidebarMenuButton>

@@ -80,7 +80,7 @@ func GetListing(c *gin.Context) { //single
 	}
 	defer rows.Close()
 
-	var images []string
+	images := []string{}
 	for rows.Next() {
 		var image_url string
 		if err := rows.Scan(&image_url); err != nil {

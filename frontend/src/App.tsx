@@ -2,7 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { LoginPage } from "./pages/login";
 import { SignupPage } from "./pages/signup";
 import Main from "./pages/main";
-import { CreateListingForm, CreateListingPage } from "./pages/createListing";
+import { CreateListingPage } from "./pages/createListing";
 import { ListingPage } from "./pages/listing";
 
 export function App() {

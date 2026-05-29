@@ -286,7 +286,7 @@ export function CreateListingCarousel({
           {files.map((file) => (
             <CarouselItem className="basis-1/2">
               <Item>
-                <ItemContent className="outline rounded-sm">
+                <ItemContent className="border rounded-sm">
                   <img className="aspect-square object-cover" src={URL.createObjectURL(file)} />
                 </ItemContent>
               </Item>
@@ -295,7 +295,7 @@ export function CreateListingCarousel({
           {files.length === 0 && (
             <CarouselItem className="basis-1/2">
               <Item>
-                <ItemContent className="flex items-center justify-center aspect-square outline rounded-sm">
+                <ItemContent className="flex items-center justify-center aspect-square border rounded-sm">
                   <ItemDescription>No photos uploaded</ItemDescription>
                 </ItemContent>
               </Item>

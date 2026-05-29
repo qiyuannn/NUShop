@@ -6,8 +6,15 @@ import { Input } from "./ui/input";
 import { SidebarTrigger, useSidebar } from "./ui/sidebar";
 import { Separator } from "./ui/separator";
 import { useAuth } from "@/context/auth";
+import type { Dispatch, SetStateAction } from "react";
 
-export function AppHeader() {
+type AppHeaderProps = {
+  searchInput: string;
+  setSearchInput: Dispatch<SetStateAction<string>>;
+  setSearch: Dispatch<SetStateAction<string>>;
+};
+
+export function AppHeader({ searchInput, setSearchInput, setSearch }: AppHeaderProps) {
   const { toggleSidebar } = useSidebar();
   const { user, token } = useAuth();
 
@@ -21,8 +28,18 @@ export function AppHeader() {
       </div>
       <div className="flex-grow" />
       <ButtonGroup>
-        <Input id="search" placeholder="Search..." />
-        <Button variant="outline" aria-label="search">
+        <Input
+          id="search"
+          placeholder="Search..."
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              setSearch(searchInput);
+            }
+          }}
+        />
+        <Button variant="outline" aria-label="search" onClick={() => setSearch(searchInput)}>
           <SearchIcon />
         </Button>
       </ButtonGroup>

@@ -12,20 +12,23 @@ type ListingWithDetails = Listing;
 export default function Main() {
   const [listings, setListings] = useState<ListingWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
 
   useEffect(() => {
     async function fetchListings() {
       try {
         setLoading(true);
 
-        const res = await fetch("http://localhost:8080/listings", {
+        const url = search.trim()
+          ? `http://localhost:8080/listings?search=${encodeURIComponent(search.trim())}`
+          : "http://localhost:8080/listings";
+
+        const res = await fetch(url, {
           method: "GET",
         });
 
         const json = await res.json();
-
-        console.log("response", json);
-        console.log("first listing", json.data?.[0]);
 
         setListings(json.data ?? []);
       } catch (err) {
@@ -37,19 +40,19 @@ export default function Main() {
     }
 
     fetchListings();
-  }, []);
+  }, [search]);
 
   return (
     <>
       <AppSidebar />
       <SidebarInset>
-        <AppHeader />
+        <AppHeader searchInput={searchInput} setSearchInput={setSearchInput} setSearch={setSearch} />
 
         <div className="grid grid-cols-2 gap-3 p-3 md:grid-cols-3 lg:grid-cols-4">
           {loading ? (
             <p className="col-span-full p-4 text-sm text-muted-foreground">Loading listings...</p>
           ) : listings.length === 0 ? (
-            <p className="col-span-full p-4 text-sm text-muted-foreground">No listings yet.</p>
+            <p className="col-span-full p-4 text-sm text-muted-foreground">No listings found.</p>
           ) : (
             listings.map((listing) => (
               <Item asChild variant="outline" key={listing.uuid}>

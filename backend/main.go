@@ -5,6 +5,7 @@ import (
 	"backend/database"
 	"backend/handlers/categories"
 	"backend/handlers/listings"
+	"backend/handlers/users"
 	"backend/response"
 	"log"
 	"os"
@@ -44,8 +45,12 @@ func main() {
 	router.POST("/login", auth.Login)
 	router.POST("/create_user", auth.CreateUser)
 
+	//users handlers 
+	router.GET("/user/:userID", users.GetUser)
+
 	//categories handlers
 	router.GET("/categories", categories.GetCategories)
+	router.GET("/categories/:categoryID", categories.GetCategory)
 
 	//listing handlers
 	router.GET("/listings/:listingID", listings.GetListing)

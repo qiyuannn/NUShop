@@ -1,0 +1,43 @@
+package users
+
+import (
+	db "backend/database"
+	"backend/models"
+	"backend/response"
+	"errors"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
+)
+func GetUser(c *gin.Context) {
+	userUUID := c.Param("userID")
+
+	var user models.User
+	if err := db.Pool.QueryRow(
+		c.Request.Context(),
+		`SELECT 
+		first_name,
+		last_name,
+		created_on
+		FROM users WHERE 
+		uuid = $1`, 
+		userUUID,
+	).Scan(
+		&user.FirstName, 
+		&user.LastName, 
+		&user.CreatedOn,
+	); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			c.Error(response.ErrBadRequest(err))
+			return
+		}
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+
+	response.Success(c, http.StatusOK, gin.H{
+		"user": user,
+		"message": "user getfetched",
+	})
+}

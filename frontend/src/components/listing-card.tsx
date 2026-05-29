@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Item, ItemContent, ItemDescription, ItemHeader, ItemTitle } from "./ui/item";
 import { Separator } from "./ui/separator";
 
-export function ListingCard({id} : {id: string}) {
+export function ListingCard({ id }: { id: string }) {
   return (
     <Item asChild variant="outline">
       <Link to={`/listing/${id}`}>

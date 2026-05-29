@@ -120,17 +120,19 @@ func CreateListing(c *gin.Context) {
 		return
 	}
 
-	sqlQuery := "INSERT INTO images (listing_uuid, file_url) VALUES " + strings.Join(placeholder, ", ")
-	allArgs := []any{insertedListing.UUID}
-	allArgs = append(allArgs, args...)
-
-	if _, err := db.Pool.Exec(
-		c.Request.Context(),
-		sqlQuery,
-		allArgs...,
-	); err != nil {
-		c.Error(response.ErrInternalServerError(err))
-		return
+	if len(files) > 0 {
+		sqlQuery := "INSERT INTO images (listing_uuid, file_url) VALUES " + strings.Join(placeholder, ", ")
+		allArgs := []any{insertedListing.UUID}
+		allArgs = append(allArgs, args...)
+	
+		if _, err := db.Pool.Exec(
+			c.Request.Context(),
+			sqlQuery,
+			allArgs...,
+		); err != nil {
+			c.Error(response.ErrInternalServerError(err))
+			return
+		}
 	}
 
 	response.Success(c, http.StatusCreated, gin.H{

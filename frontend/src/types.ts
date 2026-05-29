@@ -11,8 +11,9 @@ export type Listing = {
   sellerUUID: string;
   title: string;
   description: string;
-  Price: number;
+  price: number;
   quantity: number;
+  condition: string;
   categoryUUID: string;
   createdOn: string;
   images: string[];

@@ -2,6 +2,10 @@ import { Link } from "react-router-dom";
 import { Item, ItemContent, ItemDescription, ItemHeader, ItemTitle } from "./ui/item";
 import { Separator } from "./ui/separator";
 
+type ListingCardProps = {
+  id: string;
+};
+
 export function ListingCard({ id }: { id: string }) {
   return (
     <Item asChild variant="outline">
@@ -10,6 +14,7 @@ export function ListingCard({ id }: { id: string }) {
           <img
             src="https://images.unsplash.com/photo-1610280777472-54133d004c8c?q=80&w=640&auto=format&fit=crop"
             className="aspect-square rounded-lg outline"
+            alt="Listing"
           />
         </ItemHeader>
         <ItemContent>

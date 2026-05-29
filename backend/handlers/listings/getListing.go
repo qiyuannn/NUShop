@@ -102,7 +102,7 @@ func GetListing(c *gin.Context) { //single
 	})
 }
 
-func GetListings(c *gin.Context) { // multiple
+func GetListings(c *gin.Context) { //multiple
 	var query getListingsQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
 		c.Error(response.ErrBadRequest(err))
@@ -114,7 +114,7 @@ func GetListings(c *gin.Context) { // multiple
 	argsIndex := 1
 
 	if query.SellerID != uuid.Nil {
-		conditions = append(conditions, "seller_id = $"+strconv.Itoa(argsIndex))
+		conditions = append(conditions, "seller_uuid = $"+strconv.Itoa(argsIndex))
 		args = append(args, query.SellerID)
 		argsIndex++
 	}
@@ -124,6 +124,7 @@ func GetListings(c *gin.Context) { // multiple
 		args = append(args, "%"+query.Search+"%")
 		argsIndex++
 	}
+
 	if query.MinPrice > 0 {
 		conditions = append(conditions, "price >= $"+strconv.Itoa(argsIndex))
 		args = append(args, query.MinPrice)
@@ -137,7 +138,7 @@ func GetListings(c *gin.Context) { // multiple
 	}
 
 	if query.Category != "" {
-		conditions = append(conditions, "category = $"+strconv.Itoa(argsIndex))
+		conditions = append(conditions, "category_uuid = $"+strconv.Itoa(argsIndex))
 		args = append(args, query.Category)
 		argsIndex++
 	}
@@ -149,40 +150,55 @@ func GetListings(c *gin.Context) { // multiple
 		return
 	}
 
-	if !query.CursorTime.IsZero() && query.CursorID != uuid.Nil {
-		conditions = append(conditions, "(created_on, id) < ($"+strconv.Itoa(argsIndex)+",$"+strconv.Itoa(argsIndex+1)+")")
+	if hasCursorTime && hasCursorID {
+		conditions = append(conditions, "(created_on, uuid) < ($"+strconv.Itoa(argsIndex)+",$"+strconv.Itoa(argsIndex+1)+")")
 		args = append(args, query.CursorTime, query.CursorID)
 		argsIndex += 2
 	}
 
-	sqlQuery := "SELECT id, seller_id, title, description, price, quantity, category, created_on FROM listings"
+	sqlQuery := `
+		SELECT
+			uuid,
+			seller_uuid,
+			title,
+			description,
+			price,
+			quantity,
+			condition,
+			category_uuid,
+			created_on
+		FROM listings
+	`
 
 	if len(conditions) > 0 {
 		sqlQuery += " WHERE " + strings.Join(conditions, " AND ")
 	}
 
-	sqlQuery += " ORDER BY created_on DESC, id DESC"
-
+	sqlQuery += " ORDER BY created_on DESC, uuid DESC"
 	sqlQuery += " LIMIT " + strconv.Itoa(query.Limit+1)
 
-	rows, err := db.Pool.Query(
-		c.Request.Context(),
-		sqlQuery,
-		args...,
-	)
-
+	rows, err := db.Pool.Query(c.Request.Context(), sqlQuery, args...)
 	if err != nil {
 		c.Error(response.ErrInternalServerError(err))
 		return
 	}
-
 	defer rows.Close()
 
 	listings := []models.Listing{}
 
 	for rows.Next() {
 		var l models.Listing
-		if err := rows.Scan(&l.UUID, &l.SellerUUID, &l.Title, &l.Description, &l.Price, &l.Quantity, &l.CategoryUUID, &l.CreatedOn); err != nil {
+		if err := rows.Scan(
+			&l.UUID,
+			&l.SellerUUID,
+			&l.Title,
+			&l.Description,
+			&l.Price,
+			&l.Quantity,
+			&l.Condition,
+			&l.CategoryUUID,
+			&l.CreatedOn,
+		); err != nil {
 			c.Error(response.ErrInternalServerError(err))
 			return
 		}
@@ -194,10 +210,51 @@ func GetListings(c *gin.Context) { // multiple
 		return
 	}
 
-	hasMore := len(listings) > query.Limit
-	cursor := response.Cursor{
-		HasMore: hasMore,
+	ids := make([]string, 0, len(listings))
+	for _, l := range listings {
+		ids = append(ids, l.UUID)
 	}
+
+	imageMap := map[string][]string{}
+
+	if len(ids) > 0 {
+		placeholders := make([]string, len(ids))
+		args := make([]any, len(ids))
+		for i, id := range ids {
+			placeholders[i] = fmt.Sprintf("$%d", i+1)
+			args[i] = id
+		}
+
+		imageRows, err := db.Pool.Query(
+			c.Request.Context(),
+			`SELECT listing_uuid, file_url
+		 FROM images
+		 WHERE listing_uuid IN (`+strings.Join(placeholders, ",")+`)`,
+			args...,
+		)
+		if err != nil {
+			c.Error(response.ErrInternalServerError(err))
+			return
+		}
+		defer imageRows.Close()
+
+		for imageRows.Next() {
+			var listingUUID string
+			var fileURL string
+			if err := imageRows.Scan(&listingUUID, &fileURL); err != nil {
+				c.Error(response.ErrInternalServerError(err))
+				return
+			}
+			imageMap[listingUUID] = append(imageMap[listingUUID], fileURL)
+		}
+	}
+
+	for i := range listings {
+		listings[i].Images = imageMap[listings[i].UUID]
+	}
+
+	hasMore := len(listings) > query.Limit
+	cursor := response.Cursor{HasMore: hasMore}
 
 	if hasMore {
 		listings = listings[:query.Limit]
@@ -210,7 +267,7 @@ func GetListings(c *gin.Context) { // multiple
 	}
 
 	c.JSON(http.StatusOK, response.Response{
-		Data: listings,
+		Data:   listings,
 		Cursor: &cursor,
 	})
 }

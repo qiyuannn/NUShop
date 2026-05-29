@@ -53,6 +53,7 @@ func main() {
 	router.GET("/categories/:categoryID", categories.GetCategory)
 
 	//listing handlers
+	router.GET("/listings", listings.GetListings)
 	router.GET("/listings/:listingID", listings.GetListing)
 	private.POST("/listings", listings.CreateListing)
 	private.PUT("/listings/:id", listings.UpdateListing)

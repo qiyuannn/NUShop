@@ -42,7 +42,7 @@ export function AppSidebar() {
             <SidebarGroup>
               <SidebarGroupLabel>My listings</SidebarGroupLabel>
               <SidebarMenu>
-                <SidebarMenuButton onClick={() => navigate("")} tooltip="Manage listings" disabled>
+                <SidebarMenuButton onClick={() => navigate("/userListings")} tooltip="Manage listings">
                   <SquareChartGantt />
                   Manage listings
                 </SidebarMenuButton>
@@ -75,9 +75,9 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter>
         <SidebarGroup>
-          <SidebarGroupLabel>Mange Account</SidebarGroupLabel>
+          <SidebarGroupLabel>Manage Account</SidebarGroupLabel>
           {!token && (
-            <SidebarMenu className="flex jusitfy-center items-center">
+            <SidebarMenu className="flex items-center jusitfy-center">
               <SidebarMenuButton onClick={() => navigate("/signup")} tooltip="Sign up">
                 <Plus />
                 Sign up
@@ -89,7 +89,7 @@ export function AppSidebar() {
             </SidebarMenu>
           )}
           {token && (
-            <SidebarMenu className="flex jusitfy-center items-center">
+            <SidebarMenu className="flex items-center" jusitfy-center>
               <SidebarMenuButton onClick={() => navigate("")} tooltip="Account" disabled>
                 <User />
                 Account

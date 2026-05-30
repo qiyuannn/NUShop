@@ -9,7 +9,7 @@ export function useAuthApiFetch() {
       ...options,
       headers: {
         ...options.headers,
-        ...(token !== null ? { Authorisation: `Bearer ${token}` } : {}),
+        ...(token !== null ? { Authorization: `Bearer ${token}` } : {}),
       },
       credentials: "include",
     });
@@ -35,7 +35,7 @@ export function useAuthApiFetch() {
       ...options,
       headers: {
         ...options.headers,
-        ...(newToken !== null ? { Authorisation: `Bearer ${newToken}` } : {}),
+        ...(newToken !== null ? { Authorization: `Bearer ${newToken}` } : {}),
       },
       credentials: "include",
     });

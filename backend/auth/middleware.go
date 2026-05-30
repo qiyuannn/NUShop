@@ -12,7 +12,7 @@ import (
 
 func AuthHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		header := c.GetHeader("Authorisation")
+		header := c.GetHeader("Authorization")
 
 		if ok := strings.HasPrefix(header, "Bearer"); !ok {
 			c.Error(response.ErrUnauthorised(errors.New("wrong header format")))

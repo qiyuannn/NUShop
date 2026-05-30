@@ -51,7 +51,7 @@ func main() {
 	//listing handlers
 	router.GET("/listings", listings.GetListings)
 	router.GET("/listings/:listingID", listings.GetListing)
-	private.GET("/listings/me", listings.GetMyListings)
+	private.GET("/listings/me", listings.GetListings)
 	private.POST("/listings", listings.CreateListing)
 	private.PUT("/listings/:id", listings.UpdateListing)
 	private.DELETE("/listings/:id", listings.DeleteListing)

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Item, ItemContent, ItemDescription, ItemHeader, ItemTitle } from "@/components/ui/item";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { useAuth } from "@/context/auth";
+import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
 import type { Listing } from "@/types";
 import { Separator } from "@/components/ui/separator";
 import { API_URL } from "@/lib/api";
@@ -19,50 +20,48 @@ function listingImageSrc(listing: Listing) {
 }
 
 export function UserListingsPage() {
-  const {user, ready, token} = useAuth();
+  const { user, ready } = useAuth();
+  const apiFetch = useAuthApiFetch();
+
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-useEffect(() => {
-  if (!ready) return;
+  useEffect(() => {
+    if (!ready) return;
 
-  if (!user || !token) {
-    setLoading(false);
-    setListings([]);
-    return;
-  }
-
-  async function fetchUserListings() {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const res = await fetch(`${API_URL}/listings/me`, {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const json = await res.json();
-
-      if (!res.ok) {
-        throw new Error(json?.error?.code ?? "FAILED_TO_FETCH_LISTINGS");
-      }
-
-      setListings(json.data ?? []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "FAILED_TO_FETCH_LISTINGS");
-      setListings([]);
-    } finally {
+    if (!user) {
       setLoading(false);
+      setListings([]);
+      return;
     }
-  }
 
-  fetchUserListings();
-}, [ready, user, token]);
+    async function fetchUserListings() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const res = await apiFetch(`${API_URL}/listings/me`, {
+          method: "GET",
+        });
+
+        const json = await res.json();
+
+        if (!res.ok) {
+          throw new Error(json?.error?.code ?? "FAILED_TO_FETCH_LISTINGS");
+        }
+
+        setListings(json.data ?? []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "FAILED_TO_FETCH_LISTINGS");
+        setListings([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchUserListings();
+  }, [ready, user]);
 
   return (
     <>

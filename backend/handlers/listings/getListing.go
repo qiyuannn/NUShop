@@ -18,6 +18,7 @@ import (
 
 type getListingsQuery struct {
 	SellerID uuid.UUID `form:"seller_id"`
+	Mine     bool      `form:"mine"`
 	Search   string    `form:"search"`
 	MinPrice int64     `form:"min_price" binding:"gte=0,ltefield=MaxPrice"`
 	MaxPrice int64     `form:"max_price" binding:"gte=0,gtefield=MinPrice"`
@@ -107,6 +108,28 @@ func GetListings(c *gin.Context) { //multiple
 	if err := c.ShouldBindQuery(&query); err != nil {
 		c.Error(response.ErrBadRequest(err))
 		return
+	}
+
+	if c.FullPath() == "/listings/me" {
+		userIDValue, ok := c.Get("userID")
+		if !ok {
+			c.Error(response.ErrUnauthorised(errors.New("user not logged in")))
+			return
+		}
+
+		userIDStr, ok := userIDValue.(string)
+		if !ok {
+			c.Error(response.ErrInternalServerError(errors.New("invalid auth context")))
+			return
+		}
+
+		userID, err := uuid.Parse(userIDStr)
+		if err != nil {
+			c.Error(response.ErrInternalServerError(err))
+			return
+		}
+
+		query.SellerID = userID
 	}
 
 	conditions := []string{}

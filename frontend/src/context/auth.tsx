@@ -26,7 +26,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       refreshed.current = true;
 
       try {
-        const res = await fetch("http://localhost:8080/auth/refresh", {
+        const res = await fetch(`${API_URL}/auth/refresh`, {
           method: "POST",
           credentials: "include",
         });

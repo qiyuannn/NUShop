@@ -6,6 +6,7 @@ import { SidebarInset } from "@/components/ui/sidebar";
 import { Item, ItemContent, ItemDescription, ItemHeader, ItemTitle } from "@/components/ui/item";
 import { Separator } from "@/components/ui/separator";
 import type { Listing } from "@/types";
+import { API_URL } from "@/lib/api";
 
 type ListingWithDetails = Listing;
 
@@ -21,8 +22,8 @@ export default function Main() {
         setLoading(true);
 
         const url = search.trim()
-          ? `http://localhost:8080/listings?search=${encodeURIComponent(search.trim())}`
-          : "http://localhost:8080/listings";
+          ? `${API_URL}/listings?search=${encodeURIComponent(search.trim())}`
+          : `${API_URL}/listings`;
 
         const res = await fetch(url, {
           method: "GET",
@@ -65,8 +66,8 @@ export default function Main() {
                           : listing.images[0].startsWith("http")
                             ? listing.images[0]
                             : listing.images[0].startsWith("/")
-                              ? `http://localhost:8080${listing.images[0]}`
-                              : `http://localhost:8080/${listing.images[0]}`
+                              ? `${API_URL}${listing.images[0]}`
+                              : `${API_URL}/${listing.images[0]}`
                       }
                       alt={listing.title}
                       className="w-full aspect-square object-contain rounded-lg outline bg-black"

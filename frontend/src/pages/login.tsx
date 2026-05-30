@@ -15,6 +15,7 @@ import { EyeIcon, EyeOffIcon, ShoppingBag } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Spinner } from "../components/ui/spinner";
 import { useAuth } from "@/context/auth";
+import { API_URL } from "@/lib/api";
 
 export function LoginPage() {
   return (
@@ -47,7 +48,7 @@ export function LoginForm() {
     setErr(null);
 
     try {
-      const res = await fetch("http://localhost:8080/login", {
+      const res = await fetch(`${API_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

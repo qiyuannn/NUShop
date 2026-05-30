@@ -14,6 +14,7 @@ import { InputGroup, InputGroupButton, InputGroupInput } from "../components/ui/
 import React from "react";
 import { Button } from "../components/ui/button";
 import { Spinner } from "../components/ui/spinner";
+import { API_URL } from "@/lib/api";
 
 export function SignupPage() {
   return (
@@ -62,7 +63,7 @@ export function SignupForm() {
     const { confirmPassword, ...body } = formData;
 
     try {
-      const res = await fetch("http://localhost:8080/create_user ", {
+      const res = await fetch(`${API_URL}/create_user`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

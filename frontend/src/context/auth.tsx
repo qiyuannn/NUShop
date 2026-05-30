@@ -32,8 +32,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
         if (res.ok) {
           const json = await res.json();
-          setUser(json.data.user);
-          setToken(json.data.token);
+
+          setUser(json.data.replaced ?? null);
+          setToken(json.data.token ?? null);
         }
       } finally {
         setReady(true);

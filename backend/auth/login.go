@@ -6,6 +6,7 @@ import (
 	"backend/response"
 	"errors"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -97,15 +98,24 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	http.SetCookie(c.Writer, &http.Cookie{
+	isProd := os.Getenv("ENV") == "production"
+
+	cookie := &http.Cookie{
 		Name:     "refresh_token",
 		Value:    refreshToken,
 		Path:     "/",
 		MaxAge:   7 * 24 * 60 * 60,
 		HttpOnly: true,
-		Secure:   false,
-		SameSite: http.SameSiteLaxMode,
-	})
+		Secure:   isProd,
+		SameSite: http.SameSiteNoneMode,
+	}
+	if isProd {
+		cookie.SameSite = http.SameSiteNoneMode
+	} else {
+		cookie.SameSite = http.SameSiteLaxMode
+	}
+
+	http.SetCookie(c.Writer, cookie)
 
 	resp := UserResponse{
 		UUID:      user.UUID,

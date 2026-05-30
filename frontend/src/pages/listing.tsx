@@ -105,9 +105,8 @@ export function ListingMain() {
         if (!res2.ok) {
           throw new Error(json2?.error?.code ?? "INTERNAL_ERROR");
         }
-        console.log(json2.data.category.name)
+        console.log(json2.data.category.name);
         setListingData((p) => ({ ...p, category: json2.data.category.name }));
-
       } catch (error) {
         console.log(error instanceof Error ? error.message : "idk");
         setErr(true);
@@ -201,21 +200,22 @@ export function ListingCarousel({ files }: { files: string[] }) {
     <div>
       <Carousel setApi={setApi} opts={{ loop: true, containScroll: false }}>
         <CarouselContent>
-          {files.length > 0 && files.map((file) => (
-            <CarouselItem className="basis-1/2">
-              <Item>
-                <ItemContent className="border rounded-sm">
-                  <img
-                    className="aspect-square object-cover"
-                    key={file}
-                    src={`http://localhost:8080${file}`}
-                  />
-                </ItemContent>
-              </Item>
-            </CarouselItem>
-          ))}
+          {files.length > 0 &&
+            files.map((file) => (
+              <CarouselItem className="basis-3/5 md:basis-1/2 lg:basis-2/5">
+                <Item>
+                  <ItemContent className="border rounded-sm">
+                    <img
+                      className="aspect-square object-cover"
+                      key={file}
+                      src={`http://localhost:8080${file}`}
+                    />
+                  </ItemContent>
+                </Item>
+              </CarouselItem>
+            ))}
           {files.length === 0 && (
-            <CarouselItem className="basis-1/2">
+            <CarouselItem className="basis-3/5 md:basis-1/2 lg:basis-2/5">
               <Item>
                 <ItemContent className="flex items-center justify-center border rounded-sm aspect-square">
                   <ItemDescription>Listing have no images</ItemDescription>

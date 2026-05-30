@@ -5,21 +5,29 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
 } from "./ui/sidebar";
 import {
   CopyPlus,
+  Home,
   LogIn,
   LogOut,
   Package,
   Plus,
+  ShoppingBag,
   ShoppingCart,
   SquareChartGantt,
   User,
 } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { useLogout } from "@/hooks/use-logout";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { DropdownMenu, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import { Item, ItemMedia } from "./ui/item";
 
 export function AppSidebar() {
   const navigate = useNavigate();
@@ -28,6 +36,12 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" typeof="floating">
+      <SidebarHeader>
+        <SidebarMenuButton onClick={() => navigate("/")}>
+          <ShoppingBag />
+          <p className="font-bold text-xl">NUShop</p>
+        </SidebarMenuButton>
+      </SidebarHeader>
       <SidebarContent>
         {token && (
           <>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { AppHeader } from "@/components/header";
 import { AppSidebar } from "@/components/sidebar";
 import { SidebarInset } from "@/components/ui/sidebar";
@@ -12,8 +12,8 @@ type ListingWithDetails = Listing;
 export default function Main() {
   const [listings, setListings] = useState<ListingWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [searchInput, setSearchInput] = useState("");
+  const [searchParam] = useSearchParams();
+  const search = searchParam.get("s") ?? "";
 
   useEffect(() => {
     async function fetchListings() {
@@ -46,7 +46,7 @@ export default function Main() {
     <>
       <AppSidebar />
       <SidebarInset>
-        <AppHeader searchInput={searchInput} setSearchInput={setSearchInput} setSearch={setSearch} />
+        <AppHeader />
 
         <div className="grid grid-cols-2 gap-3 p-3 md:grid-cols-3 lg:grid-cols-4">
           {loading ? (

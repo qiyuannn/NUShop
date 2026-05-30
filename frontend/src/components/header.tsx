@@ -1,45 +1,42 @@
 import { SearchIcon, ShoppingBag, User2 } from "lucide-react";
 import { Button } from "./ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ButtonGroup } from "./ui/button-group";
 import { Input } from "./ui/input";
 import { SidebarTrigger, useSidebar } from "./ui/sidebar";
 import { Separator } from "./ui/separator";
 import { useAuth } from "@/context/auth";
-import type { Dispatch, SetStateAction } from "react";
+import React from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
-type AppHeaderProps = {
-  searchInput: string;
-  setSearchInput: Dispatch<SetStateAction<string>>;
-  setSearch: Dispatch<SetStateAction<string>>;
-};
-
-export function AppHeader({ searchInput, setSearchInput, setSearch }: AppHeaderProps) {
+export function AppHeader() {
   const { toggleSidebar } = useSidebar();
-  const { user, token } = useAuth();
+  const { token } = useAuth();
+  const navigate = useNavigate();
+  const [search, setSearch] = React.useState("");
 
   return (
-    <header className="sticky top-0 z-0 flex items-center h-12 p-2 pl-4 pr-4 gap-4 w-full bg-secondary">
+    <header className="sticky top-0 z-50 flex items-center h-12 p-2 pl-4 pr-4 gap-4 w-full bg-secondary">
       <SidebarTrigger onClick={() => toggleSidebar} />
       <Separator orientation="vertical" />
-      <div className="flex flex-none items-center gap-2">
-        <ShoppingBag />
-        <h1 className="font-semibold">{user ? `Welcome ${user.lastName}!` : "Welcome!"}</h1>
-      </div>
       <div className="flex-grow" />
       <ButtonGroup>
         <Input
           id="search"
           placeholder="Search..."
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              setSearch(searchInput);
+              navigate(`/?s=${encodeURIComponent(e.currentTarget.value)}`);
             }
           }}
         />
-        <Button variant="outline" aria-label="search" onClick={() => setSearch(searchInput)}>
+        <Button
+          variant="outline"
+          aria-label="search"
+          onClick={() => navigate(`/?s=${encodeURIComponent(search)}`)}
+        >
           <SearchIcon />
         </Button>
       </ButtonGroup>
@@ -56,7 +53,10 @@ export function AppHeader({ searchInput, setSearchInput, setSearch }: AppHeaderP
       {token && (
         <div className="flex gap-3">
           <Link to="" className="hover:bg-sidebar-ring rounded-sm">
-            <User2 />
+            <Avatar>
+              <AvatarImage src="https://github.com/evilrabbit.png" />
+              <AvatarFallback>HI</AvatarFallback>
+            </Avatar>
           </Link>
         </div>
       )}

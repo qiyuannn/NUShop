@@ -1,4 +1,4 @@
-import { SearchIcon, ShoppingBag, User2 } from "lucide-react";
+import { SearchIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { ButtonGroup } from "./ui/button-group";

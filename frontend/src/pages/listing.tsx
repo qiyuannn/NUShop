@@ -64,7 +64,7 @@ export function ListingMain() {
     lastName: "",
     createdOn: "",
   });
-  const [err, setErr] = React.useState(false);
+  const [_, setErr] = React.useState(false);
 
   React.useEffect(() => {
     async function fetchListing() {

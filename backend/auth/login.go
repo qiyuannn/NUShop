@@ -107,7 +107,6 @@ func Login(c *gin.Context) {
 		MaxAge:   7 * 24 * 60 * 60,
 		HttpOnly: true,
 		Secure:   isProd,
-		SameSite: http.SameSiteNoneMode,
 	}
 	if isProd {
 		cookie.SameSite = http.SameSiteNoneMode

@@ -22,6 +22,7 @@ func Logout(c *gin.Context) {
 
 	claims := &jwt.RegisteredClaims{}
 	secret := os.Getenv("RefreshTokenSecret")
+	isProd := os.Getenv("ENV") == "production"
 
 	_, err = jwt.ParseWithClaims(
 		rTokenStr,
@@ -39,13 +40,20 @@ func Logout(c *gin.Context) {
 	)
 	if err != nil {
 		c.Error(response.ErrInternalServerError(err))
-		http.SetCookie(c.Writer, &http.Cookie{
+		cookie := &http.Cookie{
 			Name:     "refresh_token",
 			Path:     "/",
 			Expires:  time.Unix(0, 0),
+			Secure: isProd,
 			HttpOnly: true,
 			MaxAge:   -1,
-		})
+		}
+		if (isProd) {
+			cookie.SameSite = http.SameSiteNoneMode
+		} else {
+			cookie.SameSite =http.SameSiteLaxMode
+		}
+		http.SetCookie(c.Writer, cookie)
 		return
 	}
 
@@ -59,22 +67,37 @@ func Logout(c *gin.Context) {
 		time.Now(), tokenUUID,
 	); err != nil || res.RowsAffected() != 1 {
 		c.Error(response.ErrInternalServerError(err))
-		http.SetCookie(c.Writer, &http.Cookie{
+		cookie := &http.Cookie{
 			Name:     "refresh_token",
 			Path:     "/",
 			Expires:  time.Unix(0, 0),
 			HttpOnly: true,
 			MaxAge:   -1,
-		})
+			Secure: isProd,
+		}
+		if (isProd) {
+			cookie.SameSite = http.SameSiteNoneMode
+		} else {
+			cookie.SameSite =http.SameSiteLaxMode
+		}
+		http.SetCookie(c.Writer, cookie)
 		return
 	}
 
-	http.SetCookie(c.Writer, &http.Cookie{
+	cookie := &http.Cookie{
 		Name:    "refresh_token",
 		Path:    "/",
 		Expires: time.Unix(0, 0),
 		MaxAge:  -1,
-	})
+		Secure: isProd,
+	}
+	if (isProd) {
+		cookie.SameSite = http.SameSiteNoneMode
+	} else {
+		cookie.SameSite =http.SameSiteLaxMode
+	}
+	http.SetCookie(c.Writer, cookie)
+
 	response.Success(c, http.StatusOK, gin.H{
 		"mesage": "refresh token deleted",
 	})

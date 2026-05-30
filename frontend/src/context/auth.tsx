@@ -7,6 +7,7 @@ type AuthContextType = {
   setUser: (user: User | null) => void;
   token: string | null;
   setToken: (token: string | null) => void;
+  ready: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -14,6 +15,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<User | null>(null);
   const [token, setToken] = React.useState<string | null>(null);
+  const [ready, setReady] = React.useState(false);
   const refreshed = React.useRef(false);
 
   React.useEffect(() => {
@@ -23,14 +25,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       refreshed.current = true;
 
-      const res = await fetch(`${API_URL}/auth/refresh`, {
-        method: "POST",
-        credentials: "include",
-      });
-      if (res.ok) {
-        const json = await res.json();
-        setUser(json.data.user);
-        setToken(json.data.token);
+      try {
+        const res = await fetch("http://localhost:8080/auth/refresh", {
+          method: "POST",
+          credentials: "include",
+        });
+        if (res.ok) {
+          const json = await res.json();
+          setUser(json.data.user);
+          setToken(json.data.token);
+        }
+      } finally {
+        setReady(true);
       }
     }
     refresh();
@@ -43,6 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser,
         token,
         setToken,
+        ready,
       }}
     >
       {children}

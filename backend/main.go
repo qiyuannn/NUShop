@@ -27,7 +27,7 @@ func main() {
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:8080", "http://localhost:5173"},
 		AllowMethods:     []string{"GET", "PUT", "POST", "DELETE"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorisation"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		AllowCredentials: true,
 	}))
 
@@ -51,6 +51,7 @@ func main() {
 	//listing handlers
 	router.GET("/listings", listings.GetListings)
 	router.GET("/listings/:listingID", listings.GetListing)
+	private.GET("/listings/me", listings.GetMyListings)
 	private.POST("/listings", listings.CreateListing)
 	private.PUT("/listings/:id", listings.UpdateListing)
 	private.DELETE("/listings/:id", listings.DeleteListing)

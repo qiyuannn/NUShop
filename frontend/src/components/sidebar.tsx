@@ -8,12 +8,9 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarRail,
 } from "./ui/sidebar";
 import {
   CopyPlus,
-  Home,
   LogIn,
   LogOut,
   Package,
@@ -25,9 +22,6 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { useLogout } from "@/hooks/use-logout";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { DropdownMenu, DropdownMenuTrigger } from "./ui/dropdown-menu";
-import { Item, ItemMedia } from "./ui/item";
 
 export function AppSidebar() {
   const navigate = useNavigate();

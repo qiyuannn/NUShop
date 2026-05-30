@@ -4,6 +4,7 @@ import { SignupPage } from "./pages/signup";
 import Main from "./pages/homepage";
 import { CreateListingPage } from "./pages/createListing";
 import { ListingPage } from "./pages/listing";
+import { Filters } from "./components/filters";
 
 export function App() {
   return (
@@ -13,6 +14,7 @@ export function App() {
       <Route path="/" element={<Main />} />
       <Route path="/listing/:listingID" element={<ListingPage />} />
       <Route path="/create" element={<CreateListingPage />} />
+      <Route path="/test" element={<Filters/>}/>
     </Routes>
   );
 }

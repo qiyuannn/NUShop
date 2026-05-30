@@ -12,7 +12,7 @@ import { AuthProvider } from "./context/auth.tsx";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider>
-      <SidebarProvider>
+      <SidebarProvider defaultOpen={false}>
         <AuthProvider>
           <TooltipProvider>
             <BrowserRouter>

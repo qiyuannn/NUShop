@@ -16,13 +16,9 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal(err)
-	}
-	if len(os.Getenv("AccessTokenSecret")) < 64 || len(os.Getenv("RefreshTokenSecret")) < 64 {
-		log.Fatal("missing/invalid secret")
-	}
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found, using environment variables")
+	}	
 
 	db.Connect()
 	router := gin.Default()
@@ -61,9 +57,11 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = ":8080"
+		port = "8080"
 		log.Println("Port undefined, using :8080")
 	}
 	router.Static("/uploads", "./uploads")
-	router.Run(port)
+	if err := router.Run(":" + port); err != nil {
+		log.Fatal(err)
+	}
 }

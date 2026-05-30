@@ -1,4 +1,5 @@
 import { useAuth } from "@/context/auth";
+import { API_URL } from "@/lib/api";
 
 export function useAuthApiFetch() {
   const { setUser, token, setToken } = useAuth();
@@ -17,7 +18,7 @@ export function useAuthApiFetch() {
       return res;
     }
 
-    const refreshTokenRes = await fetch("http://localhost:8080/auth/refresh", {
+    const refreshTokenRes = await fetch(`${API_URL}/auth/refresh`, {
       method: "POST",
       credentials: "include",
     });

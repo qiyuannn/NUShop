@@ -5,6 +5,7 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
 } from "./ui/sidebar";
@@ -14,6 +15,7 @@ import {
   LogOut,
   Package,
   Plus,
+  ShoppingBag,
   ShoppingCart,
   SquareChartGantt,
   User,
@@ -28,6 +30,12 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" typeof="floating">
+      <SidebarHeader>
+        <SidebarMenuButton onClick={() => navigate("/")}>
+          <ShoppingBag />
+          <p className="font-bold text-xl">NUShop</p>
+        </SidebarMenuButton>
+      </SidebarHeader>
       <SidebarContent>
         {token && (
           <>

@@ -1,5 +1,8 @@
+import { AppHeader } from "@/components/header";
+import { AppSidebar } from "@/components/sidebar";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
   type CarouselApi,
@@ -26,7 +29,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SidebarInset } from "@/components/ui/sidebar";
 import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
+import { API_URL } from "@/lib/api";
 import type { Category } from "@/types";
 import { AlertCircleIcon, DollarSign, Trash2 } from "lucide-react";
 import React, { type SetStateAction } from "react";
@@ -43,12 +48,13 @@ type FormDataType = {
 
 export function CreateListingPage() {
   return (
-    <div className="flex items-center justify-center min-w-svw">
-      <div>
-        <p className="text-3xl pb-4">Create your listing</p>
+    <>
+      <AppSidebar />
+      <SidebarInset>
+        <AppHeader />
         <CreateListingForm />
-      </div>
-    </div>
+      </SidebarInset>
+    </>
   );
 }
 
@@ -103,7 +109,7 @@ export function CreateListingForm() {
     }
 
     try {
-      const res = await apiFetch("http://localhost:8080/listings", {
+      const res = await apiFetch(`${API_URL}/listings`, {
         method: "POST",
         body: form,
       });
@@ -118,7 +124,7 @@ export function CreateListingForm() {
 
   React.useEffect(() => {
     async function fetchCategories() {
-      const res = await fetch("http://localhost:8080/categories", {
+      const res = await fetch(`${API_URL}/categories`, {
         method: "GET",
       });
       const json = await res.json();
@@ -131,9 +137,11 @@ export function CreateListingForm() {
   }, []);
 
   return (
-    <div className="flex justify-center items-center min-w-full">
-      <div className="max-w-md">
+    <Card>
+      <div className="pl-16 pr-16">
         <CreateListingCarousel files={formData.files} setFormData={setFormData} />
+      </div>
+      <CardContent>
         <form onSubmit={handleSubmit}>
           <FieldSet className="min-w-md">
             <Field>
@@ -243,8 +251,8 @@ export function CreateListingForm() {
             </Field>
           </FieldSet>
         </form>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -284,7 +292,7 @@ export function CreateListingCarousel({
       <Carousel setApi={setApi} opts={{ loop: true, containScroll: false }}>
         <CarouselContent>
           {files.map((file) => (
-            <CarouselItem className="basis-1/2">
+            <CarouselItem className="basis-3/5 md:basis-1/2 lg:basis-2/5">
               <Item>
                 <ItemContent className="border rounded-sm">
                   <img className="aspect-square object-cover" src={URL.createObjectURL(file)} />
@@ -293,7 +301,7 @@ export function CreateListingCarousel({
             </CarouselItem>
           ))}
           {files.length === 0 && (
-            <CarouselItem className="basis-1/2">
+            <CarouselItem className="basis-3/5 md:basis-1/2 lg:basis-2/5">
               <Item>
                 <ItemContent className="flex items-center justify-center aspect-square border rounded-sm">
                   <ItemDescription>No photos uploaded</ItemDescription>

@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/item";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset } from "@/components/ui/sidebar";
+import { API_URL } from "@/lib/api";
 import { MessageSquare, ShoppingCart, User } from "lucide-react";
 import React from "react";
 import { useParams } from "react-router-dom";
@@ -64,7 +65,7 @@ export function ListingMain() {
     lastName: "",
     createdOn: "",
   });
-  const [err, setErr] = React.useState(false);
+  const [_, setErr] = React.useState(false);
 
   React.useEffect(() => {
     async function fetchListing() {
@@ -73,7 +74,7 @@ export function ListingMain() {
         return;
       }
       try {
-        const res = await fetch(`http://localhost:8080/listings/${encodeURIComponent(listingID)}`, {
+        const res = await fetch(`${API_URL}/listings/${encodeURIComponent(listingID)}`, {
           method: "GET",
         });
         const json = await res.json();
@@ -87,7 +88,7 @@ export function ListingMain() {
         });
 
         const res1 = await fetch(
-          `http://localhost:8080/user/${encodeURIComponent(json.data.listing.sellerUUID)}`,
+          `${API_URL}/user/${encodeURIComponent(json.data.listing.sellerUUID)}`,
           {
             method: "GET",
           },
@@ -99,15 +100,14 @@ export function ListingMain() {
         setSellerData(json1.data.user);
 
         const res2 = await fetch(
-          `http://localhost:8080/categories/${encodeURIComponent(json.data.listing.categoryUUID)}`,
+          `${API_URL}/categories/${encodeURIComponent(json.data.listing.categoryUUID)}`,
         );
         const json2 = await res2.json();
         if (!res2.ok) {
           throw new Error(json2?.error?.code ?? "INTERNAL_ERROR");
         }
-        console.log(json2.data.category.name)
+        console.log(json2.data.category.name);
         setListingData((p) => ({ ...p, category: json2.data.category.name }));
-
       } catch (error) {
         console.log(error instanceof Error ? error.message : "idk");
         setErr(true);
@@ -201,21 +201,22 @@ export function ListingCarousel({ files }: { files: string[] }) {
     <div>
       <Carousel setApi={setApi} opts={{ loop: true, containScroll: false }}>
         <CarouselContent>
-          {files.length > 0 && files.map((file) => (
-            <CarouselItem className="basis-1/2">
-              <Item>
-                <ItemContent className="border rounded-sm">
-                  <img
-                    className="aspect-square object-cover"
-                    key={file}
-                    src={`http://localhost:8080${file}`}
-                  />
-                </ItemContent>
-              </Item>
-            </CarouselItem>
-          ))}
+          {files.length > 0 &&
+            files.map((file) => (
+              <CarouselItem className="basis-3/5 md:basis-1/2 lg:basis-2/5">
+                <Item>
+                  <ItemContent className="border rounded-sm">
+                    <img
+                      className="aspect-square object-cover"
+                      key={file}
+                      src={`${API_URL}${file}`}
+                    />
+                  </ItemContent>
+                </Item>
+              </CarouselItem>
+            ))}
           {files.length === 0 && (
-            <CarouselItem className="basis-1/2">
+            <CarouselItem className="basis-3/5 md:basis-1/2 lg:basis-2/5">
               <Item>
                 <ItemContent className="flex items-center justify-center border rounded-sm aspect-square">
                   <ItemDescription>Listing have no images</ItemDescription>

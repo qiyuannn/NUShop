@@ -8,13 +8,14 @@ import { SidebarInset } from "@/components/ui/sidebar";
 import { useAuth } from "@/context/auth";
 import type { Listing } from "@/types";
 import { Separator } from "@/components/ui/separator";
+import { API_URL } from "@/lib/api";
 
 function listingImageSrc(listing: Listing) {
   const image = listing.images?.[0];
   if (!image) return "https://via.placeholder.com/640";
   if (image.startsWith("http")) return image;
-  if (image.startsWith("/")) return `http://localhost:8080${image}`;
-  return `http://localhost:8080/${image}`;
+  if (image.startsWith("/")) return `${API_URL}${image}`;
+  return `${API_URL}/${image}`;
 }
 
 export function UserListingsPage() {
@@ -37,7 +38,7 @@ useEffect(() => {
       setLoading(true);
       setError(null);
 
-      const res = await fetch("http://localhost:8080/listings/me", {
+      const res = await fetch(`${API_URL}/listings/me`, {
         method: "GET",
         credentials: "include",
         headers: {

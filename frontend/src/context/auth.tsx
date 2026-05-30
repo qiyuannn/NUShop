@@ -1,3 +1,4 @@
+import { API_URL } from "@/lib/api";
 import type { User } from "@/types";
 import React, { createContext, useContext } from "react";
 
@@ -22,7 +23,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       refreshed.current = true;
 
-      const res = await fetch("http://localhost:8080/auth/refresh", {
+      const res = await fetch(`${API_URL}/auth/refresh`, {
         method: "POST",
         credentials: "include",
       });

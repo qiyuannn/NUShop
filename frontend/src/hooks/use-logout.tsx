@@ -1,4 +1,5 @@
 import { useAuth } from "@/context/auth";
+import { API_URL } from "@/lib/api";
 
 export function useLogout() {
   const { setToken, setUser } = useAuth();
@@ -7,7 +8,7 @@ export function useLogout() {
     setUser(null);
     setToken(null);
 
-    await fetch("http://localhost:8080/auth/logout", {
+    await fetch(`${API_URL}/auth/logout`, {
       method: "PUT",
       credentials: "include",
     });

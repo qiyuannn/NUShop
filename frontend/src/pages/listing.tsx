@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/item";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset } from "@/components/ui/sidebar";
+import { API_URL } from "@/lib/api";
 import { MessageSquare, ShoppingCart, User } from "lucide-react";
 import React from "react";
 import { useParams } from "react-router-dom";
@@ -73,7 +74,7 @@ export function ListingMain() {
         return;
       }
       try {
-        const res = await fetch(`http://localhost:8080/listings/${encodeURIComponent(listingID)}`, {
+        const res = await fetch(`${API_URL}/listings/${encodeURIComponent(listingID)}`, {
           method: "GET",
         });
         const json = await res.json();
@@ -87,7 +88,7 @@ export function ListingMain() {
         });
 
         const res1 = await fetch(
-          `http://localhost:8080/user/${encodeURIComponent(json.data.listing.sellerUUID)}`,
+          `${API_URL}/user/${encodeURIComponent(json.data.listing.sellerUUID)}`,
           {
             method: "GET",
           },
@@ -99,7 +100,7 @@ export function ListingMain() {
         setSellerData(json1.data.user);
 
         const res2 = await fetch(
-          `http://localhost:8080/categories/${encodeURIComponent(json.data.listing.categoryUUID)}`,
+          `${API_URL}/categories/${encodeURIComponent(json.data.listing.categoryUUID)}`,
         );
         const json2 = await res2.json();
         if (!res2.ok) {
@@ -208,7 +209,7 @@ export function ListingCarousel({ files }: { files: string[] }) {
                     <img
                       className="aspect-square object-cover"
                       key={file}
-                      src={`http://localhost:8080${file}`}
+                      src={`${API_URL}${file}`}
                     />
                   </ItemContent>
                 </Item>

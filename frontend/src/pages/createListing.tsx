@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/select";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
+import { API_URL } from "@/lib/api";
 import type { Category } from "@/types";
 import { AlertCircleIcon, DollarSign, Trash2 } from "lucide-react";
 import React, { type SetStateAction } from "react";
@@ -108,7 +109,7 @@ export function CreateListingForm() {
     }
 
     try {
-      const res = await apiFetch("http://localhost:8080/listings", {
+      const res = await apiFetch(`${API_URL}/listings`, {
         method: "POST",
         body: form,
       });
@@ -123,7 +124,7 @@ export function CreateListingForm() {
 
   React.useEffect(() => {
     async function fetchCategories() {
-      const res = await fetch("http://localhost:8080/categories", {
+      const res = await fetch(`${API_URL}/categories`, {
         method: "GET",
       });
       const json = await res.json();

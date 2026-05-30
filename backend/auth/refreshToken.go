@@ -105,16 +105,23 @@ func RefreshToken(c *gin.Context) {
 		return
 	}
 
+	isProd := os.Getenv("ENV") == "production"
 	//replace cookie
-	http.SetCookie(c.Writer, &http.Cookie{
+	cookie := &http.Cookie{
 		Name:     "refresh_token",
 		Value:    newToken,
 		Path:     "/",
 		MaxAge:   7 * 24 * 60 * 60,
 		HttpOnly: true,
-		Secure:   false,
-		SameSite: http.SameSiteLaxMode,
-	})
+		Secure:   isProd,
+	} 
+	if (isProd) {
+		cookie.SameSite = http.SameSiteNoneMode
+	} else {
+		cookie.SameSite =http.SameSiteLaxMode
+	}
+
+	http.SetCookie(c.Writer, cookie)
 
 	//generate new accesstoken
 	newAccessToken, err := GenerateAcessToken(t.UserUUID)

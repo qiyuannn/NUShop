@@ -1,3 +1,4 @@
+import { API_URL } from "@/lib/api";
 import type { User } from "@/types";
 import React, { createContext, useContext } from "react";
 

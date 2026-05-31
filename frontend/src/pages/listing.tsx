@@ -106,13 +106,10 @@ export function ListingMain() {
         if (!res2.ok) {
           throw new Error(json2?.error?.code ?? "INTERNAL_ERROR");
         }
-        console.log(json2.data.category.name);
         setListingData((p) => ({ ...p, category: json2.data.category.name }));
       } catch (error) {
-        console.log(error instanceof Error ? error.message : "idk");
         setErr(true);
       } finally {
-        console.log(listingData);
       }
     }
     fetchListing();

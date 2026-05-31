@@ -10,6 +10,7 @@ import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
 import type { Listing } from "@/types";
 import { Separator } from "@/components/ui/separator";
 import { API_URL } from "@/lib/api";
+import { Pencil } from "lucide-react";
 
 function listingImageSrc(listing: Listing) {
   const image = listing.images?.[0];
@@ -70,7 +71,7 @@ export function UserListingsPage() {
         <AppHeader />
 
         <div className="p-4">
-          <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="flex w-full items-center justify-between gap-3">
             <div>
               <h1 className="text-2xl font-semibold">My listings</h1>
               <p className="text-sm text-muted-foreground">
@@ -108,27 +109,50 @@ export function UserListingsPage() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
               {listings.map((listing) => (
-                <Item asChild variant="outline" key={listing.uuid}>
-                  <Link to={`/listing/${listing.uuid}`}>
-                    <ItemHeader>
-                      <img
-                        src={listingImageSrc(listing)}
-                        alt={listing.title}
-                        className="aspect-square w-full rounded-lg bg-black object-contain outline"
-                      />
-                    </ItemHeader>
+                <Item
+                  key={listing.uuid}
+                  variant="outline"
+                  className="flex h-full flex-col overflow-hidden"
+                >
+                  <div className="flex h-full flex-col p-0">
+                    <Link to={`/listing/${listing.uuid}`} className="block">
+                      <ItemHeader>
+                        <img
+                          src={listingImageSrc(listing)}
+                          alt={listing.title}
+                          className="h-56 w-full rounded-lg bg-black object-contain"
+                        />
+                      </ItemHeader>
+                    </Link>
 
-                    <ItemContent>
-                      <ItemTitle>{listing.title}</ItemTitle>
-                      <div className="flex gap-2">
+                    <ItemContent className="mt-4 flex flex-1 flex-col pb-2">
+                      <div className="flex w-full items-center justify-between gap-3">
+                        <Link
+                          to={`/listing/${listing.uuid}`}
+                          className="min-w-0 flex-1 overflow-hidden"
+                        >
+                          <ItemTitle className="truncate">
+                            {listing.title}
+                          </ItemTitle>
+                        </Link>
+
+                        <Button asChild size="sm" variant="outline" className="shrink-0">
+                          <Link to={`/create/${listing.uuid}`}>
+                            <Pencil className="mr-1 h-4 w-4" />
+                            Edit
+                          </Link>
+                        </Button>
+                      </div>
+
+                      <div className="mt-auto flex gap-2 pt-2">
                         <ItemDescription>${listing.price}</ItemDescription>
                         <Separator orientation="vertical" />
-                        <ItemDescription>{listing.condition || "Unknown"}</ItemDescription>
+                        <ItemDescription>{listing.condition}</ItemDescription>
                       </div>
                     </ItemContent>
-                  </Link>
+                  </div>
                 </Item>
               ))}
             </div>

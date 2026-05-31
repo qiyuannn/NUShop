@@ -12,7 +12,7 @@ CREATE TABLE listings (
     quantity BIGINT CHECK (quantity >= 0)
         NOT NULL,
     condition TEXT NOT NULL,
-    category_uuid UUID DEFAULT '00000000-0000-0000-0000-000000000000'
+    category_uuid UUID DEFAULT '1f59bfef-c791-4c70-a8ec-90b795030869'
         REFERENCES categories(uuid) 
         ON DELETE SET DEFAULT
         NOT NULL,

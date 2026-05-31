@@ -58,7 +58,6 @@ export function LoginForm() {
       if (!res.ok) {
         throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
       }
-      console.log(json);
       setUser(json.data.user);
       setToken(json.data.token);
       nav("/");

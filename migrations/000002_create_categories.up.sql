@@ -5,4 +5,4 @@ CREATE TABLE categories (
     name TEXT NOT NULL
 );
 
-INSERT INTO categories (uuid, name) VALUES ('00000000-0000-0000-0000-000000000000', 'Others');
+INSERT INTO categories (uuid, name) VALUES ('1f59bfef-c791-4c70-a8ec-90b795030869', 'Others');

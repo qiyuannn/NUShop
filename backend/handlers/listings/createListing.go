@@ -25,6 +25,7 @@ func CreateListing(c *gin.Context) {
 	userIDStr, ok := userIDValue.(string)
 	if !ok {
 		c.Error(response.ErrInternalServerError(errors.New("invalid auth context")))
+		return
 	}
 
 	userID, err := uuid.Parse(userIDStr)
@@ -39,9 +40,16 @@ func CreateListing(c *gin.Context) {
 		return
 	}
 
+	categoryUUID, err := uuid.Parse(strings.TrimSpace(listing.CategoryUUID))
+	if err != nil || categoryUUID == uuid.Nil {
+		c.Error(response.ErrBadRequest(errors.New("category is required")))
+		return
+	}
+
 	form, err := c.MultipartForm()
 	if err != nil {
 		c.Error(response.ErrBadRequest(err))
+		return
 	}
 
 	files := form.File["file"]
@@ -55,7 +63,7 @@ func CreateListing(c *gin.Context) {
 		filePath := "/uploads/" + fileUUID + filepath.Ext(file.Filename)
 		args = append(args, filePath)
 
-		if err := c.SaveUploadedFile(file, "." + filePath); err != nil {
+		if err := c.SaveUploadedFile(file, "."+filePath); err != nil {
 			c.Error(response.ErrInternalServerError(err))
 			return
 		}
@@ -91,7 +99,7 @@ func CreateListing(c *gin.Context) {
 		listing.Price,
 		listing.Quantity,
 		listing.Condition,
-		listing.CategoryUUID,
+		categoryUUID,
 	).Scan(
 		&insertedListing.UUID,
 		&insertedListing.SellerUUID,
@@ -124,7 +132,7 @@ func CreateListing(c *gin.Context) {
 		sqlQuery := "INSERT INTO images (listing_uuid, file_url) VALUES " + strings.Join(placeholder, ", ")
 		allArgs := []any{insertedListing.UUID}
 		allArgs = append(allArgs, args...)
-	
+
 		if _, err := db.Pool.Exec(
 			c.Request.Context(),
 			sqlQuery,

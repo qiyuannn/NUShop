@@ -75,7 +75,7 @@ export function LoginForm() {
           <Link to="">
             <ShoppingBag />
           </Link>
-          <p>Welcome to NUShop</p>
+          <p>Welcome to Shop</p>
         </FieldLegend>
         <FieldDescription className="text-center">
           Don't have an account? <Link to="/signup">Sign up</Link>

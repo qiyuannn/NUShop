@@ -12,7 +12,7 @@ func GenerateAcessToken(userUUID uuid.UUID) (string, error) {
 	accessTokenSecret := os.Getenv("AccessTokenSecret")
 
 	claims := jwt.RegisteredClaims{
-		Issuer:    "NUShop",
+		Issuer:    "Shop",
 		Subject:   userUUID.String(),
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 15)),
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -28,7 +28,7 @@ func GenerateRefreshToken(userUUID uuid.UUID, tokenUUID string) (string, error) 
 	refreshTokenSecret := os.Getenv("RefreshTokenSecret")
 
 	claims := jwt.RegisteredClaims{
-		Issuer:    "NUShop",
+		Issuer:    "Shop",
 		Subject:   userUUID.String(),
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 168)),
 		IssuedAt:  jwt.NewNumericDate(time.Now()),

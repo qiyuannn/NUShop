@@ -33,7 +33,7 @@ export function AppSidebar() {
       <SidebarHeader>
         <SidebarMenuButton onClick={() => navigate("/")}>
           <ShoppingBag />
-          <p className="font-bold text-xl">NUShop</p>
+          <p className="font-bold text-xl">Shop</p>
         </SidebarMenuButton>
       </SidebarHeader>
       <SidebarContent>

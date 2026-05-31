@@ -10,7 +10,7 @@ import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
 import type { Listing } from "@/types";
 import { Separator } from "@/components/ui/separator";
 import { API_URL } from "@/lib/api";
-import { Pencil } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 
 function listingImageSrc(listing: Listing) {
   const image = listing.images?.[0];
@@ -27,6 +27,24 @@ export function UserListingsPage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const handleDelete = async (listingID: string) => {
+    if (!window.confirm("Delete this listing?")) return;
+
+    try {
+      const res = await apiFetch(`${API_URL}/listings/${listingID}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to delete listing");
+      }
+
+      setListings((prev) => prev.filter((listing) => listing.uuid !== listingID));
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
     if (!ready) return;
@@ -114,7 +132,7 @@ export function UserListingsPage() {
                 <Item
                   key={listing.uuid}
                   variant="outline"
-                  className="flex h-full flex-col overflow-hidden"
+                  className="relative flex h-full flex-col overflow-hidden"
                 >
                   <div className="flex h-full flex-col p-0">
                     <Link to={`/listing/${listing.uuid}`} className="block">
@@ -126,7 +144,15 @@ export function UserListingsPage() {
                         />
                       </ItemHeader>
                     </Link>
-
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute right-2 top-2 z-10 h-8 w-8 rounded-full shadow-md opacity-50 hover:opacity-100 transition-all duration-200"
+                      onClick={() => handleDelete(listing.uuid)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                     <ItemContent className="mt-4 flex flex-1 flex-col pb-2">
                       <div className="flex w-full items-center justify-between gap-3">
                         <Link

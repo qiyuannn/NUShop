@@ -14,7 +14,7 @@ export function App() {
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/" element={<Main />} />
       <Route path="/listing/:listingID" element={<ListingPage />} />
-      <Route path="/create" element={<CreateListingPage />} />
+      <Route path="/create/:listingID?" element={<CreateListingPage />} />
       <Route path="/userListings" element={<UserListingsPage />} />
       <Route path="/test" element={<Filters/>}/>
     </Routes>

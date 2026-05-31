@@ -5,7 +5,9 @@ import (
 	"backend/models"
 	"backend/response"
 	"errors"
+	"mime/multipart"
 	"net/http"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -14,57 +16,91 @@ import (
 )
 
 type CreateListingRequest struct {
-	Title        string    `form:"title"`
-	Description  string    `form:"description"`
-	Price        int64     `form:"price" binding:"gte=0"`
-	Quantity     int64     `form:"quantity" binding:"gte=0"`
-	Condition    string    `form:"condition"`
+	Title        string `form:"title"`
+	Description  string `form:"description"`
+	Price        int64  `form:"price" binding:"gte=0"`
+	Quantity     int64  `form:"quantity" binding:"gte=0"`
+	Condition    string `form:"condition"`
 	CategoryUUID string `form:"category"`
 }
 
 func UpdateListing(c *gin.Context) {
-	userIDValue, ok := c.Get("user_id")
+	userIDValue, ok := c.Get("userID")
 	if !ok {
 		c.Error(response.ErrUnauthorised(errors.New("user not logged in")))
 		return
 	}
-	userID, ok := userIDValue.(uuid.UUID)
+
+	userIDStr, ok := userIDValue.(string)
 	if !ok {
 		c.Error(response.ErrInternalServerError(errors.New("invalid auth context")))
 		return
 	}
 
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+
+	listingID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.Error(response.ErrBadRequest(errors.New("invalid listing id")))
+		return
+	}
+
 	var listing CreateListingRequest
-	if err := c.ShouldBindJSON(&listing); err != nil {
+	if err := c.ShouldBind(&listing); err != nil {
 		c.Error(response.ErrBadRequest(err))
 		return
 	}
 
-	idVal := c.Param("id")
-	id, err := uuid.Parse(idVal)
+	form, err := c.MultipartForm()
 	if err != nil {
-		c.Error(response.ErrBadRequest(errors.New("invalid post id")))
+		c.Error(response.ErrBadRequest(err))
 		return
 	}
 
-	var updatedListing models.Listing
+	var files []*multipart.FileHeader
+	if form != nil {
+		files = form.File["file"]
+	}
 
-	if err := db.Pool.QueryRow(
+	tx, err := db.Pool.Begin(c.Request.Context())
+	if err != nil {
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+	defer tx.Rollback(c.Request.Context())
+
+	var updatedListing models.Listing
+	if err := tx.QueryRow(
 		c.Request.Context(),
 		`UPDATE listings SET
-		title = $1,
-		description = $2,
-		price = $3,
-		quantity = $4,
-		category_id = $5
-		WHERE id = $6 AND seller_id = $7 
-		RETURNING id, seller_id, title, description, price, quantity, category_id, created_on`,
+			title = $1,
+			description = $2,
+			price = $3,
+			quantity = $4,
+			condition = $5,
+			category_uuid = $6
+		WHERE uuid = $7 AND seller_uuid = $8
+		RETURNING
+			uuid,
+			seller_uuid,
+			title,
+			description,
+			price,
+			quantity,
+			condition,
+			category_uuid,
+			created_on`,
 		listing.Title,
 		listing.Description,
 		listing.Price,
 		listing.Quantity,
+		listing.Condition,
 		listing.CategoryUUID,
-		id,
+		listingID,
 		userID,
 	).Scan(
 		&updatedListing.UUID,
@@ -73,6 +109,7 @@ func UpdateListing(c *gin.Context) {
 		&updatedListing.Description,
 		&updatedListing.Price,
 		&updatedListing.Quantity,
+		&updatedListing.Condition,
 		&updatedListing.CategoryUUID,
 		&updatedListing.CreatedOn,
 	); err != nil {
@@ -93,6 +130,42 @@ func UpdateListing(c *gin.Context) {
 				return
 			}
 		}
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+
+	if len(files) > 0 {
+		if _, err := tx.Exec(
+			c.Request.Context(),
+			`DELETE FROM images WHERE listing_uuid = $1`,
+			listingID,
+		); err != nil {
+			c.Error(response.ErrInternalServerError(err))
+			return
+		}
+
+		for _, file := range files {
+			fileUUID := uuid.NewString()
+			filePath := "/uploads/" + fileUUID + filepath.Ext(file.Filename)
+
+			if err := c.SaveUploadedFile(file, "."+filePath); err != nil {
+				c.Error(response.ErrInternalServerError(err))
+				return
+			}
+
+			if _, err := tx.Exec(
+				c.Request.Context(),
+				`INSERT INTO images (listing_uuid, file_url) VALUES ($1, $2)`,
+				listingID,
+				filePath,
+			); err != nil {
+				c.Error(response.ErrInternalServerError(err))
+				return
+			}
+		}
+	}
+
+	if err := tx.Commit(c.Request.Context()); err != nil {
 		c.Error(response.ErrInternalServerError(err))
 		return
 	}

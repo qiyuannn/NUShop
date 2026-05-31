@@ -35,6 +35,7 @@ import { API_URL } from "@/lib/api";
 import type { Category } from "@/types";
 import { AlertCircleIcon, DollarSign, Trash2 } from "lucide-react";
 import React, { type SetStateAction } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 type FormDataType = {
   title: string;
@@ -43,7 +44,7 @@ type FormDataType = {
   price: string;
   quantity: string;
   condition: string;
-  files: File[];
+  files: (File | string)[];
 };
 
 export function CreateListingPage() {
@@ -59,6 +60,10 @@ export function CreateListingPage() {
 }
 
 export function CreateListingForm() {
+  const { listingID } = useParams();
+  const navigate = useNavigate();
+  const isEditing = Boolean(listingID);
+
   const [formData, setFormData] = React.useState<FormDataType>({
     title: "",
     category: "",
@@ -68,11 +73,12 @@ export function CreateListingForm() {
     condition: "",
     files: [],
   });
+
+
   const [categories, setCategory] = React.useState<Category[]>([]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData((p) => ({ ...p, [e.target.id]: e.target.value }));
-    console.log(formData);
   };
   const handleCategoryChange = (value: string) => {
     setFormData((p) => ({ ...p, category: value }));
@@ -93,7 +99,7 @@ export function CreateListingForm() {
 
   const apiFetch = useAuthApiFetch();
   const [err, setErr] = React.useState(false);
-  const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const form = new FormData();
@@ -105,19 +111,27 @@ export function CreateListingForm() {
     form.append("condition", formData.condition);
 
     for (const file of formData.files) {
-      form.append("file", file);
+      if (file instanceof File) {
+        form.append("file", file);
+      }
     }
 
     try {
-      const res = await apiFetch(`${API_URL}/listings`, {
-        method: "POST",
-        body: form,
-      });
+      const res = await apiFetch(
+        isEditing ? `${API_URL}/listings/${listingID}` : `${API_URL}/listings`,
+        {
+          method: isEditing ? "PUT" : "POST",
+          body: form,
+        },
+      );
+
       const json = await res.json();
       if (!res.ok) {
         throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
       }
-    } catch (error) {
+
+      navigate("/userlistings");
+    } catch {
       setErr(true);
     }
   };
@@ -131,10 +145,35 @@ export function CreateListingForm() {
       if (res.ok) {
         setCategory(json?.data?.categories ?? []);
       }
-      console.log(json.data.categories);
     }
     fetchCategories();
   }, []);
+
+  React.useEffect(() => {
+    async function fetchListing() {
+      if (!listingID) return;
+
+      const res = await fetch(`${API_URL}/listings/${listingID}`);
+      const json = await res.json();
+
+      if (!res.ok) {
+        setErr(true);
+        return;
+      }
+
+      setFormData({
+        title: json.data.listing.title ?? "",
+        category: json.data.listing.categoryUUID ?? "",
+        description: json.data.listing.description ?? "",
+        price: String(json.data.listing.price ?? ""),
+        quantity: String(json.data.listing.quantity ?? ""),
+        condition: json.data.listing.condition ?? "",
+        files: json.data.listing.images ?? [],
+      });
+    }
+
+    fetchListing();
+  }, [listingID]);
 
   return (
     <Card>
@@ -151,7 +190,12 @@ export function CreateListingForm() {
             <FieldGroup>
               <Field>
                 <FieldLabel>Category</FieldLabel>
-                <Select onValueChange={handleCategoryChange} required>
+                <Select
+                  key={`${formData.category}-${categories.length}`}
+                  value={formData.category}
+                  onValueChange={handleCategoryChange}
+                  required
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
@@ -206,7 +250,7 @@ export function CreateListingForm() {
               </Field>
               <Field>
                 <FieldLabel>Condition</FieldLabel>
-                <Select onValueChange={handleConditionChange} required>
+                <Select value={formData.condition} onValueChange={handleConditionChange} required>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -246,7 +290,7 @@ export function CreateListingForm() {
             )}
             <Field>
               <div className="flex justify-end">
-                <Button type="submit">Post</Button>
+                <Button type="submit">{isEditing ? "Save changes" : "Post"}</Button>
               </div>
             </Field>
           </FieldSet>
@@ -260,7 +304,7 @@ export function CreateListingCarousel({
   files,
   setFormData,
 }: {
-  files: File[];
+  files: (File | string)[];
   setFormData: React.Dispatch<SetStateAction<FormDataType>>;
 }) {
   const [api, setApi] = React.useState<CarouselApi>();
@@ -291,11 +335,17 @@ export function CreateListingCarousel({
     <div>
       <Carousel setApi={setApi} opts={{ loop: true, containScroll: false }}>
         <CarouselContent>
-          {files.map((file) => (
-            <CarouselItem className="basis-3/5 md:basis-1/2 lg:basis-2/5">
+          {files.map((file, index) => (
+            <CarouselItem
+              key={typeof file === "string" ? `${file}-${index}` : `${file.name}-${index}`}
+              className="basis-3/5 md:basis-1/2 lg:basis-2/5"
+            >
               <Item>
                 <ItemContent className="border rounded-sm">
-                  <img className="aspect-square object-cover" src={URL.createObjectURL(file)} />
+                  <img
+                    className="aspect-square object-cover"
+                    src={typeof file === "string" ? `${API_URL}${file}` : URL.createObjectURL(file)}
+                  />
                 </ItemContent>
               </Item>
             </CarouselItem>

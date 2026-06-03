@@ -18,7 +18,7 @@ import (
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, using environment variables")
-	}	
+	}
 
 	db.Connect()
 	router := gin.Default()
@@ -41,7 +41,7 @@ func main() {
 	router.POST("/login", auth.Login)
 	router.POST("/create_user", auth.CreateUser)
 
-	//users handlers 
+	//users handlers
 	router.GET("/user/:userID", users.GetUser)
 
 	//categories handlers
@@ -61,7 +61,17 @@ func main() {
 		port = "8080"
 		log.Println("Port undefined, using :8080")
 	}
-	router.Static("/uploads", "./uploads")
+
+	uploadDir := os.Getenv("UPLOAD_DIR")
+	if uploadDir == "" {
+		uploadDir = "./uploads"
+	}
+
+	if err := os.MkdirAll(uploadDir, 0755); err != nil {
+		log.Fatal(err)
+	}
+	
+	router.Static("/uploads", uploadDir)
 	if err := router.Run(":" + port); err != nil {
 		log.Fatal(err)
 	}

@@ -6,6 +6,7 @@ import (
 	"backend/response"
 	"errors"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -58,16 +59,26 @@ func CreateListing(c *gin.Context) {
 	placeholder := []string{}
 	queryIndex := 2
 
+	uploadDir := os.Getenv("UPLOAD_DIR")
+	if uploadDir == "" {
+		uploadDir = "./uploads"
+	}
+	if err := os.MkdirAll(uploadDir, 0755); err != nil {
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+
 	for _, file := range files {
 		fileUUID := uuid.NewString()
 		filePath := "/uploads/" + fileUUID + filepath.Ext(file.Filename)
-		args = append(args, filePath)
+		savePath := filepath.Join(uploadDir, fileUUID+filepath.Ext(file.Filename))
 
-		if err := c.SaveUploadedFile(file, "."+filePath); err != nil {
+		if err := c.SaveUploadedFile(file, savePath); err != nil {
 			c.Error(response.ErrInternalServerError(err))
 			return
 		}
 
+		args = append(args, filePath)
 		placeholder = append(placeholder, "($1, $"+strconv.Itoa(queryIndex)+")")
 		queryIndex++
 	}

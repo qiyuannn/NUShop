@@ -239,11 +239,11 @@ export function ListingItem({
               <Separator orientation="vertical" />
               <ItemDescription>{condition}</ItemDescription>
             </div>
-            <ItemDescription>{timeAgo(createdOn)}</ItemDescription>
+            <div className="flex justify-between">
+              <ItemDescription>{timeAgo(createdOn)}</ItemDescription>
+              <Badge variant="secondary">{categoryName}</Badge>
+            </div>
           </ItemContent>
-          <ItemActions className="self-start">
-            <Badge variant="secondary">{categoryName}</Badge>
-          </ItemActions>
         </Link>
       </Item>
       {isManaging && (

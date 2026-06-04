@@ -185,8 +185,8 @@ export function ItemCarousel({ files }: { files: string[] }) {
             </CarouselItem>
           )}
         </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
+        <CarouselPrevious className="hidden md:flex"/>
+        <CarouselNext className="hidden sm:flex" />
       </Carousel>
       {files.length > 0 && (
         <div className="py-2 text-center text-sm text-muted-foreground">

@@ -13,7 +13,7 @@ import { RefreshCcw } from "lucide-react";
 
 export function FilterBar() {
   return (
-    <div className="flex flex-row gap-2 items-center h-12 p-2 pl-4 pr-4 w-full">
+    <div className="flex flex-row gap-2 items-center h-12 p-2 pl-4 pr-4 w-full overflow-x-auto">
       <span className="text-muted-foreground text-sm">Filters:</span>
       <CategoryFilter />
       <Separator orientation="vertical" />

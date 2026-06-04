@@ -9,7 +9,6 @@ import { Separator } from "./ui/separator";
 import { Item, ItemContent, ItemTitle } from "./ui/item";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useFormStatus } from "react-dom";
 import { RefreshCcw } from "lucide-react";
 
 export function FilterBar() {

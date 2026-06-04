@@ -224,7 +224,7 @@ export function ListingItem({
 
   return (
     <div>
-      <Item asChild variant="outline" className={isManaging ? "rounded-b-none border-b-0" : ""}>
+      <Item asChild variant="outline" className={isManaging?"rounded-b-none p-0 border-0" :"p-0 border-0"}>
         <Link to={`/listing/${listingID}`}>
           <ItemHeader>
             <img
@@ -247,7 +247,7 @@ export function ListingItem({
         </Link>
       </Item>
       {isManaging && (
-        <div className="flex flex-row border rounded-lg object-cover rounded-t-none border-t-0">
+        <div className="flex flex-row rounded-lg object-cover rounded-t-none">
           <Button
             className="flex-3 rounded-none rounded-bl-md"
             variant="secondary"

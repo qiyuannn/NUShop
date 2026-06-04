@@ -1,5 +1,5 @@
 export type User = {
-  uuid: string;
+  id: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -7,19 +7,14 @@ export type User = {
 };
 
 export type Listing = {
-  uuid: string;
-  sellerUUID: string;
+  id: string;
+  sellerID: string;
   title: string;
   description: string;
   price: number;
   quantity: number;
   condition: string;
-  categoryUUID: string;
+  categoryName: string;
   createdOn: string;
   images: string[];
-};
-
-export type Category = {
-  uuid: string;
-  name: string;
 };

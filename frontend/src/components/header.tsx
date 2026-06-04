@@ -1,6 +1,6 @@
 import { SearchIcon } from "lucide-react";
 import { Button } from "./ui/button";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ButtonGroup } from "./ui/button-group";
 import { Input } from "./ui/input";
 import { SidebarTrigger, useSidebar } from "./ui/sidebar";
@@ -14,6 +14,10 @@ export function AppHeader() {
   const { token } = useAuth();
   const navigate = useNavigate();
   const [search, setSearch] = React.useState("");
+  const location = useLocation();
+
+  const q = new URLSearchParams(location.search);
+  q.set("search", search);
 
   return (
     <header className="sticky top-0 z-50 flex items-center h-12 p-2 pl-4 pr-4 gap-4 w-full bg-secondary">
@@ -28,14 +32,14 @@ export function AppHeader() {
           onChange={(e) => setSearch(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              navigate(`/?s=${encodeURIComponent(e.currentTarget.value)}`);
+              navigate(`${location.pathname}?${q}`);
             }
           }}
         />
         <Button
           variant="outline"
           aria-label="search"
-          onClick={() => navigate(`/?s=${encodeURIComponent(search)}`)}
+          onClick={() => navigate(`${location.pathname}?${q}`)}
         >
           <SearchIcon />
         </Button>

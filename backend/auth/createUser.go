@@ -42,7 +42,7 @@ func CreateUser(c *gin.Context) {
 		email,
 		password_hash
 		) VALUES ($1, $2, $3, $4) RETURNING
-		uuid,
+		id,
 		first_name,
 		last_name,
 		email,
@@ -53,7 +53,7 @@ func CreateUser(c *gin.Context) {
 		request.Email,
 		hashedPassword,
 	).Scan(
-		&user.UUID,
+		&user.ID,
 		&user.FirstName,
 		&user.LastName,
 		&user.Email,

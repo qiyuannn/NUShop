@@ -16,15 +16,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<User | null>(null);
   const [token, setToken] = React.useState<string | null>(null);
   const [ready, setReady] = React.useState(false);
-  const refreshed = React.useRef(false);
 
   React.useEffect(() => {
     async function refresh() {
-      if (refreshed.current) {
-        return;
-      }
-      refreshed.current = true;
-
       try {
         const res = await fetch(`${API_URL}/auth/refresh`, {
           method: "POST",
@@ -32,8 +26,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
         if (res.ok) {
           const json = await res.json();
-
-          setUser(json.data.replaced ?? null);
           setToken(json.data.token ?? null);
         }
       } finally {

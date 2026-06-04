@@ -5,7 +5,7 @@ import (
 )
 
 type User struct {
-	UUID         string `json:"uuid"`
+	ID         string `json:"id"`
 	FirstName    string    `json:"firstName"`
 	LastName     string    `json:"lastName"`
 	Email        string    `json:"email"`
@@ -14,25 +14,20 @@ type User struct {
 }
 
 type Listing struct {
-	UUID         string `json:"uuid"`
-	SellerUUID   string `json:"sellerUUID"`
+	ID         string `json:"id"`
+	SellerID   string `json:"sellerID"`
 	Title        string    `json:"title"`
 	Description  string    `json:"description"`
 	Price        int64     `json:"price" binding:"gte=0"`
 	Quantity     int64     `json:"quantity" binding:"gte=0"`
 	Condition    string    `json:"condition"`
-	CategoryUUID string `json:"categoryUUID"`
+	CategoryName string `json:"categoryName"`
 	CreatedOn    time.Time `json:"createdOn"`
 	Images       []string  `json:"images"`
 }
 
-type Category struct {
-	ID  	string `json:"uuid"`
-	Name string    `json:"name"`
-}
-
 type Image struct {
-	UUID string `json:"uuid"`
-	SellerUUID string `json:"sellerUUID"`
+	ID string `json:"uuid"`
+	SellerUUID string `json:"sellerID"`
 	FilePath string `json:"filePath"`
 }

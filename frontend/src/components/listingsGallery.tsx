@@ -4,7 +4,7 @@ import React, { type SetStateAction } from "react";
 import { API_URL } from "@/lib/api";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import type { Listing } from "@/types";
-import { Item, ItemActions, ItemContent, ItemDescription, ItemHeader, ItemTitle } from "./ui/item";
+import { Item, ItemContent, ItemDescription, ItemHeader, ItemTitle } from "./ui/item";
 import { Separator } from "./ui/separator";
 import { timeAgo } from "@/lib/timeAgo";
 import { Badge } from "./ui/badge";

@@ -23,7 +23,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
 export function Listing() {
-  const param = useParams();
+  const { listingID } = useParams();
   const [listing, setListing] = React.useState<Listing>({
     id: "",
     sellerID: "",
@@ -71,7 +71,6 @@ export function Listing() {
     fetchData();
   }, []);
 
-  const listingID = param.listingID;
   if (!listingID || err) {
     return (
       <div className="flex items-center justify-center w-full h-full">
@@ -79,9 +78,10 @@ export function Listing() {
       </div>
     );
   }
+
   return (
-    <div>
-      <Item className="pb-15">
+    <div className="flex flex-col">
+      <Item className="pb-10">
         <ItemHeader>
           <ItemCarousel files={listing.images} />
         </ItemHeader>
@@ -101,7 +101,7 @@ export function Listing() {
           <Separator />
           <ItemTitle>Seller information</ItemTitle>
           <Item asChild>
-            <Link to="">
+            <Link to={`/user/${listing.sellerID}`}>
               <ItemMedia>
                 <Avatar size="lg">
                   <AvatarImage
@@ -124,7 +124,7 @@ export function Listing() {
           </Item>
         </ItemContent>
       </Item>
-      <div className="fixed bottom-0 w-full flex gap-0 bg-secondary">
+      <div className="fixed bottom-0 z-50 flex gap-0 bg-secondary w-full">
         <Button size="lg" className="flex-1 rounded-none">
           Chat with seller
         </Button>

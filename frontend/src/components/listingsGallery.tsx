@@ -2,7 +2,7 @@ import { useFilter } from "@/context/filter";
 import { FilterBar } from "./filterBar";
 import React, { type SetStateAction } from "react";
 import { API_URL } from "@/lib/api";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import type { Listing } from "@/types";
 import { Item, ItemContent, ItemDescription, ItemHeader, ItemTitle } from "./ui/item";
 import { Separator } from "./ui/separator";
@@ -26,6 +26,7 @@ import {
 
 export function ListingGallery({ isManaging }: { isManaging: boolean }) {
   const [searchParams] = useSearchParams();
+  const { sellerID } = useParams()
   const { minPrice, maxPrice, condition } = useFilter();
   const [listings, setListings] = React.useState<Listing[]>([]);
   const [err, setErr] = React.useState<string>("");
@@ -53,6 +54,9 @@ export function ListingGallery({ isManaging }: { isManaging: boolean }) {
     const category = searchParams.get("category");
     if (category != null) {
       params.set("category", category);
+    }
+    if (sellerID) {
+      params.set("seller_id", sellerID)
     }
 
     if (cursor != null && cursor?.has_more) {
@@ -106,6 +110,10 @@ export function ListingGallery({ isManaging }: { isManaging: boolean }) {
       const category = searchParams.get("category");
       if (category != null) {
         params.set("category", category);
+      }
+      const user = searchParams.get("user")
+      if (user != null) {
+        params.set("user", user)
       }
 
       params.set("limit", "10");
@@ -224,7 +232,7 @@ export function ListingItem({
 
   return (
     <div>
-      <Item asChild variant="outline" className={isManaging?"rounded-b-none p-0 border-0" :"p-0 border-0"}>
+      <Item asChild variant="outline" className={isManaging?"rounded-b-none p-0 pb-4 border-0" :"p-0 border-0 pb-3"}>
         <Link to={`/listing/${listingID}`}>
           <ItemHeader>
             <img

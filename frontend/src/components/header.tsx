@@ -40,6 +40,7 @@ export function AppHeader() {
           variant="outline"
           aria-label="search"
           onClick={() => navigate(`${location.pathname}?${q}`)}
+          className="hidden sm:flex"
         >
           <SearchIcon />
         </Button>

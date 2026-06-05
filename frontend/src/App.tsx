@@ -7,6 +7,7 @@ import { HomePage } from "./pages/home";
 import { ManageListing } from "./pages/manageListing";
 import { CreateListingPage } from "./pages/createListing";
 import { Listing } from "./pages/listingItem";
+import { ProfilePage } from "./pages/profile";
 
 export function App() {
   return (
@@ -20,6 +21,7 @@ export function App() {
         <Route path="/listings/create" element={<CreateListingPage />} />
         <Route path="/listings/manage" element={<ManageListing />} />
         <Route path="/listing/:listingID" element={<Listing />} />
+        <Route path="/user/:userID" element={<ProfilePage/>}/>
 
         <Route path="/test/:listingID" element={<Listing />} />
       </Route>

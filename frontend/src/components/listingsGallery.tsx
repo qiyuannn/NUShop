@@ -111,9 +111,8 @@ export function ListingGallery({ isManaging }: { isManaging: boolean }) {
       if (category != null) {
         params.set("category", category);
       }
-      const user = searchParams.get("user")
-      if (user != null) {
-        params.set("user", user)
+      if (userID) {
+      params.set("seller_id", userID)
       }
 
       params.set("limit", "10");
@@ -265,7 +264,7 @@ export function ListingItem({
             Edit
           </Button>
           <AlertDialog>
-            <AlertDialogTrigger>
+            <AlertDialogTrigger asChild>
               <Button className="flex-1 rounded-none rounded-br-md" variant="destructive">
                 <Trash />
                 Delete

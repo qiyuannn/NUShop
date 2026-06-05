@@ -163,12 +163,11 @@ export function ItemCarousel({ files }: { files: string[] }) {
         <CarouselContent>
           {files.length > 0 &&
             files.map((file) => (
-              <CarouselItem className="basis-4/5 md:basis-1/2 lg:basis-2/7 pl-0">
+              <CarouselItem className="basis-4/5 md:basis-1/2 lg:basis-2/7 pl-0" key={file}>
                 <Item>
                   <ItemContent className="border rounded-sm">
                     <img
                       className="aspect-square object-cover"
-                      key={file}
                       src={`${API_URL}${file}`}
                     />
                   </ItemContent>

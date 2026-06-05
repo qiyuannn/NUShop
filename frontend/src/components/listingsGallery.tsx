@@ -26,7 +26,7 @@ import {
 
 export function ListingGallery({ isManaging }: { isManaging: boolean }) {
   const [searchParams] = useSearchParams();
-  const { sellerID } = useParams()
+  const { userID } = useParams()
   const { minPrice, maxPrice, condition } = useFilter();
   const [listings, setListings] = React.useState<Listing[]>([]);
   const [err, setErr] = React.useState<string>("");
@@ -55,8 +55,8 @@ export function ListingGallery({ isManaging }: { isManaging: boolean }) {
     if (category != null) {
       params.set("category", category);
     }
-    if (sellerID) {
-      params.set("seller_id", sellerID)
+    if (userID) {
+      params.set("seller_id", userID)
     }
 
     if (cursor != null && cursor?.has_more) {

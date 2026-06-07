@@ -36,7 +36,7 @@ export function AppSidebar() {
          tooltip="Home"
          >
           <ShoppingBag />
-          <p className="font-bold text-xl">NUShop</p>
+          <p className="font-bold text-xl">Shop</p>
         </SidebarMenuButton>
       </SidebarHeader>
       <SidebarContent>

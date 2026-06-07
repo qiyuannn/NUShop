@@ -87,7 +87,7 @@ export function SignupForm() {
         <FieldLegend className="text-center flex flex-col items-center gap-2 font-semibold">
           <Link className="flex gap-1 font-bold" to="">
             <ShoppingBag />
-            <p>NUShop</p>
+            <p>Shop</p>
           </Link>
           <p>Create your account</p>
         </FieldLegend>

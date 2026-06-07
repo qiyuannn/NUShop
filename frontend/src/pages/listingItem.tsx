@@ -144,7 +144,7 @@ export function Listing() {
         <Button size="default" className="h-full flex-[1.6] rounded-none">
           Chat with seller
         </Button>
-        <Button size="default" className="h-full flex-[1.6] rounded-none">
+        <Button size="default" className="h-full flex-[1.6] rounded-none" onClick={handleAddToCart}>
           Add to cart
         </Button>
         <Button
@@ -201,7 +201,7 @@ export function ItemCarousel({ files }: { files: string[] }) {
             </CarouselItem>
           )}
         </CarouselContent>
-        <CarouselPrevious className="hidden md:flex" />
+        <CarouselPrevious className="hidden sm:flex" />
         <CarouselNext className="hidden sm:flex" />
       </Carousel>
       {files.length > 0 && (

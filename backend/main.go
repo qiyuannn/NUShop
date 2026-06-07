@@ -66,17 +66,8 @@ func main() {
 		port = "8080"
 		log.Println("Port undefined, using :8080")
 	}
-
-	uploadDir := os.Getenv("UPLOAD_DIR")
-	if uploadDir == "" {
-		uploadDir = "./uploads"
-	}
-
-	if err := os.MkdirAll(uploadDir, 0755); err != nil {
-		log.Fatal(err)
-	}
 	
-	router.Static("/uploads", uploadDir)
+	router.Static("/uploads", "./uploads")
 	if err := router.Run(":" + port); err != nil {
 		log.Fatal(err)
 	}

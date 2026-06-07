@@ -42,7 +42,7 @@ func RefreshToken(c *gin.Context) {
 			}
 			return []byte(secret), nil
 		},
-		jwt.WithIssuer("Shop"),
+		jwt.WithIssuer("NUShop"),
 		jwt.WithIssuedAt(),
 		jwt.WithExpirationRequired(),
 		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}),

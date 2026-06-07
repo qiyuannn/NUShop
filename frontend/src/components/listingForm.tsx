@@ -99,13 +99,13 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
     setFormData((p) => ({ ...p, [e.target.id]: e.target.value }));
   };
 
-  const [titleLen, setTitleLen] = React.useState(0)
+  const [titleLen, setTitleLen] = React.useState(0);
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.value.length < 50) {
-      setFormData((p) => ({ ...p, title: e.target.value }))
+      setFormData((p) => ({ ...p, title: e.target.value }));
     }
-    setTitleLen(e.target.value.length)
-  }
+    setTitleLen(e.target.value.length);
+  };
 
   const handleCategoryChange = (value: string) => {
     setFormData((p) => ({ ...p, category: value }));
@@ -173,7 +173,12 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
             <Field>
               <FieldLabel htmlFor="title">Title</FieldLabel>
               <InputGroup>
-                <InputGroupInput id="title" value={formData.title} onChange={handleTitleChange} required />
+                <InputGroupInput
+                  id="title"
+                  value={formData.title}
+                  onChange={handleTitleChange}
+                  required
+                />
                 <InputGroupAddon align="inline-end">{titleLen}/50</InputGroupAddon>
               </InputGroup>
             </Field>

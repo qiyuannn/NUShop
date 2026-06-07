@@ -21,9 +21,15 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useCartStore } from "@/context/cartStore";
+import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
+import { toast } from "sonner";
 
 export function Listing() {
   const { listingID } = useParams();
+  const addToCart = useCartStore((state) => state.addToCart)
+  const authApiFetch = useAuthApiFetch()
+
   const [listing, setListing] = React.useState<Listing>({
     id: "",
     sellerID: "",
@@ -42,6 +48,15 @@ export function Listing() {
     lastName: "",
     createdOn: "",
   });
+
+  const handleAddToCart = async () => {
+    try {
+      await addToCart(authApiFetch, listing.id, 1, false)
+      toast.success("Item added into cart")
+    } catch (error) {
+      toast.error("Failed to add item into cart, try again later.")
+    }
+  }
 
   React.useEffect(() => {
     setErr(false);
@@ -171,10 +186,7 @@ export function ItemCarousel({ files }: { files: string[] }) {
               <CarouselItem className="basis-4/5 md:basis-1/2 lg:basis-2/7 pl-0" key={file}>
                 <Item>
                   <ItemContent className="border rounded-sm">
-                    <img
-                      className="max-h-[60vh] w-full object-contain"
-                      src={`${API_URL}${file}`}
-                    />
+                    <img className="aspect-square object-cover" src={`${API_URL}${file}`} />
                   </ItemContent>
                 </Item>
               </CarouselItem>

@@ -31,3 +31,9 @@ type Image struct {
 	SellerUUID string `json:"sellerID"`
 	FilePath string `json:"filePath"`
 }
+
+type Cart struct {
+	UserID string `json:"userID"`
+	ListingID string `json:"listingID"`
+	Quantity int `json:"quanitity"`
+}

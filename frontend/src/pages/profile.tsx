@@ -6,45 +6,44 @@ import { API_URL } from "@/lib/api";
 import React from "react";
 import { useParams } from "react-router-dom";
 
-
 export function ProfilePage() {
-  const { userID } = useParams()
+  const { userID } = useParams();
   const [user, setUser] = React.useState({
-      firstName: "",
-      lastName: "",
-      createdOn: "",
-    });
-    const [err, setErr] = React.useState(false)
+    firstName: "",
+    lastName: "",
+    createdOn: "",
+  });
+  const [err, setErr] = React.useState(false);
 
   React.useEffect(() => {
-    setErr(false)
-    if (userID == "")  {
-      setErr(true)
-      return
+    setErr(false);
+    if (userID == "") {
+      setErr(true);
+      return;
     }
     async function fetchUser() {
       try {
         const res = await fetch(`${API_URL}/user/${userID}`, {
-          method: "GET"
-        })
-        const json = await res.json()
+          method: "GET",
+        });
+        const json = await res.json();
         if (!res.ok) {
-          throw new Error(json?.error?.code ?? "INTERNAL_ERROR")
+          throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
         }
-        setUser(json.data.user)
+        setUser(json.data.user);
       } catch (error) {
-        setErr(true)
+        setErr(true);
       }
     }
-    fetchUser()
-  }, [])
+    fetchUser();
+  }, []);
 
   if (!user || err) {
     return (
       <div className="flex items-center justify-center w-full h-full">
         <p>User not found</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -52,21 +51,19 @@ export function ProfilePage() {
       <Item className="p-10">
         <ItemMedia>
           <Avatar className="h-16 w-16">
-            <AvatarImage
-              src="https://github.com/shadcn.png"
-              alt="@shadcn"
-              className="grayscale"
-            />
+            <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" className="grayscale" />
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
         </ItemMedia>
         <ItemContent className="gap-0">
-          <ItemTitle className="font-bold text-xl">{user.lastName} {user.firstName}</ItemTitle>
+          <ItemTitle className="font-bold text-xl">
+            {user.lastName} {user.firstName}
+          </ItemTitle>
           <ItemDescription>Joined since {new Date(user.createdOn).getFullYear()}</ItemDescription>
         </ItemContent>
       </Item>
-      <Separator/>
-      <ListingGallery isManaging={false}/>
+      <Separator />
+      <ListingGallery isManaging={false} />
     </div>
-  )
+  );
 }

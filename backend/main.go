@@ -3,6 +3,7 @@ package main
 import (
 	"backend/auth"
 	"backend/database"
+	"backend/handlers/cart"
 	"backend/handlers/categories"
 	"backend/handlers/listings"
 	"backend/handlers/users"
@@ -54,6 +55,11 @@ func main() {
 	private.POST("/listings", listings.CreateListing)
 	private.PUT("/listings/:id", listings.UpdateListing)
 	private.DELETE("/listings/:id", listings.DeleteListing)
+
+	//cart handlers
+	private.GET("/cart", cart.GetCart)
+	private.POST("/cart", cart.AddToCart)
+	private.DELETE("/cart", cart.DeleteFromCart)
 
 	port := os.Getenv("PORT")
 	if port == "" {

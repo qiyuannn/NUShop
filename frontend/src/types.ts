@@ -18,3 +18,10 @@ export type Listing = {
   createdOn: string;
   images: string[];
 };
+
+export type CartItem = {
+  listing: Listing;
+  quantity: number;
+};
+
+export type AuthApiFetch = (url: string, options?: RequestInit) => Promise<Response>;

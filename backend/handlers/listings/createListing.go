@@ -40,12 +40,6 @@ func CreateListing(c *gin.Context) {
 		return
 	}
 
-	categoryUUID, err := uuid.Parse(strings.TrimSpace(listing.CategoryUUID))
-	if err != nil || categoryUUID == uuid.Nil {
-		c.Error(response.ErrBadRequest(errors.New("category is required")))
-		return
-	}
-
 	form, err := c.MultipartForm()
 	if err != nil {
 		c.Error(response.ErrBadRequest(err))
@@ -59,8 +53,8 @@ func CreateListing(c *gin.Context) {
 	queryIndex := 2
 
 	for _, file := range files {
-		fileUUID := uuid.NewString()
-		filePath := "/uploads/" + fileUUID + filepath.Ext(file.Filename)
+		fileID := uuid.NewString()
+		filePath := "/uploads/" + fileID + filepath.Ext(file.Filename)
 		args = append(args, filePath)
 
 		if err := c.SaveUploadedFile(file, "."+filePath); err != nil {
@@ -72,26 +66,34 @@ func CreateListing(c *gin.Context) {
 		queryIndex++
 	}
 
+	tx, err := db.Pool.Begin(c.Request.Context())
+	if err != nil {
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+
+	defer tx.Rollback(c.Request.Context())
+
 	var insertedListing models.Listing
-	if err := db.Pool.QueryRow(
+	if err := tx.QueryRow(
 		c.Request.Context(),
 		`INSERT INTO listings 
-		(seller_uuid, 
+		(seller_id, 
 		title, 
 		description, 
 		price, 
 		quantity,
 		condition,
-		category_uuid) 
+		category_name) 
 		VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING 
-		uuid, 
-		seller_uuid, 
+		id, 
+		seller_id, 
 		title, 
 		description, 
 		price,
 		condition,
 		quantity, 
-		category_uuid, 
+		category_name, 
 		created_on`,
 		userID,
 		listing.Title,
@@ -99,16 +101,16 @@ func CreateListing(c *gin.Context) {
 		listing.Price,
 		listing.Quantity,
 		listing.Condition,
-		categoryUUID,
+		listing.CategoryName,
 	).Scan(
-		&insertedListing.UUID,
-		&insertedListing.SellerUUID,
+		&insertedListing.ID,
+		&insertedListing.SellerID,
 		&insertedListing.Title,
 		&insertedListing.Description,
 		&insertedListing.Price,
 		&insertedListing.Condition,
 		&insertedListing.Quantity,
-		&insertedListing.CategoryUUID,
+		&insertedListing.CategoryName,
 		&insertedListing.CreatedOn,
 	); err != nil {
 		if pgErr, ok := err.(*pgconn.PgError); ok {
@@ -129,11 +131,11 @@ func CreateListing(c *gin.Context) {
 	}
 
 	if len(files) > 0 {
-		sqlQuery := "INSERT INTO images (listing_uuid, file_url) VALUES " + strings.Join(placeholder, ", ")
-		allArgs := []any{insertedListing.UUID}
+		sqlQuery := "INSERT INTO images (listing_id, file_url) VALUES " + strings.Join(placeholder, ", ")
+		allArgs := []any{insertedListing.ID}
 		allArgs = append(allArgs, args...)
 
-		if _, err := db.Pool.Exec(
+		if _, err := tx.Exec(
 			c.Request.Context(),
 			sqlQuery,
 			allArgs...,
@@ -143,8 +145,12 @@ func CreateListing(c *gin.Context) {
 		}
 	}
 
+	if err := tx.Commit(c.Request.Context()); err != nil {
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+
 	response.Success(c, http.StatusCreated, gin.H{
 		"listing": insertedListing,
-		"message": "created",
 	})
 }

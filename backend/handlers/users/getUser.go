@@ -21,7 +21,7 @@ func GetUser(c *gin.Context) {
 		last_name,
 		created_on
 		FROM users WHERE 
-		uuid = $1`, 
+		id = $1`, 
 		userUUID,
 	).Scan(
 		&user.FirstName, 

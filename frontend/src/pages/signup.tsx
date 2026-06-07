@@ -19,7 +19,7 @@ import { API_URL } from "@/lib/api";
 export function SignupPage() {
   return (
     <div className="flex min-w-svw justify-center items-center min-h-svh">
-      <div className="min-w-md">
+      <div className="w-sm sm:w-md">
         <SignupForm />
       </div>
     </div>
@@ -27,7 +27,7 @@ export function SignupPage() {
 }
 
 export function SignupForm() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [passwordVisible, setPasswordVisible] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [err, setErr] = React.useState<string | null>(null);
@@ -73,7 +73,7 @@ export function SignupForm() {
       if (!res.ok) {
         throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
       }
-      navigate("/login")
+      navigate("/login");
     } catch (error) {
       setErr(error instanceof Error ? error.message : "INTERNAL_ERROR");
     } finally {

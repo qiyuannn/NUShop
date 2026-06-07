@@ -1,4 +1,4 @@
-import { useFilter } from "@/context/filter";
+import { useFilterStore } from "@/context/filterStore";
 import { FilterBar } from "./filterBar";
 import React, { type SetStateAction } from "react";
 import { API_URL } from "@/lib/api";
@@ -26,8 +26,8 @@ import {
 
 export function ListingGallery({ isManaging }: { isManaging: boolean }) {
   const [searchParams] = useSearchParams();
-  const { userID } = useParams()
-  const { minPrice, maxPrice, condition } = useFilter();
+  const { userID } = useParams();
+  const { minPrice, maxPrice, condition } = useFilterStore();
   const [listings, setListings] = React.useState<Listing[]>([]);
   const [err, setErr] = React.useState<string>("");
   const [loading, setLoading] = React.useState(true);
@@ -56,7 +56,7 @@ export function ListingGallery({ isManaging }: { isManaging: boolean }) {
       params.set("category", category);
     }
     if (userID) {
-      params.set("seller_id", userID)
+      params.set("seller_id", userID);
     }
 
     if (cursor != null && cursor?.has_more) {
@@ -112,7 +112,7 @@ export function ListingGallery({ isManaging }: { isManaging: boolean }) {
         params.set("category", category);
       }
       if (userID) {
-      params.set("seller_id", userID)
+        params.set("seller_id", userID);
       }
 
       params.set("limit", "10");
@@ -231,7 +231,11 @@ export function ListingItem({
 
   return (
     <div>
-      <Item asChild variant="outline" className={isManaging?"rounded-b-none p-0 pb-4 border-0" :"p-0 border-0 pb-3"}>
+      <Item
+        asChild
+        variant="outline"
+        className={isManaging ? "rounded-b-none p-0 pb-4 border-0" : "p-0 border-0 pb-3"}
+      >
         <Link to={`/listing/${listingID}`}>
           <ItemHeader>
             <img

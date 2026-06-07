@@ -22,11 +22,14 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { useLogout } from "@/hooks/use-logout";
+import { Badge } from "./ui/badge";
+import { useCartStore } from "@/context/cartStore";
 
 export function AppSidebar() {
   const navigate = useNavigate();
   const { token } = useAuth();
   const logout = useLogout();
+  const cartItems = useCartStore((state) => state.cartItems)
 
   return (
     <Sidebar collapsible="icon" typeof="floating">
@@ -61,9 +64,10 @@ export function AppSidebar() {
             <SidebarGroup>
               <SidebarGroupLabel>Cart</SidebarGroupLabel>
               <SidebarMenu>
-                <SidebarMenuButton onClick={() => navigate("")} tooltip="Cart" disabled>
+                <SidebarMenuButton onClick={() => navigate("/cart")} tooltip="Cart">
                   <ShoppingCart />
                   Cart
+                  <Badge>{cartItems.size}</Badge>
                 </SidebarMenuButton>
               </SidebarMenu>
             </SidebarGroup>

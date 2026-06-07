@@ -1,4 +1,4 @@
-import { useFilter } from "@/context/filter";
+import { useFilterStore } from "@/context/filterStore";
 import { Button } from "./ui/button";
 import { Checkbox } from "./ui/checkbox";
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSeparator, FieldSet } from "./ui/field";
@@ -19,13 +19,14 @@ export function FilterBar() {
       <Separator orientation="vertical" />
       <PriceFilter />
       <ConditionFilter />
-      <ResetFilter/>
+      <ResetFilter />
     </div>
   );
 }
 
 export function ConditionFilter() {
-  const { condition, setCondition } = useFilter();
+  const condition = useFilterStore((state) => state.condition);
+  const setCondition = useFilterStore((state) => state.setCondition);
 
   const handleCheckedChange = (val: string, checked: boolean) => {
     if (condition.length == 2 && checked) {
@@ -36,7 +37,6 @@ export function ConditionFilter() {
     setCondition((prev: string[]) =>
       checked ? [...prev, val] : prev.filter((item) => item != val),
     );
-    console.log(condition);
   };
   const handleAllChange = (checked: boolean) => {
     if (checked) {
@@ -94,7 +94,10 @@ export function ConditionFilter() {
 }
 
 export function PriceFilter() {
-  const { minPrice, setMinPrice, maxPrice, setMaxPrice } = useFilter();
+  const minPrice = useFilterStore((state) => state.minPrice);
+  const setMinPrice = useFilterStore((state) => state.setMinPrice);
+  const maxPrice = useFilterStore((state) => state.maxPrice);
+  const setMaxPrice = useFilterStore((state) => state.setMaxPrice);
 
   const handleChangeMin = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (/^[0-9]*$/.test(e.target.value)) {
@@ -156,14 +159,13 @@ export function CategoryFilter() {
   const handleNav = (e: React.MouseEvent<HTMLButtonElement>) => {
     const q = new URLSearchParams(location.search);
     if (e.currentTarget.value == "All") {
-      q.delete("category")
+      q.delete("category");
     } else {
       q.set("category", e.currentTarget.value);
     }
 
     navigate(`${location.pathname}?${q}`);
   };
-
 
   React.useEffect(() => {
     async function fetchCategories() {
@@ -191,7 +193,7 @@ export function CategoryFilter() {
             </ItemContent>
           </Button>
         </Item>
-        <FieldSeparator/>
+        <FieldSeparator />
         {Categories.filter((catergory) => catergory != "Others").map((category) => (
           <Item key={category} asChild size="xs">
             <Button variant="ghost" value={category} onClick={handleNav}>
@@ -214,25 +216,27 @@ export function CategoryFilter() {
 }
 
 export function ResetFilter() {
-  const { setMinPrice, setMaxPrice, setCondition } = useFilter()
-  const location = useLocation()
-  const navigate = useNavigate()
-  
+  const setMinPrice = useFilterStore((state) => state.setMinPrice);
+  const setMaxPrice = useFilterStore((state) => state.setMaxPrice);
+  const setCondition = useFilterStore((state) => state.setCondition);
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const handleClick = () => {
-    setMinPrice("")
-    setMaxPrice("")
-    setCondition([])
+    setMinPrice("");
+    setMaxPrice("");
+    setCondition([]);
 
-    const q = new URLSearchParams(location.search)
-    q.delete("category")
+    const q = new URLSearchParams(location.search);
+    q.delete("category");
 
-    navigate(`${location.pathname}?${q}`)
-  }
+    navigate(`${location.pathname}?${q}`);
+  };
 
   return (
     <Button variant="outline" onClick={handleClick}>
-      <RefreshCcw/>
+      <RefreshCcw />
       Reset
     </Button>
-  )
+  );
 }

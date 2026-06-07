@@ -21,9 +21,15 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useCartStore } from "@/context/cartStore";
+import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
+import { toast } from "sonner";
 
 export function Listing() {
   const { listingID } = useParams();
+  const addToCart = useCartStore((state) => state.addToCart)
+  const authApiFetch = useAuthApiFetch()
+
   const [listing, setListing] = React.useState<Listing>({
     id: "",
     sellerID: "",
@@ -42,6 +48,15 @@ export function Listing() {
     lastName: "",
     createdOn: "",
   });
+
+  const handleAddToCart = async () => {
+    try {
+      await addToCart(authApiFetch, listing.id, 1, false)
+      toast.success("Item added into cart")
+    } catch (error) {
+      toast.error("Failed to add item into cart, try again later.")
+    }
+  }
 
   React.useEffect(() => {
     setErr(false);
@@ -93,11 +108,9 @@ export function Listing() {
           <ItemDescription>Condition: {listing.condition}</ItemDescription>
           <ItemDescription>Category: {listing.categoryName}</ItemDescription>
           <div className="w-full min-w-0 text-muted-foreground">
-             <p className="font-medium">Description:</p>
-              <p className="break-words">
-                {listing.description}
-              </p>
-            </div>
+            <p className="font-medium">Description:</p>
+            <p className="break-words">{listing.description}</p>
+          </div>
           <Separator />
           <ItemTitle>Seller information</ItemTitle>
           <Item asChild>
@@ -128,7 +141,7 @@ export function Listing() {
         <Button size="lg" className="flex-1 rounded-none">
           Chat with seller
         </Button>
-        <Button size="lg" className="flex-1 rounded-none">
+        <Button size="lg" className="flex-1 rounded-none" onClick={handleAddToCart}>
           Add to cart
         </Button>
         <Button size="lg" className="flex-2 rounded-none" variant="destructive">
@@ -166,10 +179,7 @@ export function ItemCarousel({ files }: { files: string[] }) {
               <CarouselItem className="basis-4/5 md:basis-1/2 lg:basis-2/7 pl-0" key={file}>
                 <Item>
                   <ItemContent className="border rounded-sm">
-                    <img
-                      className="aspect-square object-cover"
-                      src={`${API_URL}${file}`}
-                    />
+                    <img className="aspect-square object-cover" src={`${API_URL}${file}`} />
                   </ItemContent>
                 </Item>
               </CarouselItem>
@@ -184,7 +194,7 @@ export function ItemCarousel({ files }: { files: string[] }) {
             </CarouselItem>
           )}
         </CarouselContent>
-        <CarouselPrevious className="hidden md:flex"/>
+        <CarouselPrevious className="hidden md:flex" />
         <CarouselNext className="hidden sm:flex" />
       </Carousel>
       {files.length > 0 && (

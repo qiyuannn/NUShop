@@ -34,7 +34,7 @@ func Logout(c *gin.Context) {
 			return []byte(secret), nil
 		},
 		jwt.WithExpirationRequired(),
-		jwt.WithIssuer("Shop"),
+		jwt.WithIssuer("NUShop"),
 		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}),
 		jwt.WithIssuedAt(),
 	)

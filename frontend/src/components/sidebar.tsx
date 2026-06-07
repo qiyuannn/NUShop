@@ -31,7 +31,10 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon" typeof="floating">
       <SidebarHeader>
-        <SidebarMenuButton onClick={() => navigate("/")}>
+        <SidebarMenuButton
+         onClick={() => navigate("/")} 
+         tooltip="Home"
+         >
           <ShoppingBag />
           <p className="font-bold text-xl">NUShop</p>
         </SidebarMenuButton>

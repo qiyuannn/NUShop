@@ -31,7 +31,7 @@ import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
 import { API_URL } from "@/lib/api";
 import { AlertCircleIcon, DollarSign, Trash2 } from "lucide-react";
 import React, { type SetStateAction } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 type FormDataType = {
   title: string;
@@ -44,6 +44,7 @@ type FormDataType = {
 };
 
 export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
+  const navigate = useNavigate();
   const { listingID } = useParams();
   const [categories, setCategory] = React.useState<string[]>([]);
   const [formData, setFormData] = React.useState<FormDataType>({
@@ -67,9 +68,10 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
         setErr(true);
         return;
       }
+      console.log("category from API:", json.data.listing.categoryName);
       setFormData({
         title: json.data.listing.title ?? "",
-        category: json.data.listing.categoryName ?? "",
+        category: (json.data.listing.categoryName ?? "").trim(),
         description: json.data.listing.description ?? "",
         price: String(json.data.listing.price ?? ""),
         quantity: String(json.data.listing.quantity ?? ""),
@@ -99,8 +101,8 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
 
   const [titleLen, setTitleLen] = React.useState(0)
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if ( e.target.value.length < 50 ) {
-      setFormData((p)=>({...p, title: e.target.value}))
+    if (e.target.value.length < 50) {
+      setFormData((p) => ({ ...p, title: e.target.value }))
     }
     setTitleLen(e.target.value.length)
   }
@@ -153,6 +155,8 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
       if (!res.ok) {
         throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
       }
+
+      navigate("/listings/manage");
     } catch {
       setErr(true);
     }
@@ -169,20 +173,25 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
             <Field>
               <FieldLabel htmlFor="title">Title</FieldLabel>
               <InputGroup>
-                <InputGroupInput id="title" value={formData.title} onChange={handleTitleChange} required/>
+                <InputGroupInput id="title" value={formData.title} onChange={handleTitleChange} required />
                 <InputGroupAddon align="inline-end">{titleLen}/50</InputGroupAddon>
               </InputGroup>
             </Field>
             <FieldGroup>
               <Field>
                 <FieldLabel>Category</FieldLabel>
-                <Select value={formData.category} onValueChange={handleCategoryChange} required>
+                <Select
+                  key={categories.join("|")}
+                  value={formData.category.trim()}
+                  onValueChange={handleCategoryChange}
+                  required
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent position="popper">
                     {categories.map((category) => (
-                      <SelectItem value={category} key={category}>
+                      <SelectItem value={category.trim()} key={category}>
                         {category}
                       </SelectItem>
                     ))}

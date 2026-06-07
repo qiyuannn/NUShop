@@ -25,7 +25,7 @@ func main() {
 
 	//CORS
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173", "https://nushop-frontend.onrender.com"},
+		AllowOrigins:     []string{"http://localhost:5173", "https://nushop-frontend.onrender.com", "https://nushop-test.onrender.com"},
 		AllowMethods:     []string{"GET", "PUT", "POST", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		AllowCredentials: true,
@@ -46,11 +46,10 @@ func main() {
 
 	//categories handlers
 	router.GET("/categories", categories.GetCategories)
-	router.GET("/categories/:categoryID", categories.GetCategory)
 
 	//listing handlers
-	router.GET("/listings", listings.GetListings)
 	router.GET("/listings/:listingID", listings.GetListing)
+	router.GET("/listings", listings.GetListings)
 	private.GET("/listings/me", listings.GetListings)
 	private.POST("/listings", listings.CreateListing)
 	private.PUT("/listings/:id", listings.UpdateListing)

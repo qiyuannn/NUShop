@@ -20,7 +20,7 @@ import { API_URL } from "@/lib/api";
 export function LoginPage() {
   return (
     <div className="flex justify-center items-center min-h-svh min-w-svw">
-      <div className="w-full max-w-sm">
+      <div className="w-sm sm:w-md">
         <LoginForm />
       </div>
     </div>

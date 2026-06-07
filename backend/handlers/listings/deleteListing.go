@@ -11,6 +11,8 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+//On delete cascade will delete image pointers in images
+
 func DeleteListing(c *gin.Context) {
 	userIDValue, ok := c.Get("userID")
 	if !ok {
@@ -33,7 +35,7 @@ func DeleteListing(c *gin.Context) {
 	var deletedID uuid.UUID
 	if err := db.Pool.QueryRow(
 		c.Request.Context(),
-		`DELETE FROM listings WHERE uuid = $1 AND seller_uuid = $2 RETURNING uuid`,
+		`DELETE FROM listings WHERE id = $1 AND seller_id = $2 RETURNING id`,
 		listingID,
 		userID,
 	).Scan(&deletedID); err != nil {
@@ -41,13 +43,11 @@ func DeleteListing(c *gin.Context) {
 			c.Error(response.ErrNotFound(err))
 			return
 		}
-
 		c.Error(response.ErrInternalServerError(err))
 		return
 	}
 
 	response.Success(c, http.StatusOK, gin.H{
 		"listing_id": listingID,
-		"message":    "listing deleted",
 	})
 }

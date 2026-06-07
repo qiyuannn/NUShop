@@ -12,7 +12,6 @@ import (
 type Response struct {
 	Data   any        `json:"data,omitempty"`
 	Error  *ErrorInfo `json:"error,omitempty"`
-	Cursor *Cursor    `json:"cursor,omitempty"`
 }
 
 type ErrorInfo struct {
@@ -21,7 +20,7 @@ type ErrorInfo struct {
 }
 
 type Cursor struct {
-	CursorTimeStamp time.Time `json:"cursor_timestamp,omitempty"`
+	CursorTime time.Time `json:"cursor_time,omitempty"`
 	CursorID        string `json:"cursor_id,omitempty"`
 	HasMore         bool      `json:"has_more"`
 }

@@ -57,14 +57,14 @@ func Logout(c *gin.Context) {
 		return
 	}
 
-	tokenUUID := claims.ID
+	tokenID := claims.ID
 
 	if res, err := db.Pool.Exec(
 		c.Request.Context(),
 		`UPDATE refresh_tokens SET
 		revoked_on = $1
-		WHERE uuid = $2`,
-		time.Now(), tokenUUID,
+		WHERE id = $2`,
+		time.Now(), tokenID,
 	); err != nil || res.RowsAffected() != 1 {
 		c.Error(response.ErrInternalServerError(err))
 		cookie := &http.Cookie{

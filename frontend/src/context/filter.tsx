@@ -1,20 +1,20 @@
 import React, { useContext } from "react";
 
 type filterContextType = {
-  minPrice: number | null;
-  setMinPrice: (minPrice: number | null) => void;
-  maxPrice: number | null;
-  setMaxPrice: (maxPrice: number | null) => void;
-  category: string | null;
-  setCategory: (category: string | null) => void;
+  minPrice: string;
+  setMinPrice: React.Dispatch<React.SetStateAction<string>>;
+  maxPrice: string;
+  setMaxPrice: React.Dispatch<React.SetStateAction<string>>;
+  condition: string[];
+  setCondition: React.Dispatch<React.SetStateAction<string[]>>;
 };
 
 const filterContext = React.createContext<filterContextType | null>(null);
 
 export function FilterProvider({ children }: { children: React.ReactNode }) {
-  const [minPrice, setMinPrice] = React.useState<number | null>(null);
-  const [maxPrice, setMaxPrice] = React.useState<number | null>(null);
-  const [category, setCategory] = React.useState<string | null>(null);
+  const [condition, setCondition] = React.useState<string[]>([]);
+  const [minPrice, setMinPrice] = React.useState<string>("");
+  const [maxPrice, setMaxPrice] = React.useState<string>("");
 
   return (
     <filterContext.Provider
@@ -23,8 +23,8 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
         setMinPrice,
         maxPrice,
         setMaxPrice,
-        category,
-        setCategory,
+        condition,
+        setCondition,
       }}
     >
       {children}

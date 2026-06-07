@@ -8,12 +8,12 @@ import (
 	"github.com/google/uuid"
 )
 
-func GenerateAcessToken(userUUID uuid.UUID) (string, error) {
+func GenerateAcessToken(userID uuid.UUID) (string, error) {
 	accessTokenSecret := os.Getenv("AccessTokenSecret")
 
 	claims := jwt.RegisteredClaims{
-		Issuer:    "Shop",
-		Subject:   userUUID.String(),
+		Issuer:    "NUShop",
+		Subject:   userID.String(),
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 15)),
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
 		ID:        uuid.NewString(),
@@ -24,15 +24,15 @@ func GenerateAcessToken(userUUID uuid.UUID) (string, error) {
 	return token.SignedString([]byte(accessTokenSecret))
 }
 
-func GenerateRefreshToken(userUUID uuid.UUID, tokenUUID string) (string, error) {
+func GenerateRefreshToken(userID uuid.UUID, tokenID string) (string, error) {
 	refreshTokenSecret := os.Getenv("RefreshTokenSecret")
 
 	claims := jwt.RegisteredClaims{
-		Issuer:    "Shop",
-		Subject:   userUUID.String(),
+		Issuer:    "NUShop",
+		Subject:   userID.String(),
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 168)),
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
-		ID:        tokenUUID,
+		ID:        tokenID,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

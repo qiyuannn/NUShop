@@ -15,8 +15,8 @@ import (
 )
 
 type RefreshTokenStruct struct {
-	Uuid       uuid.UUID
-	UserUUID   uuid.UUID
+	ID       uuid.UUID
+	UserID   uuid.UUID
 	ExpOn      time.Time
 	CreatedOn  time.Time
 	RevokedOn  *time.Time
@@ -52,13 +52,21 @@ func RefreshToken(c *gin.Context) {
 		return
 	}
 
+	tx, err := db.Pool.Begin(c.Request.Context())
+	if err != nil {
+		c.Error(response.ErrInternalServerError(err))
+		return 
+	}
+
+	defer tx.Rollback(c.Request.Context())
+
 	var t RefreshTokenStruct
-	if err := db.Pool.QueryRow(
+	if err := tx.QueryRow(
 		c.Request.Context(),
-		`SELECT uuid, user_uuid, exp_on, created_on, revoked_on, replaced_by
-		FROM refresh_tokens WHERE uuid = $1`,
+		`SELECT id, user_id, exp_on, created_on, revoked_on, replaced_by
+		FROM refresh_tokens WHERE id = $1`,
 		claims.ID,
-	).Scan(&t.Uuid, &t.UserUUID, &t.ExpOn, &t.CreatedOn, &t.RevokedOn, &t.ReplacedBy); err != nil {
+	).Scan(&t.ID, &t.UserID, &t.ExpOn, &t.CreatedOn, &t.RevokedOn, &t.ReplacedBy); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			c.Error(response.ErrNotFound(err))
 			return
@@ -73,35 +81,40 @@ func RefreshToken(c *gin.Context) {
 	}
 
 	//generate new token
-	newTokenUUID := uuid.NewString()
-	newToken, err := GenerateRefreshToken(t.UserUUID, newTokenUUID)
+	newTokenID := uuid.NewString()
+	newToken, err := GenerateRefreshToken(t.UserID, newTokenID)
 	if err != nil {
 		c.Error(response.ErrInternalServerError(err))
 		return
 	}
 
 	//insert new token
-	if _, err := db.Pool.Exec(
+	if _, err := tx.Exec(
 		c.Request.Context(),
 		`INSERT INTO refresh_tokens (
-		uuid, user_uuid) VALUES ($1, $2)`,
-		newTokenUUID, t.UserUUID,
+		id, user_id) VALUES ($1, $2)`,
+		newTokenID, t.UserID,
 	); err != nil {
 		c.Error(response.ErrInternalServerError(err))
 		return
 	}
 
 	//revoke old token
-	res, err := db.Pool.Exec(
+	res, err := tx.Exec(
 		c.Request.Context(),
 		`UPDATE refresh_tokens SET 
 		revoked_on = $1,
 		replaced_by = $2
-		WHERE uuid = $3`,
-		time.Now(), newTokenUUID, t.Uuid,
+		WHERE id = $3`,
+		time.Now(), newTokenID, t.ID,
 	)
 	if err != nil || res.RowsAffected() == 0 {
 		c.Error(response.ErrInternalServerError(errors.New("failed to update refresh token")))
+		return
+	}
+
+	if err := tx.Commit(c.Request.Context()); err != nil {
+		c.Error(response.ErrInternalServerError(err))
 		return
 	}
 
@@ -124,15 +137,13 @@ func RefreshToken(c *gin.Context) {
 	http.SetCookie(c.Writer, cookie)
 
 	//generate new accesstoken
-	newAccessToken, err := GenerateAcessToken(t.UserUUID)
+	newAccessToken, err := GenerateAcessToken(t.UserID)
 	if err != nil {
 		c.Error(response.ErrInternalServerError(err))
 		return
 	}
 	//return accesstoken
 	response.Success(c, http.StatusCreated, gin.H{
-		"replaced": t.Uuid,
-		"tokenID":  newTokenUUID,
 		"token":    newAccessToken,
 	})
 }

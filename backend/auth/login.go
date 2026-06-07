@@ -21,12 +21,11 @@ type LoginRequest struct {
 }
 
 type UserResponse struct {
-	UUID      string `json:"uuid"`
+	ID      string `json:"uuid"`
 	FirstName string    `json:"firstName"`
 	LastName  string    `json:"lastName"`
 	Email     string    `json:"email"`
 	CreatedOn time.Time `json:"createdOn"`
-	Token     string    `json:"token"`
 }
 
 func Login(c *gin.Context) {
@@ -41,7 +40,7 @@ func Login(c *gin.Context) {
 	if err := db.Pool.QueryRow(
 		c.Request.Context(),
 		`SELECT 
-		uuid, 
+		id, 
 		first_name, 
 		last_name, 
 		email, 
@@ -50,7 +49,7 @@ func Login(c *gin.Context) {
 		FROM users WHERE email = $1`,
 		request.Email,
 	).Scan(
-		&user.UUID,
+		&user.ID,
 		&user.FirstName,
 		&user.LastName,
 		&user.Email,
@@ -70,19 +69,20 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	userUUID, err := uuid.Parse(user.UUID)
-	if err != nil {
-		c.Error(response.ErrInternalServerError(err))
-	}
-
-	token, err := GenerateAcessToken(userUUID)
+	userID, err := uuid.Parse(user.ID)
 	if err != nil {
 		c.Error(response.ErrInternalServerError(err))
 		return
 	}
 
-	refreshTokenUUID := uuid.NewString()
-	refreshToken, err := GenerateRefreshToken(userUUID, refreshTokenUUID)
+	token, err := GenerateAcessToken(userID)
+	if err != nil {
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+
+	refreshTokenID := uuid.NewString()
+	refreshToken, err := GenerateRefreshToken(userID, refreshTokenID)
 	if err != nil {
 		c.Error(response.ErrInternalServerError(err))
 		return
@@ -91,8 +91,8 @@ func Login(c *gin.Context) {
 	if _, err := db.Pool.Exec(
 		c.Request.Context(),
 		`INSERT INTO refresh_tokens (
-		uuid, user_uuid) VALUES ($1, $2)`,
-		refreshTokenUUID, user.UUID,
+		id, user_id) VALUES ($1, $2)`,
+		refreshTokenID, user.ID,
 	); err != nil {
 		c.Error(response.ErrInternalServerError(err))
 		return
@@ -117,7 +117,7 @@ func Login(c *gin.Context) {
 	http.SetCookie(c.Writer, cookie)
 
 	resp := UserResponse{
-		UUID:      user.UUID,
+		ID:      user.ID,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Email:     user.Email,
@@ -127,6 +127,5 @@ func Login(c *gin.Context) {
 	response.Success(c, http.StatusOK, gin.H{
 		"user":    resp,
 		"token":   token,
-		"message": "login success",
 	})
 }

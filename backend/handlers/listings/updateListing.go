@@ -22,7 +22,7 @@ type CreateListingRequest struct {
 	Price        int64  `form:"price" binding:"gte=0"`
 	Quantity     int64  `form:"quantity" binding:"gte=0"`
 	Condition    string `form:"condition"`
-	CategoryUUID string `form:"category"`
+	CategoryName string `form:"category"`
 }
 
 func UpdateListing(c *gin.Context) {
@@ -83,35 +83,35 @@ func UpdateListing(c *gin.Context) {
 			price = $3,
 			quantity = $4,
 			condition = $5,
-			category_uuid = $6
-		WHERE uuid = $7 AND seller_uuid = $8
+			category_name = $6
+		WHERE id = $7 AND seller_id = $8
 		RETURNING
-			uuid,
-			seller_uuid,
+			id,
+			seller_id,
 			title,
 			description,
 			price,
 			quantity,
 			condition,
-			category_uuid,
+			category_name,
 			created_on`,
 		listing.Title,
 		listing.Description,
 		listing.Price,
 		listing.Quantity,
 		listing.Condition,
-		listing.CategoryUUID,
+		listing.CategoryName,
 		listingID,
 		userID,
 	).Scan(
-		&updatedListing.UUID,
-		&updatedListing.SellerUUID,
+		&updatedListing.ID,
+		&updatedListing.SellerID,
 		&updatedListing.Title,
 		&updatedListing.Description,
 		&updatedListing.Price,
 		&updatedListing.Quantity,
 		&updatedListing.Condition,
-		&updatedListing.CategoryUUID,
+		&updatedListing.CategoryName,
 		&updatedListing.CreatedOn,
 	); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -138,7 +138,7 @@ func UpdateListing(c *gin.Context) {
 	if len(files) > 0 {
 		if _, err := tx.Exec(
 			c.Request.Context(),
-			`DELETE FROM images WHERE listing_uuid = $1`,
+			`DELETE FROM images WHERE listing_id = $1`,
 			listingID,
 		); err != nil {
 			c.Error(response.ErrInternalServerError(err))
@@ -146,15 +146,8 @@ func UpdateListing(c *gin.Context) {
 		}
 
 		for _, file := range files {
-			fileUUID := uuid.NewString()
-			uploadDir := os.Getenv("UPLOAD_DIR")
-			if uploadDir == "" {
-				uploadDir = "./uploads"
-			}
-			if err := os.MkdirAll(uploadDir, 0755); err != nil {
-				c.Error(response.ErrInternalServerError(err))
-				return
-			}
+			fileID := uuid.NewString()
+			filePath := "/uploads/" + fileID + filepath.Ext(file.Filename)
 
 			filePath := "/uploads/" + fileUUID + filepath.Ext(file.Filename)
 			savePath := filepath.Join(uploadDir, fileUUID+filepath.Ext(file.Filename))
@@ -166,7 +159,7 @@ func UpdateListing(c *gin.Context) {
 
 			if _, err := tx.Exec(
 				c.Request.Context(),
-				`INSERT INTO images (listing_uuid, file_url) VALUES ($1, $2)`,
+				`INSERT INTO images (listing_id, file_url) VALUES ($1, $2)`,
 				listingID,
 				filePath,
 			); err != nil {
@@ -183,6 +176,5 @@ func UpdateListing(c *gin.Context) {
 
 	response.Success(c, http.StatusOK, gin.H{
 		"listing": updatedListing,
-		"message": "updated listing",
 	})
 }

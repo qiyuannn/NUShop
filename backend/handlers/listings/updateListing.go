@@ -7,6 +7,7 @@ import (
 	"errors"
 	"mime/multipart"
 	"net/http"
+	"os"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
@@ -148,7 +149,10 @@ func UpdateListing(c *gin.Context) {
 			fileID := uuid.NewString()
 			filePath := "/uploads/" + fileID + filepath.Ext(file.Filename)
 
-			if err := c.SaveUploadedFile(file, "."+filePath); err != nil {
+			filePath := "/uploads/" + fileUUID + filepath.Ext(file.Filename)
+			savePath := filepath.Join(uploadDir, fileUUID+filepath.Ext(file.Filename))
+
+			if err := c.SaveUploadedFile(file, savePath); err != nil {
 				c.Error(response.ErrInternalServerError(err))
 				return
 			}

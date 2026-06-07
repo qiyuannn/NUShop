@@ -95,56 +95,63 @@ export function Listing() {
   }
 
   return (
-    <div className="flex flex-col">
-      <Item className="pb-10">
-        <ItemHeader>
-          <ItemCarousel files={listing.images} />
-        </ItemHeader>
-        <ItemContent className="sm:pl-16 sm:pr-16">
-          <ItemTitle className="text-2xl font-bold">{listing.title}</ItemTitle>
-          <ItemDescription className="text-lg">${listing.price}</ItemDescription>
-          <Separator />
-          <ItemTitle>Details</ItemTitle>
-          <ItemDescription>Condition: {listing.condition}</ItemDescription>
-          <ItemDescription>Category: {listing.categoryName}</ItemDescription>
-          <div className="w-full min-w-0 text-muted-foreground">
-            <p className="font-medium">Description:</p>
-            <p className="break-words">{listing.description}</p>
-          </div>
-          <Separator />
-          <ItemTitle>Seller information</ItemTitle>
-          <Item asChild>
-            <Link to={`/user/${listing.sellerID}`}>
-              <ItemMedia>
-                <Avatar size="lg">
-                  <AvatarImage
-                    src="https://github.com/shadcn.png"
-                    alt="@shadcn"
-                    className="grayscale"
-                  />
-                  <AvatarFallback>CN</AvatarFallback>
-                </Avatar>
-              </ItemMedia>
-              <ItemContent className="gap-0">
-                <ItemTitle>
-                  {seller.firstName} {seller.lastName}
-                </ItemTitle>
-                <ItemDescription>
-                  Joined since {new Date(seller.createdOn).getFullYear()}
-                </ItemDescription>
-              </ItemContent>
-            </Link>
-          </Item>
-        </ItemContent>
-      </Item>
-      <div className="fixed bottom-0 z-50 flex gap-0 bg-secondary w-full">
-        <Button size="lg" className="flex-1 rounded-none">
+    <div className="flex h-[calc(100dvh-3.5rem)] flex-col overflow-hidden">
+      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <Item className="pb-0">
+          <ItemHeader>
+            <ItemCarousel files={listing.images} />
+          </ItemHeader>
+          <ItemContent className="sm:pl-16 sm:pr-16">
+            <ItemTitle className="text-2xl font-bold">{listing.title}</ItemTitle>
+            <ItemDescription className="text-lg">${listing.price}</ItemDescription>
+            <Separator />
+            <ItemTitle>Details</ItemTitle>
+            <ItemDescription>Condition: {listing.condition}</ItemDescription>
+            <ItemDescription>Category: {listing.categoryName}</ItemDescription>
+            <div className="w-full min-w-0 text-muted-foreground">
+              <p className="font-medium">Description:</p>
+              <p className="break-words">{listing.description}</p>
+            </div>
+            <Separator />
+            <ItemTitle>Seller information</ItemTitle>
+            <Item asChild>
+              <Link to={`/user/${listing.sellerID}`}>
+                <ItemMedia>
+                  <Avatar size="lg">
+                    <AvatarImage
+                      src="https://github.com/shadcn.png"
+                      alt="@shadcn"
+                      className="grayscale"
+                    />
+                    <AvatarFallback>CN</AvatarFallback>
+                  </Avatar>
+                </ItemMedia>
+                <ItemContent className="gap-0">
+                  <ItemTitle>
+                    {seller.firstName} {seller.lastName}
+                  </ItemTitle>
+                  <ItemDescription>
+                    Joined since {new Date(seller.createdOn).getFullYear()}
+                  </ItemDescription>
+                </ItemContent>
+              </Link>
+            </Item>
+          </ItemContent>
+        </Item>
+      </div>
+
+      <div className="shrink-0 flex h-10 w-full gap-0 bg-secondary">
+        <Button size="default" className="h-full flex-[1.6] rounded-none">
           Chat with seller
         </Button>
-        <Button size="lg" className="flex-1 rounded-none" onClick={handleAddToCart}>
+        <Button size="default" className="h-full flex-[1.6] rounded-none">
           Add to cart
         </Button>
-        <Button size="lg" className="flex-2 rounded-none" variant="destructive">
+        <Button
+          size="default"
+          className="h-full flex-[1.6] rounded-none"
+          variant="destructive"
+        >
           Buy now
         </Button>
       </div>
@@ -171,7 +178,7 @@ export function ItemCarousel({ files }: { files: string[] }) {
   }, [api, files]);
 
   return (
-    <div className="sm:pl-16 sm:pr-16 w-full">
+    <div className="w-full">
       <Carousel setApi={setApi} opts={{ loop: false, containScroll: false }}>
         <CarouselContent>
           {files.length > 0 &&
@@ -187,7 +194,7 @@ export function ItemCarousel({ files }: { files: string[] }) {
           {files.length === 0 && (
             <CarouselItem className="basis-4/5 md:basis-1/2 lg:basis-2/7 pl-0">
               <Item>
-                <ItemContent className="flex items-center justify-center border rounded-sm aspect-square">
+                <ItemContent className="flex h-56 items-center justify-center border rounded-sm">
                   <ItemDescription>Listing have no images</ItemDescription>
                 </ItemContent>
               </Item>

@@ -56,7 +56,7 @@ func verifyToken(tokenStr string) (*jwt.RegisteredClaims, error) {
 			return []byte(secret), nil
 		},
 		jwt.WithExpirationRequired(),
-		jwt.WithIssuer("NUShop"),
+		jwt.WithIssuer("Shop"),
 		jwt.WithIssuedAt(),
 		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}),
 	)

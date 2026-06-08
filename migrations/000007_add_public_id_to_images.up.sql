@@ -1,2 +1,0 @@
-ALTER TABLE images
-ADD COLUMN public_id TEXT;

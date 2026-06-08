@@ -26,9 +26,9 @@ export function CartPage() {
     setTotal(total)
   }, [cartItems])
 
-  if (!token ) {
+  if (!token) {
     return (
-      <Unauthorised/>
+      <Unauthorised />
     )
   }
 
@@ -41,8 +41,8 @@ export function CartPage() {
         </ItemContent>
       </Item>
       <div className="sm:pl-16 sm:pr-16">
-        <CartList/>
-        <Separator/>
+        <CartList />
+        <Separator />
         <div className="flex flex-rows items-center gap-5 pt-2 justify-end">
           <p>Total: ${total}</p>
           <Button className="rounded-none" size="lg">Checkout</Button>
@@ -55,28 +55,28 @@ export function CartPage() {
 export function CartList() {
   const cartItems = useCartStore((state) => state.cartItems);
 
-  return(
+  return (
     <div>
       <Item className="flex">
-        <div className="w-10"/>
+        <div className="w-10" />
         <div className="flex-1 grid grid-cols-[1fr_50px_50px] sm:grid-cols-[1fr_100px_100px] gap-5">
           <ItemTitle>Item</ItemTitle>
           <ItemTitle>Quantity</ItemTitle>
           <ItemTitle>Subtotal</ItemTitle>
         </div>
-        <div className="w-10"/>
+        <div className="w-10" />
       </Item>
-      <Separator/>
+      <Separator />
       <div>
         {Array.from(cartItems.entries()).map(([id, cartItem]) => (
-          <CartItemCard listing={cartItem.listing} quantity={cartItem.quantity} key={id}/>
+          <CartItemCard listing={cartItem.listing} quantity={cartItem.quantity} key={id} />
         ))}
       </div>
     </div>
-  ) 
+  )
 }
 
-export function CartItemCard({listing, quantity}: {listing: Listing, quantity: number}) {
+export function CartItemCard({ listing, quantity }: { listing: Listing, quantity: number }) {
   const authApiFetch = useAuthApiFetch();
   const addToCart = useCartStore((state) => state.addToCart);
   const navigate = useNavigate()
@@ -89,7 +89,7 @@ export function CartItemCard({listing, quantity}: {listing: Listing, quantity: n
       setQty(Number(e.target.value));
     }
   };
-  
+
   const handleBlur = async () => {
     setErr(null)
     if (qty <= 0) {
@@ -114,19 +114,25 @@ export function CartItemCard({listing, quantity}: {listing: Listing, quantity: n
   React.useEffect(() => {
     setQty(quantity);
   }, [quantity]);
-  
+
   return (
     <Item>
       <ItemMedia variant="image" onClick={() => navigate(`/listings/${listing.id}`)}>
         <img
-          src={`${API_URL}${listing?.images?.[0] ? listing.images[0] : ""}`}
+          src={
+            listing?.images?.[0]
+              ? listing.images[0].startsWith("http")
+                ? listing.images[0]
+                : `${API_URL}${listing.images[0]}`
+              : ""
+          }
           className="aspect-square object-cover border rounded-sm"
         />
       </ItemMedia>
       <ItemContent className="grid grid-cols-[1fr_50px_50px] sm:grid-cols-[1fr_100px_100px] gap-5">
         <ItemTitle className="font-bold" onClick={() => navigate(`/listing/${listing.id}`)}>{listing.title}</ItemTitle>
         <div>
-          <Input value={qty} onChange={handleChange} onBlur={handleBlur} type="number" aria-invalid={err !== null}/>
+          <Input value={qty} onChange={handleChange} onBlur={handleBlur} type="number" aria-invalid={err !== null} />
           {err &&
             <p className="text-xs pt-1">{err}</p>
           }
@@ -136,7 +142,7 @@ export function CartItemCard({listing, quantity}: {listing: Listing, quantity: n
       <AlertDialog>
         <AlertDialogTrigger asChild>
           <Button variant="ghost" className="w-10 h-10">
-            <Trash/>
+            <Trash />
           </Button>
         </AlertDialogTrigger>
         <AlertDialogContent>

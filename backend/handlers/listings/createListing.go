@@ -59,7 +59,7 @@ func CreateListing(c *gin.Context) {
 			return
 		}
 
-		imageURL, err := cloudinary.UploadImage(openedFile)
+		uploadResult, err := cloudinary.UploadImage(openedFile)
 		closeErr := openedFile.Close()
 		if closeErr != nil {
 			c.Error(response.ErrInternalServerError(closeErr))
@@ -70,10 +70,9 @@ func CreateListing(c *gin.Context) {
 			return
 		}
 
-		args = append(args, imageURL)
-
-		placeholder = append(placeholder, "($1, $"+strconv.Itoa(queryIndex)+")")
-		queryIndex++
+		args = append(args, uploadResult.URL, uploadResult.PublicID)
+		placeholder = append(placeholder, "($1, $"+strconv.Itoa(queryIndex)+", $"+strconv.Itoa(queryIndex+1)+")")
+		queryIndex += 2
 	}
 
 	tx, err := db.Pool.Begin(c.Request.Context())
@@ -141,7 +140,7 @@ func CreateListing(c *gin.Context) {
 	}
 
 	if len(files) > 0 {
-		sqlQuery := "INSERT INTO images (listing_id, file_url) VALUES " + strings.Join(placeholder, ", ")
+		sqlQuery := "INSERT INTO images (listing_id, file_url, public_id) VALUES " + strings.Join(placeholder, ", ")
 		allArgs := []any{insertedListing.ID}
 		allArgs = append(allArgs, args...)
 

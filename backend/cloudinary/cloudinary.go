@@ -9,14 +9,19 @@ import (
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 )
 
-func UploadImage(file multipart.File) (string, error) {
+type UploadResult struct {
+	URL      string
+	PublicID string
+}
+
+func UploadImage(file multipart.File) (*UploadResult, error) {
 	cloud, err := cld.NewFromParams(
 		os.Getenv("CLOUDINARY_CLOUD_NAME"),
 		os.Getenv("CLOUDINARY_API_KEY"),
 		os.Getenv("CLOUDINARY_API_SECRET"),
 	)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	result, err := cloud.Upload.Upload(
@@ -25,8 +30,26 @@ func UploadImage(file multipart.File) (string, error) {
 		uploader.UploadParams{Folder: "orbital-listings"},
 	)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return result.SecureURL, nil
+	return &UploadResult{
+		URL:      result.SecureURL,
+		PublicID: result.PublicID,
+	}, nil
+}
+func DeleteImage(publicID string) error {
+	cloud, err := cld.NewFromParams(
+		os.Getenv("CLOUDINARY_CLOUD_NAME"),
+		os.Getenv("CLOUDINARY_API_KEY"),
+		os.Getenv("CLOUDINARY_API_SECRET"),
+	)
+	if err != nil {
+		return err
+	}
+	_, err = cloud.Upload.Destroy(
+		context.Background(),
+		uploader.DestroyParams{PublicID: publicID},
+	)
+	return err
 }

@@ -66,7 +66,7 @@ func UpdateListing(c *gin.Context) {
 		files = form.File["file"]
 	}
 
-	uploadedURLs := make([]string, 0, len(files))
+	uploadedImages := make([]cloudinary.UploadResult, 0, len(files))
 	for _, file := range files {
 		openedFile, err := file.Open()
 		if err != nil {
@@ -74,7 +74,7 @@ func UpdateListing(c *gin.Context) {
 			return
 		}
 
-		imageURL, uploadErr := cloudinary.UploadImage(openedFile)
+		uploadResult, uploadErr := cloudinary.UploadImage(openedFile)
 		closeErr := openedFile.Close()
 		if closeErr != nil {
 			c.Error(response.ErrInternalServerError(closeErr))
@@ -85,7 +85,7 @@ func UpdateListing(c *gin.Context) {
 			return
 		}
 
-		uploadedURLs = append(uploadedURLs, imageURL)
+		uploadedImages = append(uploadedImages, *uploadResult)
 	}
 
 	tx, err := db.Pool.Begin(c.Request.Context())
@@ -156,7 +156,43 @@ func UpdateListing(c *gin.Context) {
 		return
 	}
 
-	if len(uploadedURLs) > 0 {
+	if len(uploadedImages) > 0 {
+		rows, err := tx.Query(
+			c.Request.Context(),
+			`SELECT public_id FROM images WHERE listing_id = $1`,
+			listingID,
+		)
+		if err != nil {
+			c.Error(response.ErrInternalServerError(err))
+			return
+		}
+
+		var oldPublicIDs []string
+		for rows.Next() {
+			var publicID *string
+			if err := rows.Scan(&publicID); err != nil {
+				rows.Close()
+				c.Error(response.ErrInternalServerError(err))
+				return
+			}
+			if publicID != nil && *publicID != "" {
+				oldPublicIDs = append(oldPublicIDs, *publicID)
+			}
+		}
+		if err := rows.Err(); err != nil {
+			rows.Close()
+			c.Error(response.ErrInternalServerError(err))
+			return
+		}
+		rows.Close()
+
+		for _, publicID := range oldPublicIDs {
+			if err := cloudinary.DeleteImage(publicID); err != nil {
+				c.Error(response.ErrInternalServerError(err))
+				return
+			}
+		}
+
 		if _, err := tx.Exec(
 			c.Request.Context(),
 			`DELETE FROM images WHERE listing_id = $1`,
@@ -166,13 +202,13 @@ func UpdateListing(c *gin.Context) {
 			return
 		}
 
-		for _, imageURL := range uploadedURLs {
-
+		for _, img := range uploadedImages {
 			if _, err := tx.Exec(
 				c.Request.Context(),
-				`INSERT INTO images (listing_id, file_url) VALUES ($1, $2)`,
+				`INSERT INTO images (listing_id, file_url, public_id) VALUES ($1, $2, $3)`,
 				listingID,
-				imageURL,
+				img.URL,
+				img.PublicID,
 			); err != nil {
 				c.Error(response.ErrInternalServerError(err))
 				return

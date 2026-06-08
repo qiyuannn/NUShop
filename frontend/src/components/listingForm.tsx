@@ -47,6 +47,7 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
   const navigate = useNavigate();
   const { listingID } = useParams();
   const [categories, setCategory] = React.useState<string[]>([]);
+  const [loading, setLoading] = React.useState(false);
   const [formData, setFormData] = React.useState<FormDataType>({
     title: "",
     category: "",
@@ -129,6 +130,11 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
   const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    if (loading) return;
+    setLoading(true);
+
+
+
     const form = new FormData();
     form.append("title", formData.title);
     form.append("category", formData.category);
@@ -159,6 +165,8 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
       navigate("/listings/manage");
     } catch {
       setErr(true);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -289,7 +297,9 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
             )}
             <Field>
               <div className="flex justify-end">
-                <Button type="submit">{!typeCreate ? "Save changes" : "Post"}</Button>
+                <Button type="submit" disabled={loading}>
+                  {loading ? "Posting..." : !typeCreate ? "Save changes" : "Post"}
+                </Button>
               </div>
             </Field>
           </FieldSet>

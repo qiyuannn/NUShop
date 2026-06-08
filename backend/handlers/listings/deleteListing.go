@@ -1,6 +1,7 @@
 package listings
 
 import (
+	"backend/cloudinary"
 	db "backend/database"
 	"backend/response"
 	"errors"
@@ -30,6 +31,42 @@ func DeleteListing(c *gin.Context) {
 	if err != nil {
 		c.Error(response.ErrBadRequest(err))
 		return
+
+	}
+	rows, err := db.Pool.Query(
+		c.Request.Context(),
+		`SELECT i.public_id
+                 FROM images i
+                 JOIN listings l ON l.id = i.listing_id
+                 WHERE i.listing_id = $1 AND l.seller_id = $2`,
+		listingID,
+		userID,
+	)
+	if err != nil {
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+	defer rows.Close()
+	publicIDs := []string{}
+	for rows.Next() {
+		var publicID *string
+		if err := rows.Scan(&publicID); err != nil {
+			c.Error(response.ErrInternalServerError(err))
+			return
+		}
+		if publicID != nil && *publicID != "" {
+			publicIDs = append(publicIDs, *publicID)
+		}
+	}
+	if err := rows.Err(); err != nil {
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+	for _, publicID := range publicIDs {
+		if err := cloudinary.DeleteImage(publicID); err != nil {
+			c.Error(response.ErrInternalServerError(err))
+			return
+		}
 	}
 
 	var deletedID uuid.UUID

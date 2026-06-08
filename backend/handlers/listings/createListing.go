@@ -1,12 +1,12 @@
 package listings
 
 import (
+	"backend/cloudinary"
 	db "backend/database"
 	"backend/models"
 	"backend/response"
 	"errors"
 	"net/http"
-	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -53,14 +53,24 @@ func CreateListing(c *gin.Context) {
 	queryIndex := 2
 
 	for _, file := range files {
-		fileID := uuid.NewString()
-		filePath := "/uploads/" + fileID + filepath.Ext(file.Filename)
-		args = append(args, filePath)
-
-		if err := c.SaveUploadedFile(file, "."+filePath); err != nil {
+		openedFile, err := file.Open()
+		if err != nil {
 			c.Error(response.ErrInternalServerError(err))
 			return
 		}
+
+		imageURL, err := cloudinary.UploadImage(openedFile)
+		closeErr := openedFile.Close()
+		if closeErr != nil {
+			c.Error(response.ErrInternalServerError(closeErr))
+			return
+		}
+		if err != nil {
+			c.Error(response.ErrInternalServerError(err))
+			return
+		}
+
+		args = append(args, imageURL)
 
 		placeholder = append(placeholder, "($1, $"+strconv.Itoa(queryIndex)+")")
 		queryIndex++

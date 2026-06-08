@@ -7,9 +7,9 @@ export function Layout() {
   return (
     <>
       <AppSidebar />
-      <SidebarInset className="flex flex-col">
+      <SidebarInset className="flex min-h-screen flex-col">
         <AppHeader />
-        <div className="flex-1">
+        <div className="flex min-h-0 flex-1">
           <Outlet />
         </div>
       </SidebarInset>

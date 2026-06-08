@@ -239,7 +239,7 @@ export function ListingItem({
         <Link to={`/listing/${listingID}`}>
           <ItemHeader>
             <img
-              src={`${API_URL}${image}`}
+              src={image.startsWith("http") ? image : `${API_URL}${image}`}
               className="aspect-square border object-cover rounded-lg w-full"
             />
           </ItemHeader>

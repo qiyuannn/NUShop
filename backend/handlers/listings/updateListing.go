@@ -1,13 +1,13 @@
 package listings
 
 import (
+	"backend/cloudinary"
 	db "backend/database"
 	"backend/models"
 	"backend/response"
 	"errors"
 	"mime/multipart"
 	"net/http"
-	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -64,6 +64,28 @@ func UpdateListing(c *gin.Context) {
 	var files []*multipart.FileHeader
 	if form != nil {
 		files = form.File["file"]
+	}
+
+	uploadedURLs := make([]string, 0, len(files))
+	for _, file := range files {
+		openedFile, err := file.Open()
+		if err != nil {
+			c.Error(response.ErrInternalServerError(err))
+			return
+		}
+
+		imageURL, uploadErr := cloudinary.UploadImage(openedFile)
+		closeErr := openedFile.Close()
+		if closeErr != nil {
+			c.Error(response.ErrInternalServerError(closeErr))
+			return
+		}
+		if uploadErr != nil {
+			c.Error(response.ErrInternalServerError(uploadErr))
+			return
+		}
+
+		uploadedURLs = append(uploadedURLs, imageURL)
 	}
 
 	tx, err := db.Pool.Begin(c.Request.Context())
@@ -134,7 +156,7 @@ func UpdateListing(c *gin.Context) {
 		return
 	}
 
-	if len(files) > 0 {
+	if len(uploadedURLs) > 0 {
 		if _, err := tx.Exec(
 			c.Request.Context(),
 			`DELETE FROM images WHERE listing_id = $1`,
@@ -144,20 +166,13 @@ func UpdateListing(c *gin.Context) {
 			return
 		}
 
-		for _, file := range files {
-			fileID := uuid.NewString()
-			filePath := "/uploads/" + fileID + filepath.Ext(file.Filename)
-
-			if err := c.SaveUploadedFile(file, "."+filePath); err != nil {
-				c.Error(response.ErrInternalServerError(err))
-				return
-			}
+		for _, imageURL := range uploadedURLs {
 
 			if _, err := tx.Exec(
 				c.Request.Context(),
 				`INSERT INTO images (listing_id, file_url) VALUES ($1, $2)`,
 				listingID,
-				filePath,
+				imageURL,
 			); err != nil {
 				c.Error(response.ErrInternalServerError(err))
 				return

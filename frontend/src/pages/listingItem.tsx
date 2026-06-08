@@ -144,7 +144,11 @@ export function Listing() {
         <Button size="default" className="h-full flex-[1.6] rounded-none">
           Chat with seller
         </Button>
-        <Button size="default" className="h-full flex-[1.6] rounded-none">
+        <Button
+          size="default"
+          className="h-full flex-[1.6] rounded-none"
+          onClick={handleAddToCart}
+        >
           Add to cart
         </Button>
         <Button

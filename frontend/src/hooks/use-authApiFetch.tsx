@@ -2,7 +2,7 @@ import { useAuth } from "@/context/auth";
 import { API_URL } from "@/lib/api";
 
 export function useAuthApiFetch() {
-  const { setUser, token, setToken } = useAuth();
+  const { token, setToken } = useAuth();
 
   async function ApiFetch(url: string, options: RequestInit = {}) {
     const res = await fetch(url, {
@@ -23,7 +23,6 @@ export function useAuthApiFetch() {
       credentials: "include",
     });
     if (!refreshTokenRes.ok) {
-      setUser(null);
       return res;
     }
 

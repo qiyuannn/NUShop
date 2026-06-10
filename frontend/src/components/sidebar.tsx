@@ -29,15 +29,12 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const { token } = useAuth();
   const logout = useLogout();
-  const cartItems = useCartStore((state) => state.cartItems)
+  const cartItems = useCartStore((state) => state.cartItems);
 
   return (
     <Sidebar collapsible="icon" typeof="floating">
       <SidebarHeader>
-        <SidebarMenuButton
-         onClick={() => navigate("/")} 
-         tooltip="Home"
-         >
+        <SidebarMenuButton onClick={() => navigate("/")} tooltip="Home">
           <ShoppingBag />
           <p className="font-bold text-xl">Shop</p>
         </SidebarMenuButton>

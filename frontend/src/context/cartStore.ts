@@ -5,7 +5,12 @@ import { create } from "zustand";
 type CartStore = {
   cartItems: Map<string, CartItem>;
   initCart: (authApiFetch: AuthApiFetch) => Promise<void>;
-  addToCart: (authApiFetch: AuthApiFetch, listingID: string, quantity: number, replace: boolean) => Promise<void>;
+  addToCart: (
+    authApiFetch: AuthApiFetch,
+    listingID: string,
+    quantity: number,
+    replace: boolean,
+  ) => Promise<void>;
   deleteFromCart: (authApiFetch: AuthApiFetch, listingID: string) => Promise<void>;
 };
 
@@ -29,13 +34,13 @@ export const useCartStore = create<CartStore>((set) => ({
     });
 
     set({ cartItems: cartItems });
-    console.log(cartItems)
+    console.log(cartItems);
   },
 
   addToCart: async (authApiFetch, listingID, quantity, replace) => {
     const res = await authApiFetch(`${API_URL}/cart`, {
       method: "POST",
-      body: JSON.stringify({ listingID: listingID, quantity: quantity, replace: replace}),
+      body: JSON.stringify({ listingID: listingID, quantity: quantity, replace: replace }),
     });
 
     const json = await res.json();

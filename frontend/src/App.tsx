@@ -14,11 +14,13 @@ import { useAuthApiFetch } from "./hooks/use-authApiFetch";
 import { useAuth } from "./context/auth";
 import { toast } from "sonner";
 import { CartPage } from "./pages/cart";
+import { useStartWS } from "./hooks/use-startWS";
 
 export function App() {
   const initCart = useCartStore((state) => state.initCart);
   const authApiFetch = useAuthApiFetch();
   const { token } = useAuth();
+  const {} = useStartWS();
 
   React.useEffect(() => {
     if (!token) {
@@ -50,9 +52,9 @@ export function App() {
         <Route path="/listings/manage" element={<ManageListing />} />
         <Route path="/listing/:listingID" element={<Listing />} />
         <Route path="/user/:userID" element={<ProfilePage />} />
-        <Route path="/cart" element={<CartPage/>}/>
+        <Route path="/cart" element={<CartPage />} />
 
-        <Route path="/test" element={<CartPage/>} />
+        <Route path="/test" element={<CartPage />} />
       </Route>
     </Routes>
   );

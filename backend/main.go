@@ -2,6 +2,7 @@ package main
 
 import (
 	"backend/auth"
+	"backend/chat"
 	"backend/database"
 	"backend/handlers/cart"
 	"backend/handlers/categories"
@@ -60,6 +61,10 @@ func main() {
 	private.GET("/cart", cart.GetCart)
 	private.POST("/cart", cart.AddToCart)
 	private.DELETE("/cart", cart.DeleteFromCart)
+
+	hub := chat.NewHub()
+	go hub.Run()
+	router.GET("/ws", chat.ServeWs(hub))
 
 	port := os.Getenv("PORT")
 	if port == "" {

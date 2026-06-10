@@ -27,8 +27,8 @@ import { toast } from "sonner";
 
 export function Listing() {
   const { listingID } = useParams();
-  const addToCart = useCartStore((state) => state.addToCart)
-  const authApiFetch = useAuthApiFetch()
+  const addToCart = useCartStore((state) => state.addToCart);
+  const authApiFetch = useAuthApiFetch();
 
   const [listing, setListing] = React.useState<Listing>({
     id: "",
@@ -51,12 +51,12 @@ export function Listing() {
 
   const handleAddToCart = async () => {
     try {
-      await addToCart(authApiFetch, listing.id, 1, false)
-      toast.success("Item added into cart")
+      await addToCart(authApiFetch, listing.id, 1, false);
+      toast.success("Item added into cart");
     } catch (error) {
-      toast.error("Failed to add item into cart, try again later.")
+      toast.error("Failed to add item into cart, try again later.");
     }
-  }
+  };
 
   React.useEffect(() => {
     setErr(false);
@@ -147,11 +147,7 @@ export function Listing() {
         <Button size="default" className="h-full flex-[1.6] rounded-none" onClick={handleAddToCart}>
           Add to cart
         </Button>
-        <Button
-          size="default"
-          className="h-full flex-[1.6] rounded-none"
-          variant="destructive"
-        >
+        <Button size="default" className="h-full flex-[1.6] rounded-none" variant="destructive">
           Buy now
         </Button>
       </div>

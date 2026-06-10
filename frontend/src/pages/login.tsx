@@ -35,7 +35,7 @@ export function LoginForm() {
   });
   const [loading, setLoading] = React.useState(false);
   const [err, setErr] = React.useState<string | null>(null);
-  const { setUser, setToken } = useAuth();
+  const { setToken } = useAuth();
   const nav = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,7 +58,6 @@ export function LoginForm() {
       if (!res.ok) {
         throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
       }
-      setUser(json.data.user);
       setToken(json.data.token);
       nav("/");
     } catch (err) {

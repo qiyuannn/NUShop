@@ -27,8 +27,10 @@ func (h *Hub) Run() {
 		select{
 		case client := <- h.register:
 			h.clients[client.userID] = client
+			log.Printf(">>> registered client: %s", client.userID)
 		case client := <- h.unregister:
 			delete(h.clients, client.userID)
+			log.Printf(">>> 1. unregistered client: %s", client.userID)
 		case message := <- h.route:
 			
 			if sender, ok := h.clients[message.SenderID]; ok {
@@ -43,6 +45,7 @@ func (h *Hub) Run() {
 				default:
 					close(sender.send)
 					delete(h.clients, sender.userID)
+					log.Printf(">>> 2. unregistered client: %s", sender.userID)
 				}
 			} else {
 				log.Printf(">>> sender NOT FOUND: %s", message.SenderID)
@@ -62,6 +65,7 @@ func (h *Hub) Run() {
 					default:
 						close(receiver.send)
 						delete(h.clients, receiver.userID)
+						log.Printf(">>> 3. unregistered client: %s", receiver.userID)
 					}
 				}
 			} else {

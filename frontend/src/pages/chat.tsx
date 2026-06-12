@@ -27,7 +27,6 @@ export function Chat() {
     lastName: "",
   });
   const [messages, setMessages] = React.useState<Message[]>([]);
-  const [msg, setMsg] = React.useState("");
   const { token } = useAuth();
   const bottomRef = useRef<HTMLDivElement>(null)
 
@@ -44,7 +43,7 @@ export function Chat() {
       setMessages((p) => [...p, msg.message]);
   },[param.userID])
 
-  const { sendJsonMessage, readyState } = useWebSocket(token ? `${WS_URL}/ws` : null, {
+  const { readyState } = useWebSocket(token ? `${WS_URL}/ws` : null, {
     queryParams: { token: token! },
     share: true,
     shouldReconnect: () => true,
@@ -56,15 +55,6 @@ export function Chat() {
     },
     onMessage
   });
-
-  const handleSend = React.useCallback(() => {
-    sendJsonMessage({
-      type: "message",
-      receiverID: param.userID,
-      Content: msg,
-    });
-    setMsg("");
-  }, [msg, sendJsonMessage, param.userID]);
 
   React.useEffect(() => {
     async function fetchData() {
@@ -132,22 +122,53 @@ export function Chat() {
         <div ref={bottomRef} /> 
       </div>
       <div className="p-2">
-        <InputGroup>
-          <InputGroupInput
-            placeholder="Write your message here..."
-            value={msg}
-            onChange={(e) => setMsg(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSend();
-              } 
-            }}
-            disabled={!token}
-          />
-          <InputGroupButton onClick={handleSend}>Send</InputGroupButton>
-        </InputGroup>
+        <Message/>
       </div>
     </div>
   );
+}
+
+export function Message() {
+  const [msg, setMsg] = React.useState("");
+  const param = useParams()
+  const { token } = useAuth()
+
+  const { sendJsonMessage } = useWebSocket(token ? `${WS_URL}/ws` : null, {
+    queryParams: { token: token! },
+    share: true,
+    shouldReconnect: () => true,
+    onOpen: () => {
+      console.log("conn open");
+    },
+    onClose: () => {
+      console.log("conn closed");
+    },
+  });
+
+  const handleSend = React.useCallback(() => {
+    sendJsonMessage({
+      type: "message",
+      receiverID: param.userID,
+      Content: msg,
+    });
+    setMsg("");
+  }, [msg, sendJsonMessage, param.userID]);
+
+  return (
+    <InputGroup>
+      <InputGroupInput
+        placeholder="Write your message here..."
+        value={msg}
+        onChange={(e) => setMsg(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
+          } 
+        }}
+        disabled={!token}
+      />
+      <InputGroupButton onClick={handleSend}>Send</InputGroupButton>
+    </InputGroup>
+  )
 }

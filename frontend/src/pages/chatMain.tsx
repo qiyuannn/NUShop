@@ -41,7 +41,7 @@ export function ChatList() {
   const [_, setErr] = React.useState(false);
   const [lastMessages, setLastMessages] = React.useState<lastMessage[]>([]);
 
-  const {} = useWebSocket(token ? `${WS_URL}/ws` : null, {
+  useWebSocket(token ? `${WS_URL}/ws` : null, {
     queryParams: { token: token! },
     share: true,
     onOpen: () => {
@@ -51,7 +51,7 @@ export function ChatList() {
       console.log("conn closed");
     },
 
-    onMessage: async (event) => {
+    onMessage: async (event: MessageEvent) => {
       const msg = JSON.parse(event.data) as WSResponse;
       if (msg.error) {
         return;
@@ -89,7 +89,7 @@ export function ChatList() {
             read: msg.message.read,
           };
           setLastMessages((p) => [...p, newChat]);
-        } catch (error) {
+        } catch {
           toast.error("failed to update new message");
         }
       }
@@ -109,7 +109,7 @@ export function ChatList() {
           throw new Error(json?.error?.code ?? `INTERNAL_ERROR`);
         }
         setLastMessages(json?.data?.conversations ?? []);
-      } catch (error) {
+      } catch {
         setErr(true);
       }
     }

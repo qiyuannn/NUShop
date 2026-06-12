@@ -5,7 +5,7 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import React, { useReducer, useRef } from "react";
+import React, { useRef } from "react";
 import { useParams } from "react-router-dom";
 import { InputGroup, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import type { Message, WSResponse } from "@/types";
@@ -45,7 +45,7 @@ export function Chat() {
       console.log("conn closed");
     },
 
-    onMessage: (event) => {
+    onMessage: (event: MessageEvent) => {
       const msg = JSON.parse(event.data) as WSResponse;
 
       if (msg.chatID !== param.userID) {

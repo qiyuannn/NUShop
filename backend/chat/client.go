@@ -86,6 +86,7 @@ func (c *Client) readPump() {
 			log.Printf("failed to save message from %s: %v", message.SenderID, err)
 			errMsg, _ := json.Marshal(models.WSRespnse{
 					Type:  "error",
+					ChatID: message.ReceiverID,
 					Error: "failed to save message",
 			})
 			select {

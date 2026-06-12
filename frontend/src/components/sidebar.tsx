@@ -13,6 +13,7 @@ import {
   CopyPlus,
   LogIn,
   LogOut,
+  MessageSquareMore,
   Package,
   Plus,
   ShoppingBag,
@@ -77,6 +78,15 @@ export function AppSidebar() {
                 <SidebarMenuButton onClick={() => navigate("")} tooltip="Orders" disabled>
                   <Package />
                   Orders
+                </SidebarMenuButton>
+              </SidebarMenu>
+            </SidebarGroup>
+            <SidebarGroup>
+              <SidebarGroupLabel>Chat</SidebarGroupLabel>
+              <SidebarMenu>
+                <SidebarMenuButton onClick={() => navigate("/chat")} tooltip="Chat">
+                  <MessageSquareMore />
+                  Chat
                 </SidebarMenuButton>
               </SidebarMenu>
             </SidebarGroup>

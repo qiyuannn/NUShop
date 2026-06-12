@@ -4,16 +4,16 @@ import { useNavigate } from "react-router-dom";
 
 export function useLogout() {
   const { setToken } = useAuth();
+  const nav = useNavigate();
 
-  async function logout() {
-    const nav = useNavigate()
+  function logout() {
     setToken(null);
 
-    await fetch(`${API_URL}/auth/logout`, {
+    fetch(`${API_URL}/auth/logout`, {
       method: "PUT",
       credentials: "include",
     });
-    nav("/")
+    nav("/");
   }
   return logout;
 }

@@ -29,12 +29,13 @@ func (h *Hub) Run() {
 		case client := <- h.unregister:
 			delete(h.clients, client.userID)
 		case message := <- h.route:
-			payload, _ := json.Marshal(models.WSRespnse{
-				Type: "message",
-				Message: message,
-			})
-
+			
 			if sender, ok := h.clients[message.SenderID]; ok {
+				payload, _ := json.Marshal(models.WSRespnse{
+					Type: "message",
+					ChatID: message.ReceiverID,
+					Message: message,
+				})
 				select{
 				case sender.send <- payload:
 				default:
@@ -44,6 +45,11 @@ func (h *Hub) Run() {
 			}
 
 			if receiver, ok := h.clients[message.ReceiverID]; ok {
+				payload, _ := json.Marshal(models.WSRespnse{
+					Type: "message",
+					ChatID: message.SenderID,
+					Message: message,
+				})
 				select{
 				case receiver.send <- payload:
 				default:

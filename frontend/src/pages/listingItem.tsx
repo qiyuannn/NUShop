@@ -1,7 +1,7 @@
 import { API_URL } from "@/lib/api";
 import { type Listing } from "@/types";
 import React from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   Carousel,
   CarouselContent,
@@ -24,11 +24,14 @@ import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/context/cartStore";
 import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
 import { toast } from "sonner";
+import { useAuth } from "@/context/auth";
 
 export function Listing() {
   const { listingID } = useParams();
   const addToCart = useCartStore((state) => state.addToCart);
   const authApiFetch = useAuthApiFetch();
+  const nav = useNavigate();
+  const { token } = useAuth();
 
   const [listing, setListing] = React.useState<Listing>({
     id: "",
@@ -50,6 +53,11 @@ export function Listing() {
   });
 
   const handleAddToCart = async () => {
+    if (!token) {
+      toast.message("Log in to add item to cart.");
+      return;
+    }
+
     try {
       await addToCart(authApiFetch, listing.id, 1, false);
       toast.success("Item added into cart");
@@ -98,7 +106,7 @@ export function Listing() {
     <div className="flex h-[calc(100dvh-3.5rem)] flex-col overflow-hidden">
       <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
         <Item className="pb-0">
-          <ItemHeader>
+          <ItemHeader className="sm:pl-16 sm:pr-16">
             <ItemCarousel files={listing.images} />
           </ItemHeader>
           <ItemContent className="sm:pl-16 sm:pr-16">
@@ -110,7 +118,7 @@ export function Listing() {
             <ItemDescription>Category: {listing.categoryName}</ItemDescription>
             <div className="w-full min-w-0 text-muted-foreground">
               <p className="font-medium">Description:</p>
-              <p className="break-words">{listing.description}</p>
+              <p className="text-wrap break-all">{listing.description}</p>
             </div>
             <Separator />
             <ItemTitle>Seller information</ItemTitle>
@@ -141,7 +149,11 @@ export function Listing() {
       </div>
 
       <div className="shrink-0 flex h-10 w-full gap-0 bg-secondary">
-        <Button size="default" className="h-full flex-[1.6] rounded-none">
+        <Button
+          size="default"
+          className="h-full flex-[1.6] rounded-none"
+          onClick={() => nav(`/chat/${listing.sellerID}`)}
+        >
           Chat with seller
         </Button>
         <Button size="default" className="h-full flex-[1.6] rounded-none" onClick={handleAddToCart}>
@@ -197,8 +209,8 @@ export function ItemCarousel({ files }: { files: string[] }) {
             </CarouselItem>
           )}
         </CarouselContent>
-        <CarouselPrevious className="hidden sm:flex" />
-        <CarouselNext className="hidden sm:flex" />
+        <CarouselPrevious/>
+        <CarouselNext />
       </Carousel>
       {files.length > 0 && (
         <div className="py-2 text-center text-sm text-muted-foreground">

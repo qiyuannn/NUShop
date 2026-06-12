@@ -62,6 +62,10 @@ func main() {
 	private.POST("/cart", cart.AddToCart)
 	private.DELETE("/cart", cart.DeleteFromCart)
 
+	//chat handlers
+	private.GET("/chat/:userID", chat.GetMessages)
+	private.GET("/chat", chat.GetConversations)
+
 	hub := chat.NewHub()
 	go hub.Run()
 	router.GET("/ws", chat.ServeWs(hub))

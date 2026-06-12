@@ -11,10 +11,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type GetMessagesRequest struct {
-	OtherID string `json:"receiver_id"`
-}
-
 func GetMessages(c *gin.Context) {
 	userIDVal, ok := c.Get("userID")
 	if !ok {
@@ -33,13 +29,9 @@ func GetMessages(c *gin.Context) {
 		return
 	}
 
-	var getMessagesRequest GetMessagesRequest
-	if err := c.ShouldBindJSON(&getMessagesRequest); err != nil {
-		c.Error(response.ErrBadRequest(err))
-		return
-	}
+	var otherID = c.Param("userID")
 
-	if _, err := uuid.Parse(getMessagesRequest.OtherID); err != nil {
+	if _, err := uuid.Parse(otherID); err != nil {
 		c.Error(response.ErrUnauthorised(err))
 		return
 	}
@@ -50,14 +42,14 @@ func GetMessages(c *gin.Context) {
 		id,
 		sender_id,
 		receiver_id, 
-		content
+		content,
 		read, 
 		created_on
 		FROM messages 
 		WHERE (sender_id = $1 AND receiver_id = $2)
 			OR (receiver_id = $1 AND sender_id = $2)
-		ORDERED BY created_on ASC`,
-		userIDStr, getMessagesRequest.OtherID,
+		ORDER BY created_on ASC`,
+		userIDStr, otherID,
 	)
 
 	if err != nil {
@@ -67,7 +59,7 @@ func GetMessages(c *gin.Context) {
 
 	defer rows.Close()
 
-	var messages []models.Message
+	messages := make([]models.Message, 0)
 	for rows.Next() {
 		var m models.Message
 		if err := rows.Scan(&m.ID, &m.SenderID, &m.ReceiverID, &m.Content, &m.Read, &m.CreatedOn); err!= nil {
@@ -86,8 +78,8 @@ func GetMessages(c *gin.Context) {
 		c.Request.Context(),
 		`UPDATE messages 
 		SET read = TRUE
-		WHERE sender_id = $1 AND receriver_id = $2 AND read = FALSE`,
-		getMessagesRequest.OtherID, userIDStr,
+		WHERE sender_id = $1 AND receiver_id = $2 AND read = FALSE`,
+		otherID, userIDStr,
 	); err != nil {
 		c.Error(response.ErrInternalServerError(err))
 		return

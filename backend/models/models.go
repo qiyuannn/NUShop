@@ -43,7 +43,7 @@ type Message struct {
 	SenderID string `json:"senderID"`
 	ReceiverID string `json:"receiverID"`
 	Content string `json:"content"`
-	Read string `json:"read"`
+	Read bool `json:"read"`
 	CreatedOn time.Time `json:"createdOn"`
 }
 
@@ -57,6 +57,7 @@ type WSMessage struct {
 
 type WSRespnse struct {
 	Type string `json:"type"`
+	ChatID string `json:"chatID"`
 	Message *Message `json:"message,omitempty"`
 	Error string `json:"error,omitempty"`
 }

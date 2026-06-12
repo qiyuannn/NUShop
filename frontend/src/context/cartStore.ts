@@ -34,7 +34,6 @@ export const useCartStore = create<CartStore>((set) => ({
     });
 
     set({ cartItems: cartItems });
-    console.log(cartItems);
   },
 
   addToCart: async (authApiFetch, listingID, quantity, replace) => {

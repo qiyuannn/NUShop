@@ -15,7 +15,7 @@ import { formatMessageTime } from "@/lib/fomatTime";
 import type { lastMessage, WSResponse } from "@/types";
 import React from "react";
 import { Link } from "react-router-dom";
-import useWebSocket, { ReadyState } from "react-use-websocket";
+import useWebSocket from "react-use-websocket";
 import { toast } from "sonner";
 
 export function ChatMain() {
@@ -38,10 +38,10 @@ export function ChatMain() {
 export function ChatList() {
   const { token } = useAuth();
   const authApiFetch = useAuthApiFetch();
-  const [err, setErr] = React.useState(false);
+  const [_, setErr] = React.useState(false);
   const [lastMessages, setLastMessages] = React.useState<lastMessage[]>([]);
 
-  const { readyState } = useWebSocket(token ? `${WS_URL}/ws` : null, {
+  const {} = useWebSocket(token ? `${WS_URL}/ws` : null, {
     queryParams: { token: token! },
     share: true,
     onOpen: () => {

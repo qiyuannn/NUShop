@@ -35,6 +35,15 @@ export function Chat() {
     bottomRef.current?.scrollIntoView({ behavior: "instant" });
   }, [messages]);
 
+  const onMessage = React.useCallback((event: MessageEvent) => {
+    const msg = JSON.parse(event.data) as WSResponse;
+
+      if (msg.chatID !== param.userID) {
+        return;
+      }
+      setMessages((p) => [...p, msg.message]);
+  },[param.userID])
+
   const { sendJsonMessage, readyState } = useWebSocket(token ? `${WS_URL}/ws` : null, {
     queryParams: { token: token! },
     share: true,
@@ -45,25 +54,17 @@ export function Chat() {
     onClose: () => {
       console.log("conn closed");
     },
-
-    onMessage: (event: MessageEvent) => {
-      const msg = JSON.parse(event.data) as WSResponse;
-
-      if (msg.chatID !== param.userID) {
-        return;
-      }
-      setMessages((p) => [...p, msg.message]);
-    },
+    onMessage
   });
 
-  const handleSend = () => {
+  const handleSend = React.useCallback(() => {
     sendJsonMessage({
       type: "message",
       receiverID: param.userID,
       Content: msg,
     });
     setMsg("");
-  };
+  }, [msg, sendJsonMessage, param.userID]);
 
   React.useEffect(() => {
     async function fetchData() {

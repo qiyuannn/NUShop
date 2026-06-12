@@ -34,6 +34,9 @@ export function App() {
       onClose: () => {
         console.log("conn closed");
       },
+      onMessage: (event: MessageEvent) => {
+        console.log(event.data)
+      }
     });
 
   React.useEffect(() => {

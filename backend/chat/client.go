@@ -111,6 +111,7 @@ func (c *Client) writePump() {
 	for {
 		select{
 		case payload, ok := <- c.send:
+			log.Printf(">>> writePump sending to %s: %s", c.userID, string(payload))
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
 				c.conn.WriteMessage(websocket.CloseMessage, nil)

@@ -65,7 +65,6 @@ export function Chat() {
       if (token) {const res1 = await authApiFetch(`${API_URL}/chat/${param.userID}`);
         const json1 = await res1.json();
         setMessages(json1.data.messages);
-        console.log(json1.data.messages)
       }
 
     }
@@ -137,12 +136,6 @@ export function Message() {
     queryParams: { token: token! },
     share: true,
     shouldReconnect: () => true,
-    onOpen: () => {
-      console.log("conn open");
-    },
-    onClose: () => {
-      console.log("conn closed");
-    },
   });
 
   const handleSend = React.useCallback(() => {

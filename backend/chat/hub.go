@@ -3,6 +3,7 @@ package chat
 import (
 	"backend/models"
 	"encoding/json"
+	"log"
 )
 
 type Hub struct {
@@ -31,6 +32,7 @@ func (h *Hub) Run() {
 		case message := <- h.route:
 			
 			if sender, ok := h.clients[message.SenderID]; ok {
+				log.Printf(">>> sender FOUND: %s", message.SenderID)
 				payload, _ := json.Marshal(models.WSRespnse{
 					Type: "message",
 					ChatID: message.ReceiverID,
@@ -42,23 +44,28 @@ func (h *Hub) Run() {
 					close(sender.send)
 					delete(h.clients, sender.userID)
 				}
+			} else {
+				log.Printf(">>> sender NOT FOUND: %s", message.SenderID)
 			}
 
 			
 			if message.ReceiverID != message.SenderID {
+				log.Printf(">>> receiver FOUND: %s", message.ReceiverID)
 				if receiver, ok := h.clients[message.ReceiverID]; ok {
-				payload, _ := json.Marshal(models.WSRespnse{
-					Type: "message",
-					ChatID: message.SenderID,
-					Message: message,
-				})
-				select{
-				case receiver.send <- payload:
-				default:
-					close(receiver.send)
-					delete(h.clients, receiver.userID)
+					payload, _ := json.Marshal(models.WSRespnse{
+						Type: "message",
+						ChatID: message.SenderID,
+						Message: message,
+					})
+					select{
+					case receiver.send <- payload:
+					default:
+						close(receiver.send)
+						delete(h.clients, receiver.userID)
+					}
 				}
-			}
+			} else {
+				log.Printf(">>> receiver NOT FOUND: %s", message.ReceiverID)
 			}
 		}
 	}

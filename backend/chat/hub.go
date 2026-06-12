@@ -53,8 +53,8 @@ func (h *Hub) Run() {
 
 			
 			if message.ReceiverID != message.SenderID {
-				log.Printf(">>> receiver FOUND: %s", message.ReceiverID)
 				if receiver, ok := h.clients[message.ReceiverID]; ok {
+					log.Printf(">>> receiver FOUND: %s", message.ReceiverID)
 					payload, _ := json.Marshal(models.WSRespnse{
 						Type: "message",
 						ChatID: message.SenderID,

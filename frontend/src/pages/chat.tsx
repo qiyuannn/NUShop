@@ -38,6 +38,7 @@ export function Chat() {
   const { sendJsonMessage, readyState } = useWebSocket(token ? `${WS_URL}/ws` : null, {
     queryParams: { token: token! },
     share: true,
+    shouldReconnect: () => true,
     onOpen: () => {
       console.log("conn open");
     },
@@ -69,11 +70,13 @@ export function Chat() {
       const res2 = await fetch(`${API_URL}/user/${param.userID}`);
       const json2 = await res2.json();
       setUser({ firstName: json2.data.user.firstName, lastName: json2.data.user.lastName });
-
+      console.log(token)
       if (token) {const res1 = await authApiFetch(`${API_URL}/chat/${param.userID}`);
         const json1 = await res1.json();
         setMessages(json1.data.messages);
+        console.log(json1.data.messages)
       }
+
     }
     fetchData();
   }, []);

@@ -44,13 +44,13 @@ export function ChatList() {
   useWebSocket(token ? `${WS_URL}/ws` : null, {
     queryParams: { token: token! },
     share: true,
+    shouldReconnect: () => true,
     onOpen: () => {
       console.log("conn open");
     },
     onClose: () => {
       console.log("conn closed");
     },
-
     onMessage: async (event: MessageEvent) => {
       const msg = JSON.parse(event.data) as WSResponse;
       if (msg.error) {

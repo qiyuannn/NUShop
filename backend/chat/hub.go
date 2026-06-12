@@ -44,7 +44,9 @@ func (h *Hub) Run() {
 				}
 			}
 
-			if receiver, ok := h.clients[message.ReceiverID]; ok {
+			
+			if message.ReceiverID != message.SenderID {
+				if receiver, ok := h.clients[message.ReceiverID]; ok {
 				payload, _ := json.Marshal(models.WSRespnse{
 					Type: "message",
 					ChatID: message.SenderID,
@@ -56,6 +58,7 @@ func (h *Hub) Run() {
 					close(receiver.send)
 					delete(h.clients, receiver.userID)
 				}
+			}
 			}
 		}
 	}

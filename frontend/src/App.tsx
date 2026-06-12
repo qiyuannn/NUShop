@@ -16,11 +16,25 @@ import { toast } from "sonner";
 import { CartPage } from "./pages/cart";
 import { ChatMain } from "./pages/chatMain";
 import { Chat } from "./pages/chat";
+import { WS_URL } from "./lib/api";
+import useWebSocket from "react-use-websocket";
 
 export function App() {
   const initCart = useCartStore((state) => state.initCart);
   const authApiFetch = useAuthApiFetch();
   const { token } = useAuth();
+
+  useWebSocket(token ? `${WS_URL}/ws` : null, {
+      queryParams: { token: token! },
+      share: true,
+      shouldReconnect: () => true,
+      onOpen: () => {
+        console.log("conn open");
+      },
+      onClose: () => {
+        console.log("conn closed");
+      },
+    });
 
   React.useEffect(() => {
     if (!token) {

@@ -26,6 +26,7 @@ const (
 
 func (c *Client) readPump() {
 	defer func () {
+		log.Printf(">>> readPump exiting for %s", c.userID)
 		c.hub.unregister <- c 
 		c.conn.Close()
 	}()
@@ -40,6 +41,7 @@ func (c *Client) readPump() {
 	for {
 		_, data, err := c.conn.ReadMessage()
 		if err != nil {
+			log.Printf(">>> readPump error for %s: %v", c.userID, err)
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("error: %v", err)
 			}
@@ -104,6 +106,7 @@ func (c *Client) readPump() {
 func (c *Client) writePump() {
 	ticker := time.NewTicker(pingInterval)
 	defer func () {
+		log.Printf(">>> writePump exiting for %s", c.userID)
 		ticker.Stop()
 		c.conn.Close()
 	}()
@@ -118,11 +121,13 @@ func (c *Client) writePump() {
 				return
 			}
 			if err := c.conn.WriteMessage(websocket.TextMessage, payload); err != nil {
+				log.Printf(">>> writePump write error for %s: %v", c.userID, err)
         return
     	}
 		case <- ticker.C:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				log.Printf(">>> writePump ping error for %s: %v", c.userID, err)
 				return
 			}
 		}

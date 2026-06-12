@@ -67,10 +67,10 @@ func (h *Hub) Run() {
 						delete(h.clients, receiver.userID)
 						log.Printf(">>> 3. unregistered client: %s", receiver.userID)
 					}
+				} else {
+					log.Printf(">>> receiver NOT FOUND: %s", message.ReceiverID)
 				}
-			} else {
-				log.Printf(">>> receiver NOT FOUND: %s", message.ReceiverID)
-			}
+			} 
 		}
 	}
 }

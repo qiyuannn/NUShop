@@ -226,7 +226,7 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
                   id="description"
                   value={formData.description}
                   onChange={handleChange}
-                  className="w-full min-w-0"
+                  className="w-full min-w-0 text-wrap break-all"
                 />
               </InputGroup>
             </Field>

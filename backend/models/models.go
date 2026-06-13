@@ -37,3 +37,27 @@ type Cart struct {
 	ListingID string `json:"listingID"`
 	Quantity int `json:"quanitity"`
 }
+
+type Message struct {
+	ID string `json:"id"`
+	SenderID string `json:"senderID"`
+	ReceiverID string `json:"receiverID"`
+	Content string `json:"content"`
+	Read bool `json:"read"`
+	CreatedOn time.Time `json:"createdOn"`
+}
+
+type WSMessage struct {
+	Type string `json:"type"`
+	SenderID string `json:"senderID"`
+	ReceiverID string `json:"receiverID"`
+	Content string `json:"content"`
+	MessageID string `json:"messageID,omitempty"`
+}
+
+type WSRespnse struct {
+	Type string `json:"type"`
+	ChatID string `json:"chatID"`
+	Message *Message `json:"message,omitempty"`
+	Error string `json:"error,omitempty"`
+}

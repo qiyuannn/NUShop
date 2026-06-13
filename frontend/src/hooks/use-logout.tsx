@@ -1,12 +1,13 @@
 import { useAuth } from "@/context/auth";
 import { API_URL } from "@/lib/api";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 export function useLogout() {
-  const { setToken, setUser } = useAuth();
+  const { setToken } = useAuth();
+  const nav = useNavigate();
 
   async function logout() {
-    setUser(null);
     setToken(null);
 
     toast.success("Logged out", {
@@ -17,6 +18,7 @@ export function useLogout() {
       method: "PUT",
       credentials: "include",
     });
+    nav("/");
   }
   
   return logout;

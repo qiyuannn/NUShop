@@ -27,7 +27,7 @@ func AuthHandler() gin.HandlerFunc {
 			return
 		}
 
-		claims, err := verifyToken(tokenStr)
+		claims, err := VerifyToken(tokenStr)
 		if err != nil {
 			c.Error(response.ErrUnauthorised(err))
 			c.Abort()
@@ -40,7 +40,7 @@ func AuthHandler() gin.HandlerFunc {
 	}
 }
 
-func verifyToken(tokenStr string) (*jwt.RegisteredClaims, error) {
+func VerifyToken(tokenStr string) (*jwt.RegisteredClaims, error) {
 	secret := os.Getenv("AccessTokenSecret")
 
 

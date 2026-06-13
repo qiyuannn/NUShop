@@ -2,6 +2,7 @@ package main
 
 import (
 	"backend/auth"
+	"backend/chat"
 	"backend/database"
 	"backend/handlers/cart"
 	"backend/handlers/categories"
@@ -61,11 +62,20 @@ func main() {
 	private.POST("/cart", cart.AddToCart)
 	private.DELETE("/cart", cart.DeleteFromCart)
 
+	//chat handlers
+	private.GET("/chat/:userID", chat.GetMessages)
+	private.GET("/chat", chat.GetConversations)
+
+	hub := chat.NewHub()
+	go hub.Run()
+	router.GET("/ws", chat.ServeWs(hub))
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 		log.Println("Port undefined, using :8080")
 	}
+	
 	router.Static("/uploads", "./uploads")
 	if err := router.Run(":" + port); err != nil {
 		log.Fatal(err)

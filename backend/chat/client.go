@@ -20,8 +20,8 @@ type Client struct {
 
 const (
 	writeWait = 10 * time.Second
-	pongWait = 60 * time.Second
-	pingInterval = (pongWait * 9) / 10
+	pongWait = 15 * time.Second
+	pingInterval = 10 * time.Second
 )
 
 func (c *Client) readPump() {

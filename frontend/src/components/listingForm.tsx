@@ -143,6 +143,13 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
     form.append("quantity", formData.quantity);
     form.append("condition", formData.condition);
 
+    if (!typeCreate) {
+      form.append(
+        "retained_images",
+        JSON.stringify(formData.files.filter((f): f is string => typeof f === "string")),
+      );
+    } 
+
     for (const file of formData.files) {
       if (file instanceof File) {
         form.append("file", file);
@@ -353,7 +360,13 @@ export function ListingFormCarousel({
                 <ItemContent className="border rounded-sm">
                   <img
                     className="aspect-square object-cover"
-                    src={typeof file === "string" ? `${API_URL}${file}` : URL.createObjectURL(file)}
+                    src={
+                      typeof file === "string"
+                        ? file.startsWith("http")
+                          ? file
+                          : `${API_URL}${file}`
+                        : URL.createObjectURL(file)
+                    }
                   />
                 </ItemContent>
               </Item>

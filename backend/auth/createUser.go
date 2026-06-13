@@ -6,8 +6,10 @@ import (
 	"backend/response"
 	"errors"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -37,17 +39,16 @@ func CreateUser(c *gin.Context) {
 	if err := db.Pool.QueryRow(
 		c.Request.Context(),
 		`INSERT INTO users (
-		first_name,
-		last_name,
-		email,
-		password_hash
+			first_name,
+			last_name,
+			email,
+			password_hash
 		) VALUES ($1, $2, $3, $4) RETURNING
-		id,
-		first_name,
-		last_name,
-		email,
-		created_on
-		`,
+			id,
+			first_name,
+			last_name,
+			email,
+			created_on`,
 		request.FirstName,
 		request.LastName,
 		request.Email,
@@ -71,15 +72,63 @@ func CreateUser(c *gin.Context) {
 				c.Error(response.ErrBadRequest(errors.New("invalid data")))
 				return
 			case "23505":
-				c.Error(response.ErrStatusConflict(errors.New("email alr in use")))
+				c.Error(response.ErrStatusConflict(errors.New("email already in use")))
+				return
 			}
-			return
 		}
 		c.Error(response.ErrInternalServerError(err))
 		return
 	}
 
+	userID, err := uuid.Parse(user.ID)
+	if err != nil {
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+
+	token, err := GenerateAccessToken(userID)
+	if err != nil {
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+
+	refreshTokenID := uuid.NewString()
+	refreshToken, err := GenerateRefreshToken(userID, refreshTokenID)
+	if err != nil {
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+
+	if _, err := db.Pool.Exec(
+		c.Request.Context(),
+		`INSERT INTO refresh_tokens (id, user_id) VALUES ($1, $2)`,
+		refreshTokenID, user.ID,
+	); err != nil {
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+
+	isProd := os.Getenv("ENV") == "production"
+
+	cookie := &http.Cookie{
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		Path:     "/",
+		MaxAge:   7 * 24 * 60 * 60,
+		HttpOnly: true,
+		Secure:   isProd,
+	}
+
+	if isProd {
+		cookie.SameSite = http.SameSiteNoneMode
+	} else {
+		cookie.SameSite = http.SameSiteLaxMode
+	}
+
+	http.SetCookie(c.Writer, cookie)
+
 	response.Success(c, http.StatusCreated, gin.H{
-		"message": "user created",
+		"user":  user,
+		"token": token,
 	})
 }

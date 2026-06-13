@@ -15,6 +15,7 @@ import React from "react";
 import { Button } from "../components/ui/button";
 import { Spinner } from "../components/ui/spinner";
 import { API_URL } from "@/lib/api";
+import { useAuth } from "@/context/auth";
 
 export function SignupPage() {
   return (
@@ -28,6 +29,7 @@ export function SignupPage() {
 
 export function SignupForm() {
   const navigate = useNavigate();
+  const { setUser, setToken } = useAuth();
   const [passwordVisible, setPasswordVisible] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [err, setErr] = React.useState<string | null>(null);
@@ -68,12 +70,18 @@ export function SignupForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
+        credentials: "include",
       });
       const json = await res.json();
+
       if (!res.ok) {
         throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
       }
-      navigate("/login");
+
+      setUser(json.data.user);
+      setToken(json.data.token);
+
+      navigate("/");
     } catch (error) {
       setErr(error instanceof Error ? error.message : "INTERNAL_ERROR");
     } finally {
@@ -85,7 +93,7 @@ export function SignupForm() {
     <form onSubmit={handleSubmit}>
       <FieldSet>
         <FieldLegend className="text-center flex flex-col items-center gap-2 font-semibold">
-          <Link className="flex gap-1 font-bold" to="">
+          <Link className="flex gap-1 font-bold" to="/">
             <ShoppingBag />
             <p>NUShop</p>
           </Link>
@@ -142,7 +150,7 @@ export function SignupForm() {
                 aria-invalid={passErr !== null}
                 required
               />
-              <InputGroupButton onClick={() => setPasswordVisible(!passwordVisible)}>
+              <InputGroupButton type="button" onClick={() => setPasswordVisible(!passwordVisible)}>
                 {passwordVisible ? <EyeIcon /> : <EyeOffIcon />}
               </InputGroupButton>
             </InputGroup>
@@ -159,7 +167,7 @@ export function SignupForm() {
                 aria-invalid={passErr !== null}
                 required
               />
-              <InputGroupButton onClick={() => setPasswordVisible(!passwordVisible)}>
+              <InputGroupButton type="button" onClick={() => setPasswordVisible(!passwordVisible)}>
                 {passwordVisible ? <EyeIcon /> : <EyeOffIcon />}
               </InputGroupButton>
             </InputGroup>

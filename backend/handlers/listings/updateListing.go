@@ -5,6 +5,7 @@ import (
 	db "backend/database"
 	"backend/models"
 	"backend/response"
+	"encoding/json"
 	"errors"
 	"mime/multipart"
 	"net/http"
@@ -16,12 +17,13 @@ import (
 )
 
 type CreateListingRequest struct {
-	Title        string `form:"title"`
-	Description  string `form:"description"`
-	Price        int64  `form:"price" binding:"gte=0"`
-	Quantity     int64  `form:"quantity" binding:"gte=0"`
-	Condition    string `form:"condition"`
-	CategoryName string `form:"category"`
+	Title          string `form:"title"`
+	Description    string `form:"description"`
+	Price          int64  `form:"price" binding:"gte=0"`
+	Quantity       int64  `form:"quantity" binding:"gte=0"`
+	Condition      string `form:"condition"`
+	CategoryName   string `form:"category"`
+	RetainedImages string `form:"retained_images"`
 }
 
 func UpdateListing(c *gin.Context) {
@@ -156,41 +158,60 @@ func UpdateListing(c *gin.Context) {
 		return
 	}
 
-	if len(uploadedImages) > 0 {
+	var retainedImages []string
+	if listing.RetainedImages != "" {
+		if err := json.Unmarshal([]byte(listing.RetainedImages), &retainedImages); err != nil {
+			c.Error(response.ErrBadRequest(errors.New("invalid retained_images payload")))
+			return
+		}
+	}
+
+	if listing.RetainedImages != "" {
 		rows, err := tx.Query(
 			c.Request.Context(),
-			`SELECT public_id FROM images WHERE listing_id = $1`,
+			`SELECT file_url, public_id FROM images WHERE listing_id = $1`,
 			listingID,
 		)
 		if err != nil {
 			c.Error(response.ErrInternalServerError(err))
 			return
 		}
+		defer rows.Close()
 
-		var oldPublicIDs []string
+		retainedSet := make(map[string]struct{}, len(retainedImages))
+		for _, img := range retainedImages {
+			retainedSet[img] = struct{}{}
+		}
+
+		type existingImage struct {
+			URL      string
+			PublicID *string
+		}
+
+		keptImages := make([]existingImage, 0)
 		for rows.Next() {
-			var publicID *string
-			if err := rows.Scan(&publicID); err != nil {
-				rows.Close()
+			var img existingImage
+			if err := rows.Scan(&img.URL, &img.PublicID); err != nil {
 				c.Error(response.ErrInternalServerError(err))
 				return
 			}
-			if publicID != nil && *publicID != "" {
-				oldPublicIDs = append(oldPublicIDs, *publicID)
+
+			if _, keep := retainedSet[img.URL]; keep {
+				keptImages = append(keptImages, img)
+				continue
+			}
+
+			if img.PublicID != nil && *img.PublicID != "" {
+				if err := cloudinary.DeleteImage(*img.PublicID); err != nil {
+					c.Error(response.ErrInternalServerError(err))
+					return
+				}
 			}
 		}
+
 		if err := rows.Err(); err != nil {
-			rows.Close()
 			c.Error(response.ErrInternalServerError(err))
 			return
-		}
-		rows.Close()
-
-		for _, publicID := range oldPublicIDs {
-			if err := cloudinary.DeleteImage(publicID); err != nil {
-				c.Error(response.ErrInternalServerError(err))
-				return
-			}
 		}
 
 		if _, err := tx.Exec(
@@ -200,6 +221,19 @@ func UpdateListing(c *gin.Context) {
 		); err != nil {
 			c.Error(response.ErrInternalServerError(err))
 			return
+		}
+
+		for _, img := range keptImages {
+			if _, err := tx.Exec(
+				c.Request.Context(),
+				`INSERT INTO images (listing_id, file_url, public_id) VALUES ($1, $2, $3)`,
+				listingID,
+				img.URL,
+				img.PublicID,
+			); err != nil {
+				c.Error(response.ErrInternalServerError(err))
+				return
+			}
 		}
 
 		for _, img := range uploadedImages {

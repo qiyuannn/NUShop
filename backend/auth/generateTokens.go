@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func GenerateAcessToken(userID uuid.UUID) (string, error) {
+func GenerateAccessToken(userID uuid.UUID) (string, error) {
 	accessTokenSecret := os.Getenv("AccessTokenSecret")
 
 	claims := jwt.RegisteredClaims{

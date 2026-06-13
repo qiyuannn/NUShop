@@ -1,6 +1,6 @@
 import { useFilterStore } from "@/context/filterStore";
 import { FilterBar } from "./filterBar";
-import React, { type SetStateAction } from "react";
+import React, { type SetStateAction, useState } from "react";
 import { API_URL } from "@/lib/api";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import type { Listing } from "@/types";
@@ -11,7 +11,7 @@ import { Badge } from "./ui/badge";
 import { Spinner } from "./ui/spinner";
 import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
 import { Button } from "./ui/button";
-import { Pencil, Trash } from "lucide-react";
+import { Package, Pencil, Trash } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -69,11 +69,11 @@ export function ListingGallery({ isManaging }: { isManaging: boolean }) {
     try {
       const res = await (isManaging
         ? apiFetch(`${API_URL}/listings/me${params.toString() ? `?${params.toString()}` : ""}`, {
-            method: "GET",
-          })
+          method: "GET",
+        })
         : fetch(`${API_URL}/listings${params.toString() ? `?${params.toString()}` : ""}`, {
-            method: "GET",
-          }));
+          method: "GET",
+        }));
 
       const json = await res.json();
       if (!res.ok) {
@@ -120,11 +120,11 @@ export function ListingGallery({ isManaging }: { isManaging: boolean }) {
       try {
         const res = await (isManaging
           ? apiFetch(`${API_URL}/listings/me${params.toString() ? `?${params.toString()}` : ""}`, {
-              method: "GET",
-            })
+            method: "GET",
+          })
           : fetch(`${API_URL}/listings${params.toString() ? `?${params.toString()}` : ""}`, {
-              method: "GET",
-            }));
+            method: "GET",
+          }));
 
         const json = await res.json();
         if (!res.ok) {
@@ -219,6 +219,7 @@ export function ListingItem({
 }) {
   const navigate = useNavigate();
   const authApiFetch = useAuthApiFetch();
+  const [imageError, setImageError] = useState(false);
 
   const handleDelete = async () => {
     const res = await authApiFetch(`${API_URL}/listings/${listingID}`, {
@@ -238,10 +239,22 @@ export function ListingItem({
       >
         <Link to={`/listing/${listingID}`}>
           <ItemHeader>
-            <img
-              src={image.startsWith("http") ? image : `${API_URL}${image}`}
-              className="aspect-square border object-cover rounded-lg w-full"
-            />
+            {!image || imageError ? (
+              <div className="aspect-square border rounded-lg w-full flex items-center justify-center bg-muted">
+                <div className="text-center">
+                  <Package className="mx-auto h-10 w-10 opacity-50" />
+                  <p className="text-sm text-muted-foreground mt-2">
+                    No image available
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <img
+                src={image.startsWith("http") ? image : `${API_URL}${image}`}
+                className="border object-contain rounded-lg w-full h-64"
+                onError={() => setImageError(true)}
+              />
+            )}
           </ItemHeader>
           <ItemContent className="min-w-0">
             <ItemTitle className="w-full">{title}</ItemTitle>

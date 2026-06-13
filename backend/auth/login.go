@@ -75,7 +75,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token, err := GenerateAcessToken(userID)
+	token, err := GenerateAccessToken(userID)
 	if err != nil {
 		c.Error(response.ErrInternalServerError(err))
 		return

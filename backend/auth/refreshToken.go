@@ -137,7 +137,7 @@ func RefreshToken(c *gin.Context) {
 	http.SetCookie(c.Writer, cookie)
 
 	//generate new accesstoken
-	newAccessToken, err := GenerateAcessToken(t.UserID)
+	newAccessToken, err := GenerateAccessToken(t.UserID)
 	if err != nil {
 		c.Error(response.ErrInternalServerError(err))
 		return

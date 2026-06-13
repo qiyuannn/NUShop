@@ -18,26 +18,30 @@ import {
   ShoppingBag,
   ShoppingCart,
   SquareChartGantt,
+  Sun,
+  Moon,
   User,
 } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { useLogout } from "@/hooks/use-logout";
 import { Badge } from "./ui/badge";
 import { useCartStore } from "@/context/cartStore";
+import { useTheme } from "./theme-provider";
 
 export function AppSidebar() {
   const navigate = useNavigate();
   const { token } = useAuth();
   const logout = useLogout();
   const cartItems = useCartStore((state) => state.cartItems)
+  const { theme, setTheme } = useTheme();
 
   return (
     <Sidebar collapsible="icon" typeof="floating">
       <SidebarHeader>
         <SidebarMenuButton
-         onClick={() => navigate("/")} 
-         tooltip="Home"
-         >
+          onClick={() => navigate("/")}
+          tooltip="Home"
+        >
           <ShoppingBag />
           <p className="font-bold text-xl">NUShop</p>
         </SidebarMenuButton>
@@ -50,14 +54,14 @@ export function AppSidebar() {
               <SidebarMenu>
                 <SidebarMenuButton
                   onClick={() => navigate("/listings/manage")}
-                  tooltip="Manage listings"
+                  tooltip="Manage Listings"
                 >
                   <SquareChartGantt />
                   Manage listings
                 </SidebarMenuButton>
                 <SidebarMenuButton
                   onClick={() => navigate("/listings/create")}
-                  tooltip="Create listing"
+                  tooltip="Create Listing"
                 >
                   <CopyPlus />
                   Create listing
@@ -88,6 +92,16 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter>
         <SidebarGroup>
+          <SidebarMenu className="flex items-center">
+            <SidebarMenuButton
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              tooltip="Toggle theme"
+            >
+              {theme === "dark" ? <Sun /> : <Moon />}
+              Theme
+            </SidebarMenuButton>
+          </SidebarMenu>
+
           <SidebarGroupLabel>Manage Account</SidebarGroupLabel>
           {!token && (
             <SidebarMenu className="flex items-center justify-center">

@@ -21,7 +21,11 @@ export function AppHeader() {
 
   return (
     <header className="sticky top-0 z-50 flex items-center h-12 p-2 pl-4 pr-4 gap-4 w-full bg-secondary">
-      <SidebarTrigger onClick={() => toggleSidebar} />
+      <SidebarTrigger
+        onClick={() => toggleSidebar}
+        title="Expand Sidebar"
+        className="rounded-md hover:bg-accent hover:ring-1 hover:ring-border"
+      />
       <Separator orientation="vertical" />
       <div className="flex-grow" />
       <ButtonGroup>

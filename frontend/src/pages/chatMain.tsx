@@ -67,7 +67,7 @@ export function ChatList() {
             lastMessage: msg.message.content,
             lastMessageOn: msg.message.createdOn,
           };
-          return [...p.filter((message) => message.chatID != msg.chatID), updatedChat];
+          return [updatedChat, ...p.filter((message) => message.chatID != msg.chatID)];
         }
         return p;
       });
@@ -121,15 +121,15 @@ export function ChatList() {
       <div className="w-full h-full flex items-center justify-center">
         <p>No conversations available</p>
       </div>
-    )
+    );
   }
 
-  if ( !token) {
+  if (!token) {
     return (
       <div className="w-full h-full flex items-center justify-center">
         <p>Log in to view your conversations</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -147,7 +147,9 @@ export function ChatList() {
               <ItemTitle className="font-bold">
                 {message.firstName} {message.lastName}
               </ItemTitle>
-              <ItemDescription className="overflow-wrap break-all">{message.lastMessage}</ItemDescription>
+              <ItemDescription className="overflow-wrap break-all">
+                {message.lastMessage}
+              </ItemDescription>
             </ItemContent>
             <ItemContent>
               <ItemTitle>{formatMessageTime(message.lastMessageOn)}</ItemTitle>

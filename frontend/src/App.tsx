@@ -25,19 +25,19 @@ export function App() {
   const { token } = useAuth();
 
   useWebSocket(token ? `${WS_URL}/ws` : null, {
-      queryParams: { token: token! },
-      share: true,
-      shouldReconnect: () => true,
-      onOpen: () => {
-        console.log("conn open");
-      },
-      onClose: () => {
-        console.log("conn closed");
-      },
-      onMessage: (event: MessageEvent) => {
-        console.log(event.data)
-      }
-    });
+    queryParams: { token: token! },
+    share: true,
+    shouldReconnect: () => true,
+    onOpen: () => {
+      console.log("conn open");
+    },
+    onClose: () => {
+      console.log("conn closed");
+    },
+    onMessage: (event: MessageEvent) => {
+      console.log(event.data);
+    },
+  });
 
   React.useEffect(() => {
     if (!token) {

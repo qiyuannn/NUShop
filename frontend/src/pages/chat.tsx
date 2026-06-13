@@ -1,9 +1,4 @@
-import {
-  Item,
-  ItemGroup,
-  ItemMedia,
-  ItemTitle,
-} from "@/components/ui/item";
+import { Item, ItemGroup, ItemMedia, ItemTitle } from "@/components/ui/item";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import React, { useRef } from "react";
 import { useParams } from "react-router-dom";
@@ -28,20 +23,23 @@ export function Chat() {
   });
   const [messages, setMessages] = React.useState<Message[]>([]);
   const { token } = useAuth();
-  const bottomRef = useRef<HTMLDivElement>(null)
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "instant" });
   }, [messages]);
 
-  const onMessage = React.useCallback((event: MessageEvent) => {
-    const msg = JSON.parse(event.data) as WSResponse;
+  const onMessage = React.useCallback(
+    (event: MessageEvent) => {
+      const msg = JSON.parse(event.data) as WSResponse;
 
       if (msg.chatID !== param.userID) {
         return;
       }
       setMessages((p) => [...p, msg.message]);
-  },[param.userID])
+    },
+    [param.userID],
+  );
 
   const { readyState } = useWebSocket(token ? `${WS_URL}/ws` : null, {
     queryParams: { token: token! },
@@ -53,7 +51,7 @@ export function Chat() {
     onClose: () => {
       console.log("conn closed");
     },
-    onMessage
+    onMessage,
   });
 
   React.useEffect(() => {
@@ -61,15 +59,15 @@ export function Chat() {
       const res2 = await fetch(`${API_URL}/user/${param.userID}`);
       const json2 = await res2.json();
       setUser({ firstName: json2.data.user.firstName, lastName: json2.data.user.lastName });
-      console.log(token)
-      if (token) {const res1 = await authApiFetch(`${API_URL}/chat/${param.userID}`);
+      console.log(token);
+      if (token) {
+        const res1 = await authApiFetch(`${API_URL}/chat/${param.userID}`);
         const json1 = await res1.json();
         setMessages(json1.data.messages);
       }
-
     }
     fetchData();
-  }, []);
+  }, [token]);
 
   return (
     <div className="flex flex-col h-[calc(100vh-3rem)]">
@@ -86,21 +84,21 @@ export function Chat() {
           </ItemTitle>
         </Item>
       </div>
-      <Separator/>
+      <Separator />
       <div className="flex-1 min-h-0 overflow-y-auto">
-        {!token && 
+        {!token && (
           <Alert className="w-md mx-auto mt-2" variant="destructive">
-            <AlertCircleIcon/>
+            <AlertCircleIcon />
             <AlertDescription>Log in to chat with this seller</AlertDescription>
           </Alert>
-        }
-        { token && readyState !== ReadyState.OPEN && readyState !== ReadyState.CONNECTING &&
+        )}
+        {token && readyState !== ReadyState.OPEN && readyState !== ReadyState.CONNECTING && (
           <Alert className="w-md mx-auto mt-2" variant="destructive">
-            <AlertCircleIcon/>
+            <AlertCircleIcon />
             <AlertTitle>Not connected to server</AlertTitle>
             <AlertDescription>Try refreshing this page.</AlertDescription>
           </Alert>
-        }
+        )}
         <ItemGroup className="gap-0">
           {messages.map((message) => (
             <Item
@@ -118,10 +116,10 @@ export function Chat() {
             </Item>
           ))}
         </ItemGroup>
-        <div ref={bottomRef} /> 
+        <div ref={bottomRef} />
       </div>
       <div className="p-2">
-        <Message/>
+        <Message />
       </div>
     </div>
   );
@@ -129,8 +127,8 @@ export function Chat() {
 
 export function Message() {
   const [msg, setMsg] = React.useState("");
-  const param = useParams()
-  const { token } = useAuth()
+  const param = useParams();
+  const { token } = useAuth();
 
   const { sendJsonMessage } = useWebSocket(token ? `${WS_URL}/ws` : null, {
     queryParams: { token: token! },
@@ -139,10 +137,13 @@ export function Message() {
   });
 
   const handleSend = React.useCallback(() => {
+    if (!msg.trim()) {
+      return;
+    }
     sendJsonMessage({
       type: "message",
       receiverID: param.userID,
-      Content: msg,
+      Content: msg.trim(),
     });
     setMsg("");
   }, [msg, sendJsonMessage, param.userID]);
@@ -157,11 +158,11 @@ export function Message() {
           if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
             handleSend();
-          } 
+          }
         }}
         disabled={!token}
       />
       <InputGroupButton onClick={handleSend}>Send</InputGroupButton>
     </InputGroup>
-  )
+  );
 }

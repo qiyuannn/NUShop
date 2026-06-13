@@ -30,12 +30,12 @@ func (h *Hub) Run() {
 			log.Printf(">>> registered client: %s", client.userID)
 			log.Print(h.clients)
 		case client := <- h.unregister:
-			if h.clients[client.userID] == client {
+			if existing, ok := h.clients[client.userID]; ok && existing == client {
 				delete(h.clients, client.userID)
-				close(client.send)
+        close(client.send)
 				log.Printf(">>> 1. unregistered client: %s", client.userID)
 				log.Print(h.clients)
-			}
+    }
 		case message := <- h.route:
 			
 			if sender, ok := h.clients[message.SenderID]; ok {

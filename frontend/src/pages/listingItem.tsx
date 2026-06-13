@@ -209,7 +209,7 @@ export function ItemCarousel({ files }: { files: string[] }) {
             </CarouselItem>
           )}
         </CarouselContent>
-        <CarouselPrevious/>
+        <CarouselPrevious />
         <CarouselNext />
       </Carousel>
       {files.length > 0 && (

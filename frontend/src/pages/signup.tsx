@@ -1,25 +1,14 @@
-import { Link, useNavigate } from "react-router-dom";
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-  FieldLegend,
-  FieldSeparator,
-  FieldSet,
-} from "../components/ui/field";
-import { EyeIcon, EyeOffIcon, ShoppingBag } from "lucide-react";
-import { Input } from "../components/ui/input";
-import { InputGroup, InputGroupButton, InputGroupInput } from "../components/ui/input-group";
 import React from "react";
-import { Button } from "../components/ui/button";
-import { Spinner } from "../components/ui/spinner";
+import { Link, useNavigate } from "react-router-dom";
+import { ShoppingBag } from "lucide-react";
 import { API_URL } from "@/lib/api";
 import { useAuth } from "@/context/auth";
+import { FieldDescription, FieldLegend, FieldSeparator, FieldSet } from "../components/ui/field";
+import { Spinner } from "../components/ui/spinner";
 
 export function SignupPage() {
   return (
-    <div className="flex min-w-svw justify-center items-center min-h-svh">
+    <div className="flex min-w-svw items-center justify-center min-h-svh">
       <div className="w-sm sm:w-md">
         <SignupForm />
       </div>
@@ -30,170 +19,213 @@ export function SignupPage() {
 export function SignupForm() {
   const navigate = useNavigate();
   const { setUser, setToken } = useAuth();
-  const [passwordVisible, setPasswordVisible] = React.useState(false);
+  const buttonRef = React.useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [err, setErr] = React.useState<string | null>(null);
-  const [passErr, setPassErr] = React.useState<string | null>(null);
-  const [formData, setFormData] = React.useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
+  const [email, setEmail] = React.useState("");
+  const [code, setCode] = React.useState("");
+  const [step, setStep] = React.useState<"email" | "code">("email");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((p) => ({ ...p, [e.target.id]: e.target.value }));
-  };
+  React.useEffect(() => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
+    if (!clientId) {
+      setErr("Missing VITE_GOOGLE_CLIENT_ID");
+      return;
+    }
 
-  const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
-    e.preventDefault();
+    const googleWindow = window as Window & { google?: any };
+
+    const handleCredential = async (response: { credential?: string }) => {
+      if (!response.credential) {
+        setErr("Missing Google credential");
+        return;
+      }
+
+      setLoading(true);
+      setErr(null);
+
+      try {
+        const res = await fetch(`${API_URL}/create_user`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ credential: response.credential }),
+          credentials: "include",
+        });
+
+        const json = await res.json();
+
+        if (!res.ok) {
+          throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
+        }
+
+        setUser(json.data.user);
+        setToken(json.data.token);
+        navigate("/");
+      } catch (error) {
+        setErr(error instanceof Error ? error.message : "INTERNAL_ERROR");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const renderGoogleButton = () => {
+      if (!googleWindow.google?.accounts?.id || !buttonRef.current) return;
+
+      buttonRef.current.innerHTML = "";
+      googleWindow.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: handleCredential,
+        auto_select: false,
+      });
+
+      googleWindow.google.accounts.id.renderButton(buttonRef.current, {
+        theme: "outline",
+        size: "large",
+        shape: "pill",
+        text: "signup_with",
+        width: 320,
+      });
+    };
+
+    if (googleWindow.google?.accounts?.id) {
+      renderGoogleButton();
+      return;
+    }
+
+    if (document.getElementById("google-gsi")) {
+      const existing = document.getElementById("google-gsi");
+      existing?.addEventListener("load", renderGoogleButton, { once: true });
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.id = "google-gsi";
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.onload = renderGoogleButton;
+    document.body.appendChild(script);
+  }, [navigate, setToken, setUser]);
+
+  async function sendCode() {
     setLoading(true);
     setErr(null);
-    setPassErr(null);
-
-    if (formData.confirmPassword != formData.password) {
-      setPassErr("Passwords must match");
-      setLoading(false);
-      return;
-    }
-    if (formData.password.length < 8) {
-      setPassErr("Password must have at least 8 characters");
-      setLoading(false);
-      return;
-    }
-
-    const { confirmPassword, ...body } = formData;
 
     try {
-      const res = await fetch(`${API_URL}/create_user`, {
+      const res = await fetch(`${API_URL}/auth/request_code`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
         credentials: "include",
+        body: JSON.stringify({ email }),
       });
-      const json = await res.json();
 
-      if (!res.ok) {
-        throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
-      }
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
+
+      setStep("code");
+    } catch (error) {
+      setErr(error instanceof Error ? error.message : "INTERNAL_ERROR");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function verifyCode() {
+    setLoading(true);
+    setErr(null);
+
+    try {
+      const res = await fetch(`${API_URL}/auth/verify_code`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email, code }),
+      });
+
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
 
       setUser(json.data.user);
       setToken(json.data.token);
-
       navigate("/");
     } catch (error) {
       setErr(error instanceof Error ? error.message : "INTERNAL_ERROR");
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <FieldSet>
-        <FieldLegend className="text-center flex flex-col items-center gap-2 font-semibold">
-          <Link className="flex gap-1 font-bold" to="/">
-            <ShoppingBag />
-            <p>NUShop</p>
-          </Link>
-          <p>Create your account</p>
-        </FieldLegend>
-        <FieldDescription className="text-center">
-          Have an account? <Link to="/login">log in</Link>
-        </FieldDescription>
-        <FieldGroup className="grid grid-cols-2">
-          <Field>
-            <FieldLabel htmlFor="firstName">First name</FieldLabel>
-            <Input
-              id="firstName"
-              type="text"
-              placeholder="Joe"
-              value={formData.firstName}
-              onChange={handleChange}
-              required
+    <FieldSet>
+      <FieldLegend className="flex flex-col items-center gap-2 text-center font-semibold">
+        <Link className="flex gap-1 font-bold" to="/">
+          <ShoppingBag />
+          <p>NUShop</p>
+        </Link>
+        <p>Create your account</p>
+      </FieldLegend>
+
+      <FieldDescription className="text-center">
+        Have an account? <Link to="/login">log in</Link>
+      </FieldDescription>
+
+      <div className="flex justify-center py-2">
+        <div ref={buttonRef} />
+      </div>
+
+      {loading && (
+        <div className="flex justify-center">
+          <Spinner />
+        </div>
+      )}
+
+      {err !== null && (
+        <FieldDescription className="text-center text-red-500">{err}</FieldDescription>
+      )}
+
+      <FieldSeparator>Or</FieldSeparator>
+
+      <FieldSeparator>Or</FieldSeparator>
+
+      <div className="flex flex-col gap-3">
+        <input
+          className="rounded border border-neutral-700 bg-transparent px-3 py-2 outline-none"
+          type="email"
+          placeholder="yourname@gmail.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        {step === "email" ? (
+          <button
+            type="button"
+            className="rounded bg-white px-3 py-2 text-black"
+            onClick={sendCode}
+            disabled={loading}
+          >
+            Send code
+          </button>
+        ) : (
+          <>
+            <input
+              className="rounded border border-neutral-700 bg-transparent px-3 py-2 outline-none"
+              inputMode="numeric"
+              placeholder="6-digit code"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
             />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor="lastName">Last name</FieldLabel>
-            <Input
-              id="lastName"
-              type="text"
-              placeholder="Tan"
-              value={formData.lastName}
-              onChange={handleChange}
-              required
-            />
-          </Field>
-        </FieldGroup>
-        <Field data-invalid={err === "STATUS_CONFLICT"}>
-          <FieldLabel htmlFor="email">Email</FieldLabel>
-          <Input
-            id="email"
-            type="email"
-            placeholder="abc@xyz.com"
-            value={formData.email}
-            onChange={handleChange}
-            aria-invalid={err === "STATUS_CONFLICT"}
-            required
-          />
-        </Field>
-        <FieldGroup>
-          <Field data-invalid={passErr !== null}>
-            <FieldLabel htmlFor="password">Password</FieldLabel>
-            <InputGroup>
-              <InputGroupInput
-                id="password"
-                type={passwordVisible ? "text" : "password"}
-                value={formData.password}
-                onChange={handleChange}
-                aria-invalid={passErr !== null}
-                required
-              />
-              <InputGroupButton type="button" onClick={() => setPasswordVisible(!passwordVisible)}>
-                {passwordVisible ? <EyeIcon /> : <EyeOffIcon />}
-              </InputGroupButton>
-            </InputGroup>
-          </Field>
-          <FieldDescription>Password must be at least 8 characters long</FieldDescription>
-          <Field data-invalid={passErr !== null}>
-            <FieldLabel htmlFor="confirmPassword">Confirm password</FieldLabel>
-            <InputGroup>
-              <InputGroupInput
-                id="confirmPassword"
-                type={passwordVisible ? "text" : "password"}
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                aria-invalid={passErr !== null}
-                required
-              />
-              <InputGroupButton type="button" onClick={() => setPasswordVisible(!passwordVisible)}>
-                {passwordVisible ? <EyeIcon /> : <EyeOffIcon />}
-              </InputGroupButton>
-            </InputGroup>
-          </Field>
-        </FieldGroup>
-        <Field>
-          {passErr !== null && (
-            <FieldDescription className="text-center">{passErr}</FieldDescription>
-          )}
-          {err === "STATUS_CONFLICT" && (
-            <FieldDescription className="text-center">Email already in use</FieldDescription>
-          )}
-          {err !== "STATUS_CONFLICT" && err !== null && (
-            <FieldDescription className="text-center">
-              Network error. Please try again
-            </FieldDescription>
-          )}
-        </Field>
-        <Field>
-          <Button type="submit">{loading ? <Spinner /> : "Create account"}</Button>
-        </Field>
-        <FieldSeparator>Or</FieldSeparator>
-        <FieldDescription className="text-center">
-          <Link to="/">Continue as guest</Link>
-        </FieldDescription>
-      </FieldSet>
-    </form>
+
+            <button
+              type="button"
+              className="rounded bg-white px-3 py-2 text-black"
+              onClick={verifyCode}
+              disabled={loading}
+            >
+              Verify and continue
+            </button>
+          </>
+        )}
+      </div>
+    </FieldSet>
   );
 }

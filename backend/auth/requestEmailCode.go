@@ -1,0 +1,78 @@
+package auth
+
+import (
+	db "backend/database"
+	"backend/response"
+	"crypto/rand"
+	"errors"
+	"fmt"
+	"math/big"
+	"net/http"
+	"strings"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
+)
+
+type RequestEmailCodeRequest struct {
+	Email string `json:"email"`
+}
+
+func generateCode() (string, error) {
+	n, err := rand.Int(rand.Reader, big.NewInt(1000000))
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%06d", n.Int64()), nil
+}
+
+func RequestEmailCode(c *gin.Context) {
+	var req RequestEmailCodeRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.Error(response.ErrBadRequest(err))
+		return
+	}
+
+	email := strings.ToLower(strings.TrimSpace(req.Email))
+	if !strings.HasSuffix(email, "@gmail.com") {
+		c.Error(response.ErrBadRequest(errors.New("gmail address required")))
+		return
+	}
+
+	code, err := generateCode()
+	if err != nil {
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(code), bcrypt.DefaultCost)
+	if err != nil {
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+
+	_, err = db.Pool.Exec(
+		c.Request.Context(),
+		`INSERT INTO email_login_codes (id, email, code_hash, expires_at)
+		 VALUES ($1, $2, $3, NOW() + INTERVAL '10 minutes')
+		 ON CONFLICT (email)
+		 DO UPDATE SET code_hash = EXCLUDED.code_hash, expires_at = EXCLUDED.expires_at`,
+		uuid.New(),
+		email,
+		string(hash),
+	)
+	if err != nil {
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+
+	if err := sendGmailCode(email, code); err != nil {
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+
+	response.Success(c, http.StatusOK, gin.H{
+		"message": "code sent",
+	})
+}

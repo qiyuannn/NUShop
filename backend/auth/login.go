@@ -7,7 +7,6 @@ import (
 	"errors"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -18,14 +17,6 @@ import (
 type LoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
-}
-
-type UserResponse struct {
-	ID      string `json:"uuid"`
-	FirstName string    `json:"firstName"`
-	LastName  string    `json:"lastName"`
-	Email     string    `json:"email"`
-	CreatedOn time.Time `json:"createdOn"`
 }
 
 func Login(c *gin.Context) {
@@ -116,16 +107,10 @@ func Login(c *gin.Context) {
 
 	http.SetCookie(c.Writer, cookie)
 
-	resp := UserResponse{
-		ID:      user.ID,
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
-		Email:     user.Email,
-		CreatedOn: user.CreatedOn,
-	}
+	user.PasswordHash = ""
 
 	response.Success(c, http.StatusOK, gin.H{
-		"user":    resp,
-		"token":   token,
+		"user":  user,
+		"token": token,
 	})
 }

@@ -195,7 +195,7 @@ export function ItemCarousel({ files }: { files: string[] }) {
                 <Item>
                   <ItemContent className="border rounded-sm">
                     <img
-                      className="aspect-square object-cover"
+                      className="w-full h-auto object-contain"
                       src={file.startsWith("http") ? file : `${API_URL}${file}`}
                     />
                   </ItemContent>

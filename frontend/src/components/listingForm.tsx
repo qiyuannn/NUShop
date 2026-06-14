@@ -359,7 +359,7 @@ export function ListingFormCarousel({
               <Item>
                 <ItemContent className="border rounded-sm">
                   <img
-                    className="aspect-square object-cover"
+                    className="w-full h-auto object-contain"
                     src={
                       typeof file === "string"
                         ? file.startsWith("http")

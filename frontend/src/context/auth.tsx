@@ -1,10 +1,13 @@
 import { API_URL } from "@/lib/api";
 import React, { createContext, useContext } from "react";
+import type { User } from "@/types";
 
 type AuthContextType = {
   token: string | null;
   setToken: (token: string | null) => void;
   ready: boolean;
+  user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -12,6 +15,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = React.useState<string | null>(null);
   const [ready, setReady] = React.useState(false);
+  const [user, setUser] = React.useState<User | null>(null);
 
   React.useEffect(() => {
     async function refresh() {
@@ -37,6 +41,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         token,
         setToken,
         ready,
+        user,
+        setUser,
       }}
     >
       {children}

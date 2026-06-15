@@ -9,7 +9,7 @@ import { Spinner } from "../components/ui/spinner";
 export function SignupPage() {
   return (
     <div className="flex min-w-svw items-center justify-center min-h-svh">
-      <div className="w-sm sm:w-md">
+      <div className="w-sm">
         <SignupForm />
       </div>
     </div>
@@ -166,10 +166,10 @@ export function SignupForm() {
       </FieldLegend>
 
       <FieldDescription className="text-center">
-        Have an account? <Link to="/login">log in</Link>
+        Have an account? <Link to="/login">Log in</Link>
       </FieldDescription>
 
-      <div className="flex justify-center py-2">
+      <div className="flex justify-center py-3">
         <div ref={buttonRef} />
       </div>
 
@@ -189,7 +189,7 @@ export function SignupForm() {
         <input
           className="rounded border border-neutral-700 bg-transparent px-3 py-2 outline-none"
           type="email"
-          placeholder="yourname@gmail.com"
+          placeholder="Enter your email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />

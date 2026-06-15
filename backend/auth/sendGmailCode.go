@@ -71,9 +71,9 @@ func sendGmailCode(to string, code string) error {
 	}
 	defer w.Close()
 
-	subject := "NUShop verification code"
+	subject := "Your NUShop Verification Code"
 	body := fmt.Sprintf(
-		"Your NUShop verification code is: %s\r\n\r\nThis code expires in 10 minutes.\r\n",
+		"Hello,\r\n\r\nYour NUShop verification code is: %s\r\n\r\nThis code expires in 10 minutes.\r\n\r\nIf you did not request this code, you can safely ignore this email.\r\n\r\nNUShop Team",
 		code,
 	)
 

@@ -29,8 +29,8 @@ func VerifyEmailCode(c *gin.Context) {
 	}
 
 	email := strings.ToLower(strings.TrimSpace(req.Email))
-	if !strings.HasSuffix(email, "@gmail.com") {
-		c.Error(response.ErrBadRequest(errors.New("gmail address required")))
+	if email == "" || !strings.Contains(email, "@") {
+		c.Error(response.ErrBadRequest(errors.New("invalid email")))
 		return
 	}
 

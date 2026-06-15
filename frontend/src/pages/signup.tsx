@@ -116,7 +116,7 @@ export function SignupForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: email.trim() }),
       });
 
       const json = await res.json();
@@ -139,7 +139,7 @@ export function SignupForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ email, code }),
+        body: JSON.stringify({ email: email.trim(), code: code.trim() }),
       });
 
       const json = await res.json();
@@ -182,8 +182,6 @@ export function SignupForm() {
       {err !== null && (
         <FieldDescription className="text-center text-red-500">{err}</FieldDescription>
       )}
-
-      <FieldSeparator>Or</FieldSeparator>
 
       <FieldSeparator>Or</FieldSeparator>
 

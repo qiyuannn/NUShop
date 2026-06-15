@@ -24,7 +24,7 @@ func sendGmailCode(to string, code string) error {
 	pass := os.Getenv("SMTP_APP_PASSWORD")
 	displayFrom := os.Getenv("EMAIL_FROM")
 	if displayFrom == "" {
-		displayFrom = from
+		displayFrom = fmt.Sprintf("NUShop <%s>", from)
 	}
 
 	if from == "" || pass == "" {

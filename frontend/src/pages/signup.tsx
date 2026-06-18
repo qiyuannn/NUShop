@@ -55,7 +55,7 @@ export function SignupForm() {
         const json = await res.json();
 
         if (!res.ok) {
-          throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
+          throw new Error(json?.error?.message ?? json?.error?.code ?? "INTERNAL_ERROR");
         }
 
         setUser(json.data.user);
@@ -120,7 +120,7 @@ export function SignupForm() {
       });
 
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
+      if (!res.ok) throw new Error(json?.error?.message ?? json?.error?.code ?? "INTERNAL_ERROR");
 
       setStep("code");
     } catch (error) {
@@ -143,7 +143,7 @@ export function SignupForm() {
       });
 
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
+      if (!res.ok) throw new Error(json?.error?.message ?? json?.error?.code ?? "INTERNAL_ERROR");
 
       setUser(json.data.user);
       setToken(json.data.token);

@@ -56,7 +56,7 @@ export function LoginForm() {
       });
       const json = await res.json();
       if (!res.ok) {
-        throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
+        throw new Error(json?.error?.message ?? json?.error?.code ?? "INTERNAL_ERROR");
       }
       setToken(json.data.token);
       nav("/");

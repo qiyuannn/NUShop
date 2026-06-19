@@ -17,8 +17,6 @@ func GetUser(c *gin.Context) {
 	if err := db.Pool.QueryRow(
 		c.Request.Context(),
 		`SELECT 
-		first_name,
-		last_name,
 		created_on
 		FROM users WHERE 
 		id = $1`, 

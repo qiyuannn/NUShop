@@ -11,14 +11,14 @@ import (
 	"github.com/google/uuid"
 )
 
-type Conversation struct{
-	ChatID string `json:"chatID"`
-	FirstName string `json:"firstName"`
-	LastName string `json:"lastName"`
-	LastMessage string `json:"lastMessage"`
-	LastMessageSender string `json:"lastMessageSender"`
-	LastMessageOn time.Time `json:"lastMessageOn"`
-	Read bool `json:"read"`
+type Conversation struct {
+	ChatID            string    `json:"chatID"`
+	FirstName         string    `json:"firstName"`
+	LastName          string    `json:"lastName"`
+	LastMessage       string    `json:"lastMessage"`
+	LastMessageSender string    `json:"lastMessageSender"`
+	LastMessageOn     time.Time `json:"lastMessageOn"`
+	Read              bool      `json:"read"`
 }
 
 func GetConversations(c *gin.Context) {
@@ -39,13 +39,11 @@ func GetConversations(c *gin.Context) {
 		return
 	}
 
-
 	rows, err := db.Pool.Query(
 		c.Request.Context(),
 		`SELECT DISTINCT ON (u.id)
 		u.id,
-		u.first_name,
-		u.last_name,
+		u.username,
 		m.content,
 		m.sender_id,
 		m.created_on,
@@ -59,14 +57,14 @@ func GetConversations(c *gin.Context) {
 		ORDER BY u.id, m.created_on DESC`,
 		userIDStr,
 	)
-	
+
 	if err != nil {
 		c.Error(response.ErrInternalServerError(err))
 		return
 	}
-	
+
 	defer rows.Close()
-	
+
 	conversations := make([]Conversation, 0)
 	for rows.Next() {
 		var conv Conversation

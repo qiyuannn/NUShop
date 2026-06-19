@@ -9,7 +9,7 @@ import { Spinner } from "../components/ui/spinner";
 export function SignupPage() {
   return (
     <div className="flex min-w-svw items-center justify-center min-h-svh">
-      <div className="w-sm">
+      <div className="w-full max-w-sm">
         <SignupForm />
       </div>
     </div>
@@ -152,7 +152,7 @@ export function SignupForm() {
 
       <div className="flex flex-col gap-3">
         {step === "email" && (
-          <div className="space-y-4">
+          <div className="flex w-full flex-col gap-4">
             <input
               className="rounded border border-neutral-700 bg-transparent px-3 py-2 outline-none"
               type="email"
@@ -161,16 +161,16 @@ export function SignupForm() {
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
             />
-            <button onClick={sendCode} disabled={loading || !email.trim()}>
+            <button className="w-full" onClick={sendCode} disabled={loading || !email.trim()}>
               {loading ? "Sending..." : "Send code"}
             </button>
           </div>
         )}
 
         {step === "code" && (
-          <div className="space-y-4">
+          <div className="flex w-full flex-col gap-4">
             <input
-              className="rounded border border-neutral-700 bg-transparent px-3 py-2 outline-none"
+              className="w-full rounded border border-neutral-700 bg-transparent px-3 py-2 outline-none"
               type="text"
               inputMode="numeric"
               maxLength={6}
@@ -179,11 +179,20 @@ export function SignupForm() {
               onChange={(e) => setCode(e.target.value)}
               autoComplete="one-time-code"
             />
-            <div className="flex gap-2">
-              <button onClick={verifyCode} disabled={loading || code.trim().length !== 6}>
+            <div className="flex w-full flex-col gap-2">
+              <button
+                className="w-full text-lg font-semibold underline underline-offset-4"
+                onClick={verifyCode}
+                disabled={loading || code.trim().length !== 6}
+              >
                 {loading ? "Checking..." : "Verify code"}
               </button>
-              <button onClick={() => setStep("email")} disabled={loading}>
+
+              <button
+                className="w-full"
+                onClick={() => setStep("email")}
+                disabled={loading}
+              >
                 Back
               </button>
             </div>
@@ -191,9 +200,9 @@ export function SignupForm() {
         )}
 
         {step === "credentials" && (
-          <div className="space-y-4">
+          <div className="flex w-full flex-col gap-4">
             <input
-              className="rounded border border-neutral-700 bg-transparent px-3 py-2 outline-none"
+              className="w-full rounded border border-neutral-700 bg-transparent px-3 py-2 outline-none"
               type="text"
               placeholder="Username"
               value={username}
@@ -201,14 +210,14 @@ export function SignupForm() {
               autoComplete="username"
             />
             <input
-              className="rounded border border-neutral-700 bg-transparent px-3 py-2 outline-none"
+              className="w-full rounded border border-neutral-700 bg-transparent px-3 py-2 outline-none"
               type="password"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="new-password"
             />
-            <div className="flex gap-2">
+            <div className="grid w-full grid-cols-2 gap-2">
               <button
                 onClick={completeSignup}
                 disabled={loading || !username.trim() || !password}

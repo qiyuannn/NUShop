@@ -12,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -37,6 +38,25 @@ func RequestEmailCode(c *gin.Context) {
 	email := strings.ToLower(strings.TrimSpace(req.Email))
 	if email == "" || !strings.Contains(email, "@") {
 		c.Error(response.ErrBadRequest(errors.New("invalid email")))
+		return
+	}
+
+	var existingUserID string
+	err := db.Pool.QueryRow(
+		c.Request.Context(),
+		`SELECT id
+		 FROM users
+		 WHERE email = $1
+		 LIMIT 1`,
+		email,
+	).Scan(&existingUserID)
+
+	if err == nil {
+		c.Error(response.ErrBadRequest(errors.New("An account with this email already exists. Please log in instead.")))
+		return
+	}
+	if !errors.Is(err, pgx.ErrNoRows) {
+		c.Error(response.ErrInternalServerError(err))
 		return
 	}
 

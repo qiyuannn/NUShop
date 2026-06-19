@@ -5,6 +5,7 @@ import { API_URL } from "@/lib/api";
 import { useAuth } from "@/context/auth";
 import { FieldDescription, FieldLegend, FieldSeparator, FieldSet } from "../components/ui/field";
 import { Spinner } from "../components/ui/spinner";
+import { Button } from "../components/ui/button";
 
 export function SignupPage() {
   return (
@@ -161,9 +162,13 @@ export function SignupForm() {
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
             />
-            <button className="w-full" onClick={sendCode} disabled={loading || !email.trim()}>
+            <Button
+              className="w-full"
+              onClick={sendCode}
+              disabled={loading || !email.trim()}
+            >
               {loading ? "Sending..." : "Send code"}
-            </button>
+            </Button>
           </div>
         )}
 
@@ -180,21 +185,22 @@ export function SignupForm() {
               autoComplete="one-time-code"
             />
             <div className="flex w-full flex-col gap-2">
-              <button
-                className="w-full text-lg underline underline-offset-4"
+              <Button
+                className="w-full"
                 onClick={verifyCode}
                 disabled={loading || code.trim().length !== 6}
               >
                 {loading ? "Checking..." : "Verify code"}
-              </button>
+              </Button>
 
-              <button
+              <Button
                 className="w-full"
+                variant="outline"
                 onClick={() => setStep("email")}
                 disabled={loading}
               >
                 Back
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -218,15 +224,20 @@ export function SignupForm() {
               autoComplete="new-password"
             />
             <div className="grid w-full grid-cols-2 gap-2">
-              <button
+              <Button
+                variant="outline"
+                onClick={() => setStep("code")}
+                disabled={loading}
+              >
+                Back
+              </Button>
+
+              <Button
                 onClick={completeSignup}
                 disabled={loading || !username.trim() || !password}
               >
                 {loading ? "Creating..." : "Create account"}
-              </button>
-              <button onClick={() => setStep("code")} disabled={loading}>
-                Back
-              </button>
+              </Button>
             </div>
           </div>
         )}

@@ -2,7 +2,6 @@ package auth
 
 import (
 	db "backend/database"
-	"backend/models"
 	"backend/response"
 	"errors"
 	"net/http"
@@ -11,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"golang.org/x/crypto/bcrypt"
@@ -65,99 +65,31 @@ func VerifyEmailCode(c *gin.Context) {
 		return
 	}
 
-	var user models.User
-	err = db.Pool.QueryRow(
-		c.Request.Context(),
-		`SELECT id, first_name, last_name, email, password_hash, created_on
-		 FROM users
-		 WHERE email = $1
-		 LIMIT 1`,
-		email,
-	).Scan(
-		&user.ID,
-		&user.FirstName,
-		&user.LastName,
-		&user.Email,
-		&user.PasswordHash,
-		&user.CreatedOn,
-	)
-
-	if errors.Is(err, pgx.ErrNoRows) {
-		err = db.Pool.QueryRow(
-			c.Request.Context(),
-			`INSERT INTO users (first_name, last_name, email, password_hash)
-			 VALUES ($1, $2, $3, $4)
-			 RETURNING id, first_name, last_name, email, password_hash, created_on`,
-			"Google",
-			"",
-			email,
-			"",
-		).Scan(
-			&user.ID,
-			&user.FirstName,
-			&user.LastName,
-			&user.Email,
-			&user.PasswordHash,
-			&user.CreatedOn,
-		)
-		if err != nil {
-			c.Error(response.ErrInternalServerError(err))
-			return
-		}
-	} else if err != nil {
-		c.Error(response.ErrInternalServerError(err))
+	signupSecret := os.Getenv("SignupTokenSecret")
+	if signupSecret == "" {
+		signupSecret = os.Getenv("AccessTokenSecret")
+	}
+	if signupSecret == "" {
+		c.Error(response.ErrInternalServerError(errors.New("signup token secret not set")))
 		return
 	}
 
-	userID, err := uuid.Parse(user.ID)
+	claims := jwt.RegisteredClaims{
+		Issuer:    "NUShop",
+		Subject:   email,
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(10 * time.Minute)),
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
+		ID:        uuid.NewString(),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	verificationToken, err := token.SignedString([]byte(signupSecret))
 	if err != nil {
 		c.Error(response.ErrInternalServerError(err))
 		return
 	}
-
-	token, err := GenerateAccessToken(userID)
-	if err != nil {
-		c.Error(response.ErrInternalServerError(err))
-		return
-	}
-
-	refreshTokenID := uuid.NewString()
-	refreshToken, err := GenerateRefreshToken(userID, refreshTokenID)
-	if err != nil {
-		c.Error(response.ErrInternalServerError(err))
-		return
-	}
-
-	if _, err := db.Pool.Exec(
-		c.Request.Context(),
-		`INSERT INTO refresh_tokens (id, user_id) VALUES ($1, $2)`,
-		refreshTokenID,
-		user.ID,
-	); err != nil {
-		c.Error(response.ErrInternalServerError(err))
-		return
-	}
-
-	isProd := os.Getenv("ENV") == "production"
-	cookie := &http.Cookie{
-		Name:     "refresh_token",
-		Value:    refreshToken,
-		Path:     "/",
-		MaxAge:   7 * 24 * 60 * 60,
-		HttpOnly: true,
-		Secure:   isProd,
-	}
-	if isProd {
-		cookie.SameSite = http.SameSiteNoneMode
-	} else {
-		cookie.SameSite = http.SameSiteLaxMode
-	}
-	http.SetCookie(c.Writer, cookie)
-
-	user.PasswordHash = ""
 
 	response.Success(c, http.StatusOK, gin.H{
-		"user":  user,
-		"token": token,
+		"verificationToken": verificationToken,
 	})
 }

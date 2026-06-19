@@ -7,6 +7,7 @@ import (
 	"net/smtp"
 	"os"
 	"strings"
+	"time"
 )
 
 func sendGmailCode(to string, code string) error {
@@ -33,14 +34,21 @@ func sendGmailCode(to string, code string) error {
 
 	addr := net.JoinHostPort(host, port)
 
-	conn, err := smtp.Dial(addr)
+	dialer := net.Dialer{Timeout: 10 * time.Second}
+	rawConn, err := dialer.Dial("tcp", addr)
 	if err != nil {
-		return err
+		return fmt.Errorf("smtp dial %s: %w", addr, err)
+	}
+	defer rawConn.Close()
+
+	conn, err := smtp.NewClient(rawConn, host)
+	if err != nil {
+		return fmt.Errorf("smtp client: %w", err)
 	}
 	defer conn.Close()
 
 	if err := conn.Hello("localhost"); err != nil {
-		return err
+		return fmt.Errorf("smtp hello: %w", err)
 	}
 
 	if ok, _ := conn.Extension("STARTTLS"); ok {
@@ -49,27 +57,26 @@ func sendGmailCode(to string, code string) error {
 			MinVersion: tls.VersionTLS12,
 		}
 		if err := conn.StartTLS(tlsConfig); err != nil {
-			return err
+			return fmt.Errorf("smtp starttls: %w", err)
 		}
 	}
 
 	auth := smtp.PlainAuth("", from, pass, host)
 	if err := conn.Auth(auth); err != nil {
-		return err
+		return fmt.Errorf("smtp auth: %w", err)
 	}
 
 	if err := conn.Mail(from); err != nil {
-		return err
+		return fmt.Errorf("smtp mail from: %w", err)
 	}
 	if err := conn.Rcpt(to); err != nil {
-		return err
+		return fmt.Errorf("smtp rcpt to: %w", err)
 	}
 
 	w, err := conn.Data()
 	if err != nil {
-		return err
+		return fmt.Errorf("smtp data: %w", err)
 	}
-	defer w.Close()
 
 	subject := "Your NUShop Verification Code"
 	body := fmt.Sprintf(
@@ -87,6 +94,13 @@ func sendGmailCode(to string, code string) error {
 		body,
 	}, "\r\n")
 
-	_, err = fmt.Fprint(w, msg)
-	return err
+	if _, err := fmt.Fprint(w, msg); err != nil {
+		_ = w.Close()
+		return fmt.Errorf("smtp write message: %w", err)
+	}
+	if err := w.Close(); err != nil {
+		return fmt.Errorf("smtp close data: %w", err)
+	}
+
+	return nil
 }

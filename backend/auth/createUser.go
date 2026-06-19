@@ -10,57 +10,17 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"golang.org/x/crypto/bcrypt"
-	"google.golang.org/api/idtoken"
 )
 
 type AccountCreationRequest struct {
-	Credential string `json:"credential"`
-}
-
-type googleUserRow struct {
-	ID           string
-	FirstName    string
-	LastName     string
-	Email        string
-	GoogleSub    string
-	PasswordHash string
-	CreatedOn    time.Time
-}
-
-func claimString(claims map[string]interface{}, key string) string {
-	if v, ok := claims[key]; ok {
-		if s, ok := v.(string); ok {
-			return s
-		}
-	}
-	return ""
-}
-
-func claimBool(claims map[string]interface{}, key string) bool {
-	if v, ok := claims[key]; ok {
-		switch val := v.(type) {
-		case bool:
-			return val
-		case string:
-			return strings.EqualFold(val, "true")
-		}
-	}
-	return false
-}
-
-func splitName(fullName string) (string, string) {
-	parts := strings.Fields(strings.TrimSpace(fullName))
-	if len(parts) == 0 {
-		return "", ""
-	}
-	if len(parts) == 1 {
-		return parts[0], ""
-	}
-	return parts[0], strings.Join(parts[1:], " ")
+	Email             string `json:"email"`
+	Username          string `json:"username"`
+	Password          string `json:"password"`
+	VerificationToken string `json:"verificationToken"`
 }
 
 func issueSession(c *gin.Context, userID string) (string, error) {
@@ -115,164 +75,134 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	if request.Credential == "" {
-		c.Error(response.ErrBadRequest(errors.New("missing google credential")))
+	email := strings.ToLower(strings.TrimSpace(request.Email))
+	username := strings.TrimSpace(request.Username)
+	password := request.Password
+
+	if email == "" || !strings.Contains(email, "@") {
+		c.Error(response.ErrBadRequest(errors.New("invalid email")))
+		return
+	}
+	if username == "" {
+		c.Error(response.ErrBadRequest(errors.New("username required")))
+		return
+	}
+	if password == "" {
+		c.Error(response.ErrBadRequest(errors.New("password required")))
+		return
+	}
+	if request.VerificationToken == "" {
+		c.Error(response.ErrBadRequest(errors.New("missing verification token")))
 		return
 	}
 
-	clientID := os.Getenv("GOOGLE_CLIENT_ID")
-	if clientID == "" {
-		c.Error(response.ErrInternalServerError(errors.New("GOOGLE_CLIENT_ID not set")))
+	signupSecret := os.Getenv("SignupTokenSecret")
+	if signupSecret == "" {
+		signupSecret = os.Getenv("AccessTokenSecret")
+	}
+	if signupSecret == "" {
+		c.Error(response.ErrInternalServerError(errors.New("signup token secret not set")))
 		return
 	}
 
-	payload, err := idtoken.Validate(c.Request.Context(), request.Credential, clientID)
-	if err != nil {
-		c.Error(response.ErrUnauthorised(err))
-		return
-	}
-
-	email := claimString(payload.Claims, "email")
-	if email == "" || !strings.HasSuffix(strings.ToLower(email), "@gmail.com") {
-		c.Error(response.ErrBadRequest(errors.New("gmail address required")))
-		return
-	}
-	if !claimBool(payload.Claims, "email_verified") {
-		c.Error(response.ErrUnauthorised(errors.New("email not verified by google")))
-		return
-	}
-
-	firstName := claimString(payload.Claims, "given_name")
-	lastName := claimString(payload.Claims, "family_name")
-	if firstName == "" && lastName == "" {
-		firstName, lastName = splitName(claimString(payload.Claims, "name"))
-	}
-	if firstName == "" {
-		firstName = "Google"
-	}
-
-	googleSub := payload.Subject
-	if googleSub == "" {
-		c.Error(response.ErrUnauthorised(errors.New("missing google subject")))
-		return
-	}
-
-	var user googleUserRow
-	err = db.Pool.QueryRow(
-		c.Request.Context(),
-		`SELECT id, first_name, last_name, email, google_sub, password_hash, created_on
-		 FROM users
-		 WHERE google_sub = $1 OR email = $2
-		 LIMIT 1`,
-		googleSub,
-		email,
-	).Scan(
-		&user.ID,
-		&user.FirstName,
-		&user.LastName,
-		&user.Email,
-		&user.GoogleSub,
-		&user.PasswordHash,
-		&user.CreatedOn,
+	token, err := jwt.ParseWithClaims(
+		request.VerificationToken,
+		&jwt.RegisteredClaims{},
+		func(token *jwt.Token) (any, error) {
+			return []byte(signupSecret), nil
+		},
 	)
+	if err != nil || !token.Valid {
+		c.Error(response.ErrUnauthorised(errors.New("invalid verification token")))
+		return
+	}
 
-	switch {
-	case err == nil:
-		if user.GoogleSub != "" && user.GoogleSub != googleSub {
-			c.Error(response.ErrStatusConflict(errors.New("email already linked")))
-			return
-		}
+	claims, ok := token.Claims.(*jwt.RegisteredClaims)
+	if !ok || claims.Subject != email {
+		c.Error(response.ErrUnauthorised(errors.New("verification token mismatch")))
+		return
+	}
+	if claims.ExpiresAt != nil && claims.ExpiresAt.Time.Before(time.Now()) {
+		c.Error(response.ErrUnauthorised(errors.New("verification token expired")))
+		return
+	}
 
-		if _, err := db.Pool.Exec(
-			c.Request.Context(),
-			`UPDATE users
-			 SET email = $1,
-			     first_name = $2,
-			     last_name = $3,
-			     google_sub = COALESCE(google_sub, $4)
-			 WHERE id = $5`,
-			email,
-			firstName,
-			lastName,
-			googleSub,
-			user.ID,
-		); err != nil {
-			if pgErr, ok := err.(*pgconn.PgError); ok && pgErr.Code == "23505" {
-				c.Error(response.ErrStatusConflict(errors.New("email already in use")))
-				return
-			}
-			c.Error(response.ErrInternalServerError(err))
-			return
-		}
-
-		user.Email = email
-		user.FirstName = firstName
-		user.LastName = lastName
-		user.GoogleSub = googleSub
-
-	case errors.Is(err, pgx.ErrNoRows):
-		placeholderPassword, err := bcrypt.GenerateFromPassword([]byte(uuid.NewString()), bcrypt.DefaultCost)
-		if err != nil {
-			c.Error(response.ErrInternalServerError(err))
-			return
-		}
-
-		if err := db.Pool.QueryRow(
-			c.Request.Context(),
-			`INSERT INTO users (
-				first_name,
-				last_name,
-				email,
-				google_sub,
-				password_hash
-			) VALUES ($1, $2, $3, $4, $5) RETURNING
-				id,
-				first_name,
-				last_name,
-				email,
-				google_sub,
-				password_hash,
-				created_on`,
-			firstName,
-			lastName,
-			email,
-			googleSub,
-			placeholderPassword,
-		).Scan(
-			&user.ID,
-			&user.FirstName,
-			&user.LastName,
-			&user.Email,
-			&user.GoogleSub,
-			&user.PasswordHash,
-			&user.CreatedOn,
-		); err != nil {
-			if pgErr, ok := err.(*pgconn.PgError); ok {
-				switch pgErr.Code {
-				case "23505":
-					c.Error(response.ErrStatusConflict(errors.New("email already in use")))
-					return
-				case "23502":
-					c.Error(response.ErrBadRequest(errors.New("db not null violation")))
-					return
-				case "23503":
-					c.Error(response.ErrBadRequest(errors.New("foreign key violation")))
-					return
-				case "23514":
-					c.Error(response.ErrBadRequest(errors.New("invalid data")))
-					return
-				}
-			}
-			c.Error(response.ErrInternalServerError(err))
-			return
-		}
-
-	default:
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
 		c.Error(response.ErrInternalServerError(err))
 		return
 	}
 
-	token, err := issueSession(c, user.ID)
+	var user struct {
+		ID           string
+		FirstName    string
+		LastName     string
+		Username     string
+		Email        string
+		PasswordHash string
+		CreatedOn    time.Time
+	}
+
+	err = db.Pool.QueryRow(
+		c.Request.Context(),
+		`INSERT INTO users (
+			first_name,
+			last_name,
+			username,
+			email,
+			password_hash
+		) VALUES ($1, $2, $3, $4, $5)
+		RETURNING
+			id,
+			first_name,
+			last_name,
+			username,
+			email,
+			password_hash,
+			created_on`,
+		username,
+		"",
+		username,
+		email,
+		string(passwordHash),
+	).Scan(
+		&user.ID,
+		&user.FirstName,
+		&user.LastName,
+		&user.Username,
+		&user.Email,
+		&user.PasswordHash,
+		&user.CreatedOn,
+	)
+	if err != nil {
+		if pgErr, ok := err.(*pgconn.PgError); ok {
+			switch pgErr.Code {
+			case "23505":
+				switch pgErr.ConstraintName {
+				case "users_email_key":
+					c.Error(response.ErrStatusConflict(errors.New("email already in use")))
+				case "users_username_key":
+					c.Error(response.ErrStatusConflict(errors.New("username already in use")))
+				default:
+					c.Error(response.ErrStatusConflict(errors.New("email or username already in use")))
+				}
+				return
+			case "23502":
+				c.Error(response.ErrBadRequest(errors.New("db not null violation")))
+				return
+			case "23503":
+				c.Error(response.ErrBadRequest(errors.New("foreign key violation")))
+				return
+			case "23514":
+				c.Error(response.ErrBadRequest(errors.New("invalid data")))
+				return
+			}
+		}
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+
+	tokenOut, err := issueSession(c, user.ID)
 	if err != nil {
 		c.Error(response.ErrInternalServerError(err))
 		return
@@ -283,9 +213,10 @@ func CreateUser(c *gin.Context) {
 			"id":        user.ID,
 			"firstName": user.FirstName,
 			"lastName":  user.LastName,
+			"username":  user.Username,
 			"email":     user.Email,
 			"createdOn": user.CreatedOn,
 		},
-		"token": token,
+		"token": tokenOut,
 	})
 }

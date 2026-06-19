@@ -11,6 +11,7 @@ export function ProfilePage() {
   const [user, setUser] = React.useState({
     firstName: "",
     lastName: "",
+    username: "",
     createdOn: "",
   });
   const [err, setErr] = React.useState(false);
@@ -57,7 +58,7 @@ export function ProfilePage() {
         </ItemMedia>
         <ItemContent className="gap-0">
           <ItemTitle className="font-bold text-xl">
-            {user.lastName} {user.firstName}
+            {user.username || `${user.firstName} ${user.lastName}`}
           </ItemTitle>
           <ItemDescription>Joined since {new Date(user.createdOn).getFullYear()}</ItemDescription>
         </ItemContent>

@@ -19,93 +19,14 @@ export function SignupPage() {
 export function SignupForm() {
   const navigate = useNavigate();
   const { setUser, setToken } = useAuth();
-  const buttonRef = React.useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [err, setErr] = React.useState<string | null>(null);
   const [email, setEmail] = React.useState("");
   const [code, setCode] = React.useState("");
-  const [step, setStep] = React.useState<"email" | "code">("email");
-
-  React.useEffect(() => {
-    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
-    if (!clientId) {
-      setErr("Missing VITE_GOOGLE_CLIENT_ID");
-      return;
-    }
-
-    const googleWindow = window as Window & { google?: any };
-
-    const handleCredential = async (response: { credential?: string }) => {
-      if (!response.credential) {
-        setErr("Missing Google credential");
-        return;
-      }
-
-      setLoading(true);
-      setErr(null);
-
-      try {
-        const res = await fetch(`${API_URL}/create_user`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ credential: response.credential }),
-          credentials: "include",
-        });
-
-        const json = await res.json();
-
-        if (!res.ok) {
-          throw new Error(json?.error?.message ?? json?.error?.code ?? "INTERNAL_ERROR");
-        }
-
-        setUser(json.data.user);
-        setToken(json.data.token);
-        navigate("/");
-      } catch (error) {
-        setErr(error instanceof Error ? error.message : "INTERNAL_ERROR");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const renderGoogleButton = () => {
-      if (!googleWindow.google?.accounts?.id || !buttonRef.current) return;
-
-      buttonRef.current.innerHTML = "";
-      googleWindow.google.accounts.id.initialize({
-        client_id: clientId,
-        callback: handleCredential,
-        auto_select: false,
-      });
-
-      googleWindow.google.accounts.id.renderButton(buttonRef.current, {
-        theme: "outline",
-        size: "large",
-        shape: "pill",
-        text: "signup_with",
-        width: 320,
-      });
-    };
-
-    if (googleWindow.google?.accounts?.id) {
-      renderGoogleButton();
-      return;
-    }
-
-    if (document.getElementById("google-gsi")) {
-      const existing = document.getElementById("google-gsi");
-      existing?.addEventListener("load", renderGoogleButton, { once: true });
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.id = "google-gsi";
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    script.defer = true;
-    script.onload = renderGoogleButton;
-    document.body.appendChild(script);
-  }, [navigate, setToken, setUser]);
+  const [step, setStep] = React.useState<"email" | "code" | "credentials">("email");
+  const [verificationToken, setVerificationToken] = React.useState("");
+  const [username, setUsername] = React.useState("");
+  const [password, setPassword] = React.useState("");
 
   async function sendCode() {
     setLoading(true);
@@ -119,7 +40,8 @@ export function SignupForm() {
         body: JSON.stringify({ email: email.trim() }),
       });
 
-      const json = await res.json();
+      const text = await res.text();
+      const json = text ? JSON.parse(text) : {};
       if (!res.ok) throw new Error(json?.error?.message ?? json?.error?.code ?? "INTERNAL_ERROR");
 
       setStep("code");
@@ -142,8 +64,55 @@ export function SignupForm() {
         body: JSON.stringify({ email: email.trim(), code: code.trim() }),
       });
 
-      const json = await res.json();
+      const text = await res.text();
+      const json = text ? JSON.parse(text) : {};
       if (!res.ok) throw new Error(json?.error?.message ?? json?.error?.code ?? "INTERNAL_ERROR");
+
+      const verificationToken =
+        json?.data?.verificationToken ??
+        json?.data?.token ??
+        json?.verificationToken ??
+        json?.token;
+
+      if (!verificationToken) {
+        throw new Error("Missing verification token");
+      }
+
+      setVerificationToken(verificationToken);
+      setStep("credentials");
+    } catch (error) {
+      setErr(error instanceof Error ? error.message : "INTERNAL_ERROR");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function completeSignup() {
+    setLoading(true);
+    setErr(null);
+
+    try {
+      const res = await fetch(`${API_URL}/create_user`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          email: email.trim(),
+          username: username.trim(),
+          password,
+          verificationToken,
+        }),
+      });
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        if (res.status === 409 || json?.error?.code === "STATUS_CONFLICT") {
+          throw new Error("Account already exists. Please log in.");
+        }
+
+        throw new Error(json?.error?.message ?? json?.error?.code ?? "INTERNAL_ERROR");
+      }
 
       setUser(json.data.user);
       setToken(json.data.token);
@@ -169,10 +138,6 @@ export function SignupForm() {
         Have an account? <Link to="/login">Log in</Link>
       </FieldDescription>
 
-      <div className="flex justify-center py-3">
-        <div ref={buttonRef} />
-      </div>
-
       {loading && (
         <div className="flex justify-center">
           <Spinner />
@@ -186,42 +151,75 @@ export function SignupForm() {
       <FieldSeparator>Or</FieldSeparator>
 
       <div className="flex flex-col gap-3">
-        <input
-          className="rounded border border-neutral-700 bg-transparent px-3 py-2 outline-none"
-          type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-
-        {step === "email" ? (
-          <button
-            type="button"
-            className="rounded bg-white px-3 py-2 text-black"
-            onClick={sendCode}
-            disabled={loading}
-          >
-            Send code
-          </button>
-        ) : (
-          <>
+        {step === "email" && (
+          <div className="space-y-4">
             <input
               className="rounded border border-neutral-700 bg-transparent px-3 py-2 outline-none"
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+            />
+            <button onClick={sendCode} disabled={loading || !email.trim()}>
+              {loading ? "Sending..." : "Send code"}
+            </button>
+          </div>
+        )}
+
+        {step === "code" && (
+          <div className="space-y-4">
+            <input
+              className="rounded border border-neutral-700 bg-transparent px-3 py-2 outline-none"
+              type="text"
               inputMode="numeric"
+              maxLength={6}
               placeholder="6-digit code"
               value={code}
               onChange={(e) => setCode(e.target.value)}
+              autoComplete="one-time-code"
             />
+            <div className="flex gap-2">
+              <button onClick={verifyCode} disabled={loading || code.trim().length !== 6}>
+                {loading ? "Checking..." : "Verify code"}
+              </button>
+              <button onClick={() => setStep("email")} disabled={loading}>
+                Back
+              </button>
+            </div>
+          </div>
+        )}
 
-            <button
-              type="button"
-              className="rounded bg-white px-3 py-2 text-black"
-              onClick={verifyCode}
-              disabled={loading}
-            >
-              Verify and continue
-            </button>
-          </>
+        {step === "credentials" && (
+          <div className="space-y-4">
+            <input
+              className="rounded border border-neutral-700 bg-transparent px-3 py-2 outline-none"
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              autoComplete="username"
+            />
+            <input
+              className="rounded border border-neutral-700 bg-transparent px-3 py-2 outline-none"
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={completeSignup}
+                disabled={loading || !username.trim() || !password}
+              >
+                {loading ? "Creating..." : "Create account"}
+              </button>
+              <button onClick={() => setStep("code")} disabled={loading}>
+                Back
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </FieldSet>

@@ -34,6 +34,7 @@ func Login(c *gin.Context) {
 		id, 
 		first_name, 
 		last_name, 
+		username
 		email, 
 		password_hash,
 		created_on
@@ -43,6 +44,7 @@ func Login(c *gin.Context) {
 		&user.ID,
 		&user.FirstName,
 		&user.LastName,
+		&user.Username,
 		&user.Email,
 		&user.PasswordHash,
 		&user.CreatedOn,

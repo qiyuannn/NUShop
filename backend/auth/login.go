@@ -6,10 +6,9 @@ import (
 	"backend/response"
 	"errors"
 	"net/http"
-	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -27,19 +26,26 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	email := strings.ToLower(strings.TrimSpace(request.Email))
+	if email == "" {
+		c.Error(response.ErrBadRequest(errors.New("invalid email")))
+		return
+	}
+
 	var user models.User
 	if err := db.Pool.QueryRow(
 		c.Request.Context(),
-		`SELECT 
-		id, 
-		first_name, 
-		last_name, 
-		username
-		email, 
-		password_hash,
-		created_on
-		FROM users WHERE email = $1`,
-		request.Email,
+		`SELECT
+			id,
+			first_name,
+			last_name,
+			username,
+			email,
+			password_hash,
+			created_on
+		FROM users
+		WHERE email = $1`,
+		email,
 	).Scan(
 		&user.ID,
 		&user.FirstName,
@@ -62,57 +68,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	userID, err := uuid.Parse(user.ID)
-	if err != nil {
-		c.Error(response.ErrInternalServerError(err))
-		return
-	}
-
-	token, err := GenerateAccessToken(userID)
-	if err != nil {
-		c.Error(response.ErrInternalServerError(err))
-		return
-	}
-
-	refreshTokenID := uuid.NewString()
-	refreshToken, err := GenerateRefreshToken(userID, refreshTokenID)
-	if err != nil {
-		c.Error(response.ErrInternalServerError(err))
-		return
-	}
-
-	if _, err := db.Pool.Exec(
-		c.Request.Context(),
-		`INSERT INTO refresh_tokens (
-		id, user_id) VALUES ($1, $2)`,
-		refreshTokenID, user.ID,
-	); err != nil {
-		c.Error(response.ErrInternalServerError(err))
-		return
-	}
-
-	isProd := os.Getenv("ENV") == "production"
-
-	cookie := &http.Cookie{
-		Name:     "refresh_token",
-		Value:    refreshToken,
-		Path:     "/",
-		MaxAge:   7 * 24 * 60 * 60,
-		HttpOnly: true,
-		Secure:   isProd,
-	}
-	if isProd {
-		cookie.SameSite = http.SameSiteNoneMode
-	} else {
-		cookie.SameSite = http.SameSiteLaxMode
-	}
-
-	http.SetCookie(c.Writer, cookie)
-
-	user.PasswordHash = ""
-
 	response.Success(c, http.StatusOK, gin.H{
-		"user":  user,
-		"token": token,
+		"passwordVerified": true,
 	})
 }

@@ -181,7 +181,7 @@ export function SignupForm() {
             />
             <div className="flex w-full flex-col gap-2">
               <button
-                className="w-full text-lg font-semibold underline underline-offset-4"
+                className="w-full text-lg underline underline-offset-4"
                 onClick={verifyCode}
                 disabled={loading || code.trim().length !== 6}
               >

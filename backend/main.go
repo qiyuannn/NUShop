@@ -44,6 +44,8 @@ func main() {
 	router.POST("/create_user", auth.CreateUser)
 	router.POST("/auth/request_code", auth.RequestEmailCode)
 	router.POST("/auth/verify_code", auth.VerifyEmailCode)
+	router.POST("/auth/google_login", auth.GoogleLogin)
+	
 
 	//users handlers 
 	router.GET("/user/:userID", users.GetUser)

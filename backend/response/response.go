@@ -10,8 +10,8 @@ import (
 )
 
 type Response struct {
-	Data   any        `json:"data,omitempty"`
-	Error  *ErrorInfo `json:"error,omitempty"`
+	Data  any        `json:"data,omitempty"`
+	Error *ErrorInfo `json:"error,omitempty"`
 }
 
 type ErrorInfo struct {
@@ -21,8 +21,8 @@ type ErrorInfo struct {
 
 type Cursor struct {
 	CursorTime time.Time `json:"cursor_time,omitempty"`
-	CursorID        string `json:"cursor_id,omitempty"`
-	HasMore         bool      `json:"has_more"`
+	CursorID   string    `json:"cursor_id,omitempty"`
+	HasMore    bool      `json:"has_more"`
 }
 
 type AppError struct {
@@ -44,19 +44,43 @@ func Success(c *gin.Context, status int, data any) {
 
 // Structured Errors
 func ErrInternalServerError(err error) *AppError {
-	return &AppError{Err: err, Status: http.StatusInternalServerError, Code: "INTERNAL_ERROR", Message: "internal server error"}
+	msg := "internal server error"
+	if err != nil && err.Error() != "" {
+		msg = err.Error()
+	}
+	return &AppError{Err: err, Status: http.StatusInternalServerError, Code: "INTERNAL_ERROR", Message: msg}
 }
+
 func ErrNotFound(err error) *AppError {
-	return &AppError{Err: err, Status: http.StatusNotFound, Code: "NOT_FOUND", Message: "resource not found"}
+	msg := "resource not found"
+	if err != nil && err.Error() != "" {
+		msg = err.Error()
+	}
+	return &AppError{Err: err, Status: http.StatusNotFound, Code: "NOT_FOUND", Message: msg}
 }
+
 func ErrBadRequest(err error) *AppError {
-	return &AppError{Err: err, Status: http.StatusBadRequest, Code: "INVALID_REQUEST", Message: "invalid request"}
+	msg := "invalid request"
+	if err != nil && err.Error() != "" {
+		msg = err.Error()
+	}
+	return &AppError{Err: err, Status: http.StatusBadRequest, Code: "INVALID_REQUEST", Message: msg}
 }
+
 func ErrStatusConflict(err error) *AppError {
-	return &AppError{Err: err, Status: http.StatusConflict, Code: "STATUS_CONFLICT", Message: "conflict"}
+	msg := "conflict"
+	if err != nil && err.Error() != "" {
+		msg = err.Error()
+	}
+	return &AppError{Err: err, Status: http.StatusConflict, Code: "STATUS_CONFLICT", Message: msg}
 }
+
 func ErrUnauthorised(err error) *AppError {
-	return &AppError{Err: err, Status: http.StatusUnauthorized, Code: "UNAUTHORISED", Message: "unauthorised"}
+	msg := "unauthorised"
+	if err != nil && err.Error() != "" {
+		msg = err.Error()
+	}
+	return &AppError{Err: err, Status: http.StatusUnauthorized, Code: "UNAUTHORISED", Message: msg}
 }
 
 // Error middleware

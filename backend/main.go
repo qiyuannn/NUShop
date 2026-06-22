@@ -34,7 +34,10 @@ func main() {
 	}))
 
 	router.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{"ok": true})
+		c.JSON(200, gin.H{
+			"ok":      true,
+			"service": "nushop-backend",
+		})
 	})
 
 	router.Use(response.ErrorHandler())

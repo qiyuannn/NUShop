@@ -88,7 +88,7 @@ func RequestEmailCode(c *gin.Context) {
 	}
 
 	if err := sendGmailCode(email, code); err != nil {
-		c.Error(response.ErrInternalServerError(err))
+		c.Error(response.ErrInternalServerError(errors.New("Could not send verification code right now. Please try again later.")))
 		return
 	}
 

@@ -152,6 +152,8 @@ func CreateUser(c *gin.Context) {
 		) VALUES ($1, $2, $3, $4, $5)
 		RETURNING
 			id,
+			''::text AS first_name,
+			''::text AS last_name,
 			username,
 			email,
 			password_hash,

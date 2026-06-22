@@ -27,7 +27,7 @@ func main() {
 
 	//CORS
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173", "https://nushop-frontend.onrender.com", "https://nushop-test.onrender.com", "https://nushop-d5a8.onrender.com"},
+		AllowOrigins:     []string{"http://localhost:5173", "https://nushop-frontend.onrender.com", "https://nushop-test.onrender.com", "https://nushop-dusky.vercel.app"},
 		AllowMethods:     []string{"GET", "PUT", "POST", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		AllowCredentials: true,

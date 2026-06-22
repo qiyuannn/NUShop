@@ -146,14 +146,16 @@ func CreateUser(c *gin.Context) {
 	err = db.Pool.QueryRow(
 		c.Request.Context(),
 		`INSERT INTO users (
+			first_name,
+			last_name,
 			username,
 			email,
 			password_hash
 		) VALUES ($1, $2, $3, $4, $5)
 		RETURNING
 			id,
-			''::text AS first_name,
-			''::text AS last_name,
+			first_name,
+			last_name,
 			username,
 			email,
 			password_hash,

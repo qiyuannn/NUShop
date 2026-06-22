@@ -71,8 +71,8 @@ func VerifyEmailCode(c *gin.Context) {
 		c.Request.Context(),
 		`SELECT
 			id,
-			''::text AS first_name,
-			''::text AS last_name,
+			first_name,
+			last_name,
 			username,
 			email,
 			password_hash,

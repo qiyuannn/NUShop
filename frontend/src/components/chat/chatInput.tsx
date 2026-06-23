@@ -1,7 +1,6 @@
 import { InputGroup, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { useAuth } from "@/context/auth";
 import { WS_URL } from "@/lib/api";
-import type { Message, WSMessage } from "@/types";
 import React from "react";
 import { useParams } from "react-router-dom";
 import useWebSocket from "react-use-websocket";

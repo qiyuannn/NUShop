@@ -55,9 +55,7 @@ export function ProfilePage() {
           </Avatar>
         </ItemMedia>
         <ItemContent className="gap-0">
-          <ItemTitle className="font-bold text-xl">
-            {user.username || "Unknown user"}
-          </ItemTitle>
+          <ItemTitle className="font-bold text-xl">{user.username || "Unknown user"}</ItemTitle>
           <ItemDescription>Joined since {new Date(user.createdOn).getFullYear()}</ItemDescription>
         </ItemContent>
       </Item>

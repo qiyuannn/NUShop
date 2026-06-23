@@ -27,17 +27,17 @@ export function ChatDirectoryMain() {
         </ItemContent>
       </Item>
       <div className="flex-1 min-h-0 overflow-y-auto">
-        <ChatDirectory/>
+        <ChatDirectory />
       </div>
     </div>
-  )
+  );
 }
 
 export function ChatDirectory() {
   const { token } = useAuth();
   const authApiFetch = useAuthApiFetch();
   const [chats, setChats] = React.useState<chat[]>([]);
-  const [err, setErr] = React.useState(false);
+  const [_, setErr] = React.useState(false);
 
   useWebSocket(token ? `${WS_URL}/ws` : null, {
     queryParams: { token: token! },
@@ -64,7 +64,11 @@ export function ChatDirectory() {
 
       var updated = false;
       setChats((p) => {
-        const existing = p.find((chat) => chat.listingID == message.listingID && (chat.otherID == message.senderID || chat.otherID == message.receiverID));
+        const existing = p.find(
+          (chat) =>
+            chat.listingID == message.listingID &&
+            (chat.otherID == message.senderID || chat.otherID == message.receiverID),
+        );
         if (existing) {
           updated = true;
           const newChat: chat = {
@@ -110,7 +114,7 @@ export function ChatDirectory() {
           throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
         }
         setChats(json?.data?.chats ?? []);
-      } catch (error) {
+      } catch {
         setErr(true);
       }
     }

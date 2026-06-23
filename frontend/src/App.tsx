@@ -67,8 +67,8 @@ export function App() {
         <Route path="/listing/:listingID" element={<Listing />} />
         <Route path="/user/:userID" element={<ProfilePage />} />
         <Route path="/cart" element={<CartPage />} />
-        <Route path="/chat" element={<ChatDirectoryMain/>}/>
-        <Route path="/chat/:listingID/:otherID" element={<Chat/>}/>
+        <Route path="/chat" element={<ChatDirectoryMain />} />
+        <Route path="/chat/:listingID/:otherID" element={<Chat />} />
 
         <Route path="/test" element={<CartPage />} />
       </Route>

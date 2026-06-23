@@ -42,7 +42,7 @@ export function ChatHeader() {
                 <Package className="mx-auto h-8 w-12 opacity-50" />
               </div>
             </div>
-          ): (
+          ) : (
             <img
               src={`${API_URL}${chatInfo.image}`}
               className="aspect-square object-cover border rounded-sm w-12"

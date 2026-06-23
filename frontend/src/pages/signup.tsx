@@ -162,11 +162,7 @@ export function SignupForm() {
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
             />
-            <Button
-              className="w-full"
-              onClick={sendCode}
-              disabled={loading || !email.trim()}
-            >
+            <Button className="w-full" onClick={sendCode} disabled={loading || !email.trim()}>
               {loading ? "Sending..." : "Send code"}
             </Button>
           </div>
@@ -224,18 +220,11 @@ export function SignupForm() {
               autoComplete="new-password"
             />
             <div className="grid w-full grid-cols-2 gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setStep("code")}
-                disabled={loading}
-              >
+              <Button variant="outline" onClick={() => setStep("code")} disabled={loading}>
                 Back
               </Button>
 
-              <Button
-                onClick={completeSignup}
-                disabled={loading || !username.trim() || !password}
-              >
+              <Button onClick={completeSignup} disabled={loading || !username.trim() || !password}>
                 {loading ? "Creating..." : "Create account"}
               </Button>
             </div>

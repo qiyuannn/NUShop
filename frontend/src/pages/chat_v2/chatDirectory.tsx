@@ -60,7 +60,9 @@ export function ChatDirectory() {
       });
 
       if (!updated) {
-        const res = await fetch(`${API_URL}/chat/info/${msg.message.listingID}/${msg.message.senderID}/${msg.message.receiverID}`);
+        const res = await fetch(
+          `${API_URL}/chat/info/${msg.message.listingID}/${msg.message.senderID}/${msg.message.receiverID}`,
+        );
         const json = await res.json();
 
         const newChat: chat = {

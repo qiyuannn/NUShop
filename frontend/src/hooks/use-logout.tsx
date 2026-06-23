@@ -20,6 +20,6 @@ export function useLogout() {
     });
     nav("/");
   }
-  
+
   return logout;
 }

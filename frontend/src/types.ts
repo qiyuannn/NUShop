@@ -43,10 +43,10 @@ export type Message = {
 };
 
 export type Read = {
-  user_id: string;
-  other_id: string;
-  listing_id: string;
-  last_read_id: string;
+  userID: string;
+  otherID: string;
+  listingID: string;
+  lastReadID: string;
 };
 
 export type chat = {

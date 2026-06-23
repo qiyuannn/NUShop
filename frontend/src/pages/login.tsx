@@ -54,10 +54,10 @@ export function LoginForm() {
     if (!res.ok) {
       throw new Error(
         json?.error?.message ??
-        json?.message ??
-        json?.error ??
-        json?.error?.code ??
-        "INTERNAL_ERROR"
+          json?.message ??
+          json?.error ??
+          json?.error?.code ??
+          "INTERNAL_ERROR",
       );
     }
   }
@@ -84,10 +84,10 @@ export function LoginForm() {
       if (!res.ok) {
         throw new Error(
           json?.error?.message ??
-          json?.message ??
-          json?.error ??
-          json?.error?.code ??
-          "INTERNAL_ERROR"
+            json?.message ??
+            json?.error ??
+            json?.error?.code ??
+            "INTERNAL_ERROR",
         );
       }
 
@@ -121,10 +121,10 @@ export function LoginForm() {
       if (!res.ok) {
         throw new Error(
           json?.error?.message ??
-          json?.message ??
-          json?.error ??
-          json?.error?.code ??
-          "INTERNAL_ERROR"
+            json?.message ??
+            json?.error ??
+            json?.error?.code ??
+            "INTERNAL_ERROR",
         );
       }
 

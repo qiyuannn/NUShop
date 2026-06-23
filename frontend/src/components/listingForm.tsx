@@ -133,8 +133,6 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
     if (loading) return;
     setLoading(true);
 
-
-
     const form = new FormData();
     form.append("title", formData.title);
     form.append("category", formData.category);
@@ -148,7 +146,7 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
         "retained_images",
         JSON.stringify(formData.files.filter((f): f is string => typeof f === "string")),
       );
-    } 
+    }
 
     for (const file of formData.files) {
       if (file instanceof File) {

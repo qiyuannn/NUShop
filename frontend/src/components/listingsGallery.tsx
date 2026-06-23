@@ -69,11 +69,11 @@ export function ListingGallery({ isManaging }: { isManaging: boolean }) {
     try {
       const res = await (isManaging
         ? apiFetch(`${API_URL}/listings/me${params.toString() ? `?${params.toString()}` : ""}`, {
-          method: "GET",
-        })
+            method: "GET",
+          })
         : fetch(`${API_URL}/listings${params.toString() ? `?${params.toString()}` : ""}`, {
-          method: "GET",
-        }));
+            method: "GET",
+          }));
 
       const json = await res.json();
       if (!res.ok) {
@@ -120,11 +120,11 @@ export function ListingGallery({ isManaging }: { isManaging: boolean }) {
       try {
         const res = await (isManaging
           ? apiFetch(`${API_URL}/listings/me${params.toString() ? `?${params.toString()}` : ""}`, {
-            method: "GET",
-          })
+              method: "GET",
+            })
           : fetch(`${API_URL}/listings${params.toString() ? `?${params.toString()}` : ""}`, {
-            method: "GET",
-          }));
+              method: "GET",
+            }));
 
         const json = await res.json();
         if (!res.ok) {
@@ -243,9 +243,7 @@ export function ListingItem({
               <div className="aspect-square border rounded-lg w-full flex items-center justify-center bg-muted">
                 <div className="text-center">
                   <Package className="mx-auto h-10 w-10 opacity-50" />
-                  <p className="text-sm text-muted-foreground mt-2">
-                    No image available
-                  </p>
+                  <p className="text-sm text-muted-foreground mt-2">No image available</p>
                 </div>
               </div>
             ) : (

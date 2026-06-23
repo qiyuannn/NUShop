@@ -12,7 +12,7 @@ type Hub struct {
 	route chan WSMessage
 }
 
-func newHub() *Hub{
+func NewHub() *Hub{
 	return &Hub{
 		clients: make(map[string]*Client),
 		register: make(chan *Client, 256),
@@ -21,7 +21,7 @@ func newHub() *Hub{
 	}
 }
 
-func (h *Hub) run() {
+func (h *Hub) Run() {
 	for{
 		select{
 		case client := <- h.register:

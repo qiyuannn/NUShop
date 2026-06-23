@@ -4,10 +4,12 @@ import (
 	db "backend/database"
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/jackc/pgx/v5"
 )
 
 type Client struct {
@@ -161,6 +163,9 @@ func (c *Client) readPump() {
 				ON CONFLICT (user_id, other_id, listing_id)
 					DO UPDATE
 					SET last_read_id = EXCLUDED.last_read_id
+					WHERE (SELECT created_on FROM messages WHERE id = EXCLUDED.last_read_id) 
+						> (SELECT created_on FROM messages WHERE id = read.last_read_id) 
+						AND (SELECT sender_id FROM messages WHERE id = EXCLUDED.last_read_id) = read.other_id
 				RETURNING
 					user_id, 
 					other_id,
@@ -180,6 +185,10 @@ func (c *Client) readPump() {
 			cancel()
 
 			if err != nil {
+				if errors.Is(err, pgx.ErrNoRows) {
+					log.Printf("[Error] writePump stale read update for %s: %s", c.userID, err)
+				}
+
 				log.Printf("[Error] writePump failed to save read into database for %s: %s", c.userID, err)
 				continue
 			}
@@ -193,3 +202,7 @@ func (c *Client) readPump() {
 		}
 	}
 }
+
+// READ
+// userID (reader) -> otherID 
+// message belong to other ID

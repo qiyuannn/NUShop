@@ -8,6 +8,7 @@ import useWebSocket from "react-use-websocket";
 import throttle from "lodash.throttle"
 import { Item, ItemGroup } from "../ui/item";
 import { formatMessageTime } from "@/lib/fomatTime";
+import { Check } from "lucide-react";
 
 export function ChatMessages() {
   const { token } = useAuth()
@@ -21,6 +22,8 @@ export function ChatMessages() {
 
   const messageRefs = React.useRef<Map<string, HTMLDivElement>>(new Map())
   const pendingReadID = React.useRef<string>("")
+
+  const bottomRef = React.useRef<HTMLDivElement>(null);
 
   const onMessage = React.useCallback(
     (event: MessageEvent) => {
@@ -69,6 +72,7 @@ export function ChatMessages() {
   );
 
   const sendRead = React.useCallback(
+    
     () => {
       if (!pendingReadID.current) {
         return
@@ -98,7 +102,7 @@ export function ChatMessages() {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return
-
+        
         const id = entry.target.getAttribute("data-message-id")
         const currIndex = messages.findIndex((m) => m.id == id)
 
@@ -137,44 +141,42 @@ export function ChatMessages() {
     fetchData()
   }, [])
 
-
-  if (loadErr) {
-    return (
-      <div>
-        <p>Network Error</p>
-      </div>
-    )
-  }
+  React.useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "instant" });
+  }, [messages]);
 
 
   return (
-    <ItemGroup>
-      {messages.map((message, i) => {
-        const otherMessage = message.senderID == param.otherID;
-        const isRead = !otherMessage && i <= otherLastReadIndex;
+    <div>
+      <ItemGroup className="gap-0">
+        {messages.map((message, i) => {
+          const otherMessage = message.senderID == param.otherID;
+          const isRead = !otherMessage && i <= otherLastReadIndex;
 
-        return (
-          <Item
+          return (
+            <Item
             key={message.id}
             data-message-id={message.id}
             ref={(el) => {
               if (otherMessage) {
-                if (el) messageRefs.current.set(message.id, el);
-                else messageRefs.current.delete(message.id);
+                if (el) {messageRefs.current.set(message.id, el);}
+                else {messageRefs.current.delete(message.id); }
               }
             }}
-            className={otherMessage ? "justify-start" : "justify-end"}
-          >
-            <div className="line-clamp-none max-w-4/5 p-2 bg-teal-500 rounded-sm">
-              <h1 className="text-wrap break-all text-black">{message.content}</h1>
-              <h1 className={otherMessage ? "" : "ml-auto w-fit"}>
-                {formatMessageTime(message.createdOn)}
-              </h1>
-            </div>
-            {isRead && <span className="text-xs text-gray-400 self-end">✓</span>}
-          </Item>
-        );
-      })}
-    </ItemGroup>  
+            className={otherMessage ? "justify-start p-1" : "justify-end p-1"}
+            >
+              <div className="line-clamp-none max-w-4/5 p-2 bg-teal-500 rounded-sm">
+                <h1 className="text-wrap break-all text-black">{message.content}</h1>
+                <h1 className={otherMessage ? "" : "ml-auto w-fit"}>
+                  {formatMessageTime(message.createdOn)}
+                </h1>
+              </div>
+              {isRead && <Check size={15}/>}
+            </Item>
+          );
+        })}
+      </ItemGroup>  
+       <div ref={bottomRef} />
+    </div>
   )
 }

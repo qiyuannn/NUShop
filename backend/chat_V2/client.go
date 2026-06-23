@@ -58,8 +58,8 @@ func (c *Client) writePump() {
 
 func (c *Client) readPump() {
 	defer func ()  {
-		c.conn.Close()
 		c.hub.unregister <- c
+		c.conn.Close()
 	}()
 	
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
@@ -79,6 +79,7 @@ func (c *Client) readPump() {
 
 		var wsMessage WSMessage
 		if err := json.Unmarshal(payload, &wsMessage); err != nil {
+			log.Printf("[Error] readPump failed to unmarshal JSON for %s: %s", c.userID, err)
 			continue 
 		}
 
@@ -87,8 +88,10 @@ func (c *Client) readPump() {
 			if wsMessage.Message == nil {
 				continue
 			}
+			if wsMessage.Message.ReceiverID == c.userID { continue }
 
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second * 5)
+
 
 			var saved Mesage
 			err := db.Pool.QueryRow(
@@ -147,6 +150,8 @@ func (c *Client) readPump() {
 			if wsMessage.Read == nil {
 				continue
 			}
+
+			log.Print("read received")
 
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second * 5)
 

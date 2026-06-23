@@ -16,6 +16,8 @@ import { toast } from "sonner";
 import { CartPage } from "./pages/cart";
 import { WS_URL } from "./lib/api";
 import useWebSocket from "react-use-websocket";
+import { ChatDirectoryMain } from "./pages/chat_v2/chatDirectory";
+import { Chat } from "./pages/chat_v2/chat";
 
 export function App() {
   const initCart = useCartStore((state) => state.initCart);
@@ -31,9 +33,6 @@ export function App() {
     },
     onClose: () => {
       console.log("conn closed");
-    },
-    onMessage: (event: MessageEvent) => {
-      console.log(event.data);
     },
   });
 
@@ -68,6 +67,8 @@ export function App() {
         <Route path="/listing/:listingID" element={<Listing />} />
         <Route path="/user/:userID" element={<ProfilePage />} />
         <Route path="/cart" element={<CartPage />} />
+        <Route path="/chat" element={<ChatDirectoryMain/>}/>
+        <Route path="/chat/:listingID/:otherID" element={<Chat/>}/>
 
         <Route path="/test" element={<CartPage />} />
       </Route>

@@ -10,11 +10,11 @@ CREATE TABLE messages (
   receiver_id UUID 
     NOT NULL
     REFERENCES users(id),
+  listing_id UUID 
+    NOT NULL
+    REFERENCES listings(id),
   content TEXT 
     NOT NULL,
-  read boolean
-    NOT NULL
-    DEFAULT false,
   created_on TIMESTAMPTZ
     NOT NULL
     DEFAULT now()

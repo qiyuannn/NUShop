@@ -53,5 +53,6 @@ export type chat = {
   content: string;
   createdOn: string;
   otherName: string;
+  otherID: string;
   image: string;
 };

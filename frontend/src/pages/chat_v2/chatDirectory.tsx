@@ -10,10 +10,28 @@ import {
 import { useAuth } from "@/context/auth";
 import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
 import { API_URL, WS_URL } from "@/lib/api";
+import { formatMessageTime } from "@/lib/fomatTime";
 import type { chat, WSMessage } from "@/types";
+import { Package } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
 import useWebSocket from "react-use-websocket";
+
+export function ChatDirectoryMain() {
+  return (
+    <div className="flex flex-col h-[calc(100vh-3rem)]">
+      <Item>
+        <ItemContent>
+          <ItemTitle className="font-bold text-2xl">Chats</ItemTitle>
+          <ItemDescription>View your conversations here</ItemDescription>
+        </ItemContent>
+      </Item>
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        <ChatDirectory/>
+      </div>
+    </div>
+  )
+}
 
 export function ChatDirectory() {
   const { token } = useAuth();
@@ -46,7 +64,7 @@ export function ChatDirectory() {
 
       var updated = false;
       setChats((p) => {
-        const existing = p.find((chat) => chat.listingID == message.listingID);
+        const existing = p.find((chat) => chat.listingID == message.listingID && (chat.otherID == message.senderID || chat.otherID == message.receiverID));
         if (existing) {
           updated = true;
           const newChat: chat = {
@@ -60,7 +78,7 @@ export function ChatDirectory() {
       });
 
       if (!updated) {
-        const res = await fetch(
+        const res = await authApiFetch(
           `${API_URL}/chat/info/${msg.message.listingID}/${msg.message.senderID}/${msg.message.receiverID}`,
         );
         const json = await res.json();
@@ -70,7 +88,8 @@ export function ChatDirectory() {
           title: json?.data?.title ?? "Failed to load title",
           content: message.content,
           createdOn: message.createdOn,
-          otherName: json?.data?.username ?? "Failed to load username",
+          otherName: json?.data?.otherName ?? "Failed to load username",
+          otherID: json?.data?.otherID ?? "Failed to load ID",
           image: json?.data?.image ?? "",
         };
 
@@ -102,21 +121,29 @@ export function ChatDirectory() {
     <div>
       <ItemGroup>
         {chats.map((chat) => (
-          <Item key={chat.listingID}>
-            <Link to="/">
+          <Item key={chat.listingID + chat.otherID} asChild>
+            <Link to={`/chat/${chat.listingID}/${chat.otherID}`}>
               <ItemMedia>
-                <img
-                  src={`${API_URL}${chat.image}`}
-                  className="aspect-square object-cover border rounded-sm w-12"
-                />
+                {!chat.image ? (
+                  <div className="aspect-square border rounded-lg w-full flex items-center justify-center bg-muted">
+                    <div className="text-center">
+                      <Package className="mx-auto h-10 w-17 opacity-50" />
+                    </div>
+                  </div>
+                ) : (
+                  <img
+                    src={`${API_URL}${chat.image}`}
+                    className="aspect-square object-cover border rounded-sm w-17"
+                  />
+                )}
               </ItemMedia>
-              <ItemContent>
+              <ItemContent className="gap-0">
                 <ItemDescription>{chat.otherName}</ItemDescription>
-                <ItemTitle className="text-bold font-xl">{chat.title}</ItemTitle>
+                <ItemTitle className="font-bold text-xl">{chat.title}</ItemTitle>
                 <ItemDescription>{chat.content}</ItemDescription>
               </ItemContent>
               <ItemActions className="self-start">
-                <ItemDescription>{chat.createdOn}</ItemDescription>
+                <ItemDescription>{formatMessageTime(chat.createdOn)}</ItemDescription>
               </ItemActions>
             </Link>
           </Item>

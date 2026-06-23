@@ -9,7 +9,7 @@ type WSMessage struct {
 }
 
 type Mesage struct {
-	ID string `json:"ID,omitempty"`
+	ID string `json:"id,omitempty"`
 	SenderID string `json:"senderID,omitempty"`
 	ReceiverID string `json:"receiverID"`
 	ListingID string `json:"listingID"`

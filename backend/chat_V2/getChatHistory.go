@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 func GetChatHistory(c *gin.Context) {
@@ -40,8 +41,8 @@ func GetChatHistory(c *gin.Context) {
 		content,
 		created_on
 		FROM messages 
-		WHERE listingID = $1
-			AND ( (sender_id = $2 AND receiver_id = $3) OR (sender_id = $3 AND receiver_id = $2)
+		WHERE listing_id = $1
+			AND ( (sender_id = $2 AND receiver_id = $3) OR (sender_id = $3 AND receiver_id = $2) )
 		ORDER BY created_on ASC`,
 		listingID, userIDStr, otherID,
 	)
@@ -57,7 +58,7 @@ func GetChatHistory(c *gin.Context) {
 
 	for rows.Next() {
 		var m Mesage
-		if err := rows.Scan(&m.ID, &m.SenderID, m.ReceiverID, m.Content, m.CreatedOn); err != nil {
+		if err := rows.Scan(&m.ID, &m.SenderID, &m.ReceiverID, &m.Content, &m.CreatedOn); err != nil {
 			c.Error(response.ErrInternalServerError(err))
 			return
 		}
@@ -69,7 +70,43 @@ func GetChatHistory(c *gin.Context) {
 		return
 	}
 
+	var selfLastReadID string
+	if err := db.Pool.QueryRow(
+		c.Request.Context(),
+		`SELECT 
+		last_read_id 
+		FROM read WHERE
+		user_id = $1 AND other_id = $2 AND listing_id = $3`,
+		userIDStr, otherID, listingID,
+	).Scan(&selfLastReadID); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			selfLastReadID = ""
+		} else {
+			c.Error(response.ErrInternalServerError(err))
+			return
+		}
+	}
+
+	var otherLastReadID string
+	if err := db.Pool.QueryRow(
+		c.Request.Context(),
+		`SELECT 
+		last_read_id
+		FROM read WHERE
+		user_id = $2 AND other_id = $1 AND listing_id = $3`,
+		userIDStr, otherID, listingID,
+	).Scan(&otherLastReadID); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			otherLastReadID = ""
+		} else {
+			c.Error(response.ErrInternalServerError(err))
+			return
+		}
+	}
+
 	response.Success(c, http.StatusOK, gin.H{
 		"messages": messages,
+		"otherLastReadID": otherLastReadID,
+		"selfLastReadID": selfLastReadID,
 	})
 }

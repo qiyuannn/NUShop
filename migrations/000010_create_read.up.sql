@@ -1,16 +1,20 @@
 CREATE TABLE read(
-  user_id TEXT
+  user_id UUID
     NOT NULL
-    REFERENCES users(id),
-  other_id TEXT
+    REFERENCES users(id)
+    ON DELETE CASCADE,
+  other_id UUID
     NOT NULL
-    REFERENCES users(id),
-  listing_id TEXT 
+    REFERENCES users(id)
+    ON DELETE CASCADE,
+  listing_id UUID
     NOT NULL 
-    REFERENCES listings(id),
-  last_read_id 
+    REFERENCES listings(id)
+    ON DELETE CASCADE,
+  last_read_id UUID
     NOT NULL
-    REFERENCES messages(id),
+    REFERENCES messages(id)
+    ON DELETE CASCADE,
 
   PRIMARY KEY (user_id, other_id, listing_id)
 )

@@ -28,18 +28,13 @@ export function ChatInput() {
       return;
     }
 
-    const message: Message = {
-      id: "",
-      senderID: "",
-      receiverID: param.otherID!,
-      listingID: param.listingID!,
-      content: msg,
-      createdOn: "",
-    };
-
-    const newWSmessage: WSMessage = {
+    const newWSmessage = {
       type: "message",
-      message: message,
+      message: {
+        receiverID: param.otherID!,
+        listingID: param.listingID!,
+        content: msg,
+      },
     };
 
     sendJsonMessage(newWSmessage);

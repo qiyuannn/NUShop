@@ -1,6 +1,7 @@
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@/components/ui/item";
 import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
 import { API_URL } from "@/lib/api";
+import { Package } from "lucide-react";
 import React from "react";
 import { Link, useParams } from "react-router-dom";
 
@@ -32,13 +33,21 @@ export function ChatHeader() {
   }, []);
 
   return (
-    <Item>
-      <Link to="/">
+    <Item className="w-full" asChild>
+      <Link to={`/listing/${chatInfo.listingID}`}>
         <ItemMedia>
-          <img
-            src={`${API_URL}${chatInfo.image}`}
-            className="aspect-square object-cover border rounded-sm w-12"
-          />
+          {!chatInfo.image ? (
+            <div className="aspect-square border rounded-lg w-full flex items-center justify-center bg-muted">
+              <div className="text-center">
+                <Package className="mx-auto h-8 w-12 opacity-50" />
+              </div>
+            </div>
+          ): (
+            <img
+              src={`${API_URL}${chatInfo.image}`}
+              className="aspect-square object-cover border rounded-sm w-12"
+            />
+          )}
         </ItemMedia>
         <ItemContent>
           <ItemDescription>{chatInfo.otherName}</ItemDescription>

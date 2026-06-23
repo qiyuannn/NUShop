@@ -73,11 +73,10 @@ func GetChatInfo(c *gin.Context) {
 		i.file_url
 		FROM listings l
 		JOIN users u 
-			ON u.user_id = $2
+			ON u.id = $2
 		LEFT JOIN images i
-			ON i.listing_id = l.listing_id
-		WHERE l.listing_id = $1
-		ORDER BY i.created_on DESC
+			ON i.listing_id = l.id
+		WHERE l.id = $1
 		LIMIT 1`,
 		listingID, otherUserID,
 	).Scan(&title, &username, &image); err != nil {

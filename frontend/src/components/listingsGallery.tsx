@@ -81,10 +81,7 @@ export function ListingGallery({ isManaging }: { isManaging: boolean }) {
       }
       setListings((p) => [...p, ...(json?.data?.listings ?? [])]);
       setCursor(json?.data?.cursor ?? null);
-
-      console.log(json);
     } catch (error) {
-      console.log(error);
       setErr(error instanceof Error ? error.message : "INTERNAL_ERR");
     }
   };
@@ -132,9 +129,7 @@ export function ListingGallery({ isManaging }: { isManaging: boolean }) {
         }
         setListings(json?.data?.listings ?? []);
         setCursor(json?.data?.cursor ?? null);
-        console.log(json);
       } catch (error) {
-        console.log(error);
         setErr(error instanceof Error ? error.message : "INTERNAL_ERR");
       } finally {
         setLoading(false);

@@ -5,6 +5,7 @@ import (
 	"backend/response"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -13,9 +14,10 @@ import (
 type chat struct {
 	ListingID string `json:"listingID"`
 	Content string `json:"content"`
-	Created_On string `json:"createdOn"`
-	Username string `json:"username"`
-	Image string `json:"image"`
+	Created_On time.Time `json:"createdOn"`
+	Username string `json:"otherName"`
+	OtherID string `json:"otherID"`
+	Image *string `json:"image"`
 	Title string `json:"title"`
 }
 
@@ -39,24 +41,25 @@ func GetChats(c *gin.Context) {
 
 	rows, err := db.Pool.Query(
 		c.Request.Context(),
-		`SELECT DISTINCT ON (m.listing_id)
+		`SELECT DISTINCT ON (m.listing_id, u.id)
 			m.listing_id, 
 			m.content,
 			m.created_on,
 			u.username,
-			i.file_url
-			t.title
+			u.id,
+			i.file_url,
+			l.title
 		FROM messages m
 		JOIN users u
-			ON u.user_id = CASE
+			ON u.id = CASE
 				WHEN m.sender_id = $1 THEN m.receiver_id
 				WHEN m.receiver_id = $1 THEN m.sender_id
 			END
-		JOIN images i
+		LEFT JOIN images i
 			ON i.listing_id = m.listing_id
 		JOIN listings l
-			ON l.listing_id = m.listing_id
-		ORDER BY m.listing_id, m.created_on DESC`,
+			ON l.id = m.listing_id
+		ORDER BY m.listing_id, u.id, m.created_on DESC`,
 		userIDStr,
 	)
 
@@ -71,7 +74,7 @@ func GetChats(c *gin.Context) {
 
 	for rows.Next() {
 		var ch chat
-		if err := rows.Scan(&ch.ListingID, &ch.Content, &ch.Created_On, &ch.Username, &ch.Image, &ch.Title); err != nil {
+		if err := rows.Scan(&ch.ListingID, &ch.Content, &ch.Created_On, &ch.Username, &ch.OtherID, &ch.Image, &ch.Title); err != nil {
 			c.Error(response.ErrInternalServerError(err))
 			return
 		}

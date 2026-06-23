@@ -110,7 +110,6 @@ export function ChatMessages() {
             pendingReadID.current = id!;
             throttleFn();
           }
-
           observer.unobserve(entry.target);
         });
       },

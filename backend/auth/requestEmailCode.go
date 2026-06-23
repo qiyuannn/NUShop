@@ -38,7 +38,7 @@ func RequestEmailCode(c *gin.Context) {
 
 	email := strings.ToLower(strings.TrimSpace(req.Email))
 	if email == "" || !strings.Contains(email, "@") {
-		c.Error(response.ErrBadRequest(errors.New("invalid email")))
+		c.Error(response.ErrBadRequest(errors.New("Invalid email")))
 		return
 	}
 

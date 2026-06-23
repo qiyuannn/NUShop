@@ -28,7 +28,7 @@ func Login(c *gin.Context) {
 
 	email := strings.ToLower(strings.TrimSpace(request.Email))
 	if email == "" {
-		c.Error(response.ErrBadRequest(errors.New("invalid email")))
+		c.Error(response.ErrBadRequest(errors.New("Invalid email")))
 		return
 	}
 

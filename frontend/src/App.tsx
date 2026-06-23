@@ -14,8 +14,6 @@ import { useAuthApiFetch } from "./hooks/use-authApiFetch";
 import { useAuth } from "./context/auth";
 import { toast } from "sonner";
 import { CartPage } from "./pages/cart";
-import { ChatMain } from "./pages/chatMain";
-import { Chat } from "./pages/chat";
 import { WS_URL } from "./lib/api";
 import useWebSocket from "react-use-websocket";
 
@@ -70,8 +68,6 @@ export function App() {
         <Route path="/listing/:listingID" element={<Listing />} />
         <Route path="/user/:userID" element={<ProfilePage />} />
         <Route path="/cart" element={<CartPage />} />
-        <Route path="/chat" element={<ChatMain />} />
-        <Route path="/chat/:userID" element={<Chat />} />
 
         <Route path="/test" element={<CartPage />} />
       </Route>

@@ -37,6 +37,8 @@ func Login(c *gin.Context) {
 		c.Request.Context(),
 		`SELECT
 			id,
+			first_name,
+			last_name,
 			username,
 			email,
 			password_hash,

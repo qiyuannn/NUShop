@@ -20,18 +20,25 @@ import (
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, using environment variables")
-	}	
+	}
 
 	db.Connect()
 	router := gin.Default()
 
 	//CORS
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173", "https://nushop-frontend.onrender.com", "https://nushop-test.onrender.com", "https://nushop-d5a8.onrender.com"},
+		AllowOrigins:     []string{"http://localhost:5173", "https://nushop-frontend.onrender.com", "https://nushop-test.onrender.com", "https://nushop-dusky.vercel.app"},
 		AllowMethods:     []string{"GET", "PUT", "POST", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		AllowCredentials: true,
 	}))
+
+	router.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"ok":      true,
+			"service": "nushop-backend",
+		})
+	})
 
 	router.Use(response.ErrorHandler())
 	private := router.Group("/")
@@ -45,9 +52,8 @@ func main() {
 	router.POST("/auth/request_code", auth.RequestEmailCode)
 	router.POST("/auth/verify_code", auth.VerifyEmailCode)
 	router.POST("/auth/google_login", auth.GoogleLogin)
-	
 
-	//users handlers 
+	//users handlers
 	router.GET("/user/:userID", users.GetUser)
 
 	//categories handlers
@@ -79,7 +85,7 @@ func main() {
 		port = "8080"
 		log.Println("Port undefined, using :8080")
 	}
-	
+
 	router.Static("/uploads", "./uploads")
 	if err := router.Run(":" + port); err != nil {
 		log.Fatal(err)

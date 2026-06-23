@@ -150,7 +150,7 @@ export function Listing() {
         <Button
           size="default"
           className="h-full flex-[1.6] rounded-none"
-          onClick={() => nav(`/chat/${listing.sellerID}`)}
+          onClick={() => nav(`/chat/${listing.id}/${listing.sellerID}`)}
         >
           Chat with seller
         </Button>

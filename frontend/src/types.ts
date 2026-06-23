@@ -25,27 +25,34 @@ export type CartItem = {
 
 export type AuthApiFetch = (url: string, options?: RequestInit) => Promise<Response>;
 
-export type lastMessage = {
-  chatID: string;
-  username: string;
-  lastMessage: string;
-  lastMessageSender: string;
-  lastMessageOn: string;
-  read: boolean;
+export type WSMessage = {
+  type: string;
+  message?: Message;
+  read?: Read;
 };
 
 export type Message = {
   id: string;
   senderID: string;
   receiverID: string;
+  listingID: string;
   content: string;
-  read: boolean;
   createdOn: string;
 };
 
-export type WSResponse = {
-  type: string;
-  chatID: string;
-  message: Message;
-  error: string;
+export type Read = {
+  userID: string;
+  otherID: string;
+  listingID: string;
+  lastReadID: string;
+};
+
+export type chat = {
+  listingID: string;
+  title: string;
+  content: string;
+  createdOn: string;
+  otherName: string;
+  otherID: string;
+  image: string;
 };

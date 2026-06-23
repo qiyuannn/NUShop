@@ -176,11 +176,7 @@ export function SignupForm() {
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
             />
-            <Button
-              className="w-full"
-              onClick={sendCode}
-              disabled={loading || !email.trim()}
-            >
+            <Button className="w-full" onClick={sendCode} disabled={loading || !email.trim()}>
               {loading ? "Sending..." : "Send code"}
             </Button>
           </div>
@@ -244,11 +240,7 @@ export function SignupForm() {
               At least 8 characters, with 1 uppercase, 1 lowercase, and 1 number.
             </p>
             <div className="grid w-full grid-cols-2 gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setStep("code")}
-                disabled={loading}
-              >
+              <Button variant="outline" onClick={() => setStep("code")} disabled={loading}>
                 Back
               </Button>
 

@@ -1,4 +1,4 @@
-package chat
+package chatv2
 
 import (
 	"backend/auth"

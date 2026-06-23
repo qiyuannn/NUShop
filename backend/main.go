@@ -2,7 +2,7 @@ package main
 
 import (
 	"backend/auth"
-	"backend/chat"
+	chatv2 "backend/chat_V2"
 	"backend/database"
 	"backend/handlers/cart"
 	"backend/handlers/categories"
@@ -73,12 +73,14 @@ func main() {
 	private.DELETE("/cart", cart.DeleteFromCart)
 
 	//chat handlers
-	private.GET("/chat/:userID", chat.GetMessages)
-	private.GET("/chat", chat.GetConversations)
+	private.GET("/chat", chatv2.GetChats)
+	private.GET("/chat/:listingID/:otherID", chatv2.GetChatHistory)
+	private.GET("/chat/info/:listingID/:id1/:id2", chatv2.GetChatInfo)
+	private.GET("/chat/info/:listingID/:id1", chatv2.GetChatInfo)
 
-	hub := chat.NewHub()
+	hub := chatv2.NewHub()
 	go hub.Run()
-	router.GET("/ws", chat.ServeWs(hub))
+	router.GET("/ws", chatv2.ServeWs(hub))
 
 	port := os.Getenv("PORT")
 	if port == "" {

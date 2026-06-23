@@ -29,6 +29,20 @@ export function SignupForm() {
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
 
+  React.useEffect(() => {
+    const active = document.activeElement;
+    if (active instanceof HTMLElement) {
+      active.blur();
+    }
+  }, [step]);
+
+  const usernameValid = /^[a-zA-Z0-9._]{3,30}$/.test(username);
+  const passwordValid =
+    password.length >= 8 &&
+    /[A-Z]/.test(password) &&
+    /[a-z]/.test(password) &&
+    /\d/.test(password);
+
   async function sendCode() {
     setLoading(true);
     setErr(null);
@@ -109,7 +123,7 @@ export function SignupForm() {
 
       if (!res.ok) {
         if (res.status === 409 || json?.error?.code === "STATUS_CONFLICT") {
-          throw new Error("Account already exists. Please log in.");
+          throw new Error("Username is already taken.");
         }
 
         throw new Error(json?.error?.message ?? json?.error?.code ?? "INTERNAL_ERROR");
@@ -211,6 +225,9 @@ export function SignupForm() {
               onChange={(e) => setUsername(e.target.value)}
               autoComplete="username"
             />
+            <p className="text-xs text-neutral-400">
+              3-30 characters, letters/numbers/dots/underscores only.
+            </p>
             <input
               className="w-full rounded border border-neutral-700 bg-transparent px-3 py-2 outline-none"
               type="password"
@@ -219,12 +236,18 @@ export function SignupForm() {
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="new-password"
             />
+            <p className="text-xs text-neutral-400">
+              At least 8 characters, with 1 uppercase, 1 lowercase, and 1 number.
+            </p>
             <div className="grid w-full grid-cols-2 gap-2">
               <Button variant="outline" onClick={() => setStep("code")} disabled={loading}>
                 Back
               </Button>
 
-              <Button onClick={completeSignup} disabled={loading || !username.trim() || !password}>
+              <Button
+                onClick={completeSignup}
+                disabled={loading || !usernameValid || !passwordValid}
+              >
                 {loading ? "Creating..." : "Create account"}
               </Button>
             </div>

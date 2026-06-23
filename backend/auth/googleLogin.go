@@ -82,42 +82,26 @@ func GoogleLogin(c *gin.Context) {
 		return
 	}
 
-	firstName := strings.TrimSpace(getStringClaim(payload.Claims, "given_name"))
-	lastName := strings.TrimSpace(getStringClaim(payload.Claims, "family_name"))
-	if firstName == "" {
-		firstName = strings.TrimSpace(getStringClaim(payload.Claims, "name"))
-	}
-	if firstName == "" {
-		firstName = "Google"
-	}
-	if lastName == "" {
-		lastName = "User"
-	}
-
 	var user models.User
 	err = db.Pool.QueryRow(
 		c.Request.Context(),
 		`SELECT
-			id,
-			first_name,
-			last_name,
-			username,
-			email,
-			password_hash,
-			created_on
-		FROM users
-		WHERE google_sub = $1 OR email = $2`,
+		id,
+		username,
+		email,
+		password_hash,
+		created_on
+	FROM users
+	WHERE google_sub = $1 OR email = $2`,
 		googleSub, email,
 	).Scan(
 		&user.ID,
-		&user.FirstName,
-		&user.LastName,
 		&user.Username,
 		&user.Email,
 		&user.PasswordHash,
 		&user.CreatedOn,
 	)
-
+	
 	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		c.Error(response.ErrInternalServerError(err))
 		return

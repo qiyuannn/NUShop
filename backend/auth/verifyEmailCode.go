@@ -31,7 +31,7 @@ func VerifyEmailCode(c *gin.Context) {
 
 	email := strings.ToLower(strings.TrimSpace(req.Email))
 	if email == "" || !strings.Contains(email, "@") {
-		c.Error(response.ErrBadRequest(errors.New("invalid email")))
+		c.Error(response.ErrBadRequest(errors.New("Invalid email")))
 		return
 	}
 
@@ -49,7 +49,7 @@ func VerifyEmailCode(c *gin.Context) {
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			c.Error(response.ErrUnauthorised(errors.New("code not found")))
+			c.Error(response.ErrUnauthorised(errors.New("Code not found")))
 			return
 		}
 		c.Error(response.ErrInternalServerError(err))
@@ -57,12 +57,12 @@ func VerifyEmailCode(c *gin.Context) {
 	}
 
 	if time.Now().After(expiresAt) {
-		c.Error(response.ErrUnauthorised(errors.New("code expired")))
+		c.Error(response.ErrUnauthorised(errors.New("Code expired")))
 		return
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(codeHash), []byte(req.Code)); err != nil {
-		c.Error(response.ErrUnauthorised(errors.New("invalid code")))
+		c.Error(response.ErrUnauthorised(errors.New("Invalid code")))
 		return
 	}
 
@@ -70,20 +70,16 @@ func VerifyEmailCode(c *gin.Context) {
 	err = db.Pool.QueryRow(
 		c.Request.Context(),
 		`SELECT
-			id,
-			first_name,
-			last_name,
-			username,
-			email,
-			password_hash,
-			created_on
-		FROM users
-		WHERE email = $1`,
+		id,
+		username,
+		email,
+		password_hash,
+		created_on
+	FROM users
+	WHERE email = $1`,
 		email,
 	).Scan(
 		&user.ID,
-		&user.FirstName,
-		&user.LastName,
 		&user.Username,
 		&user.Email,
 		&user.PasswordHash,
@@ -156,7 +152,7 @@ func VerifyEmailCode(c *gin.Context) {
 		signupSecret = os.Getenv("AccessTokenSecret")
 	}
 	if signupSecret == "" {
-		c.Error(response.ErrInternalServerError(errors.New("signup token secret not set")))
+		c.Error(response.ErrInternalServerError(errors.New("Signup token secret not set")))
 		return
 	}
 

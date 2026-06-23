@@ -9,8 +9,6 @@ import { useParams } from "react-router-dom";
 export function ProfilePage() {
   const { userID } = useParams();
   const [user, setUser] = React.useState({
-    firstName: "",
-    lastName: "",
     username: "",
     createdOn: "",
   });
@@ -58,7 +56,7 @@ export function ProfilePage() {
         </ItemMedia>
         <ItemContent className="gap-0">
           <ItemTitle className="font-bold text-xl">
-            {user.username || `${user.firstName} ${user.lastName}`}
+            {user.username || "Unknown user"}
           </ItemTitle>
           <ItemDescription>Joined since {new Date(user.createdOn).getFullYear()}</ItemDescription>
         </ItemContent>

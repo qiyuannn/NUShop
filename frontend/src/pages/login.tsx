@@ -39,6 +39,12 @@ export function LoginForm() {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [code, setCode] = React.useState("");
+  React.useEffect(() => {
+    const active = document.activeElement;
+    if (active instanceof HTMLElement) {
+      active.blur();
+    }
+  }, [step]);
 
   async function sendLoginCode(loginEmail: string) {
     const res = await fetch(`${API_URL}/auth/request_code`, {
@@ -210,7 +216,6 @@ export function LoginForm() {
               <Input
                 id="email"
                 type="email"
-                placeholder="abc@xyz.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
@@ -222,7 +227,6 @@ export function LoginForm() {
               <Input
                 id="password"
                 type="password"
-                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"

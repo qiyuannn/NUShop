@@ -28,7 +28,7 @@ func Login(c *gin.Context) {
 
 	email := strings.ToLower(strings.TrimSpace(request.Email))
 	if email == "" {
-		c.Error(response.ErrBadRequest(errors.New("invalid email")))
+		c.Error(response.ErrBadRequest(errors.New("Invalid email")))
 		return
 	}
 
@@ -36,20 +36,16 @@ func Login(c *gin.Context) {
 	if err := db.Pool.QueryRow(
 		c.Request.Context(),
 		`SELECT
-			id,
-			first_name,
-			last_name,
-			username,
-			email,
-			password_hash,
-			created_on
-		FROM users
-		WHERE email = $1`,
+		id,
+		username,
+		email,
+		password_hash,
+		created_on
+	FROM users
+	WHERE email = $1`,
 		email,
 	).Scan(
 		&user.ID,
-		&user.FirstName,
-		&user.LastName,
 		&user.Username,
 		&user.Email,
 		&user.PasswordHash,

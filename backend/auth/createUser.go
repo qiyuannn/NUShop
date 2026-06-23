@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -79,20 +80,58 @@ func CreateUser(c *gin.Context) {
 	username := strings.TrimSpace(request.Username)
 	password := request.Password
 
+	usernameRegex := regexp.MustCompile(`^[a-zA-Z0-9._]{3,30}$`)
+
+	if !usernameRegex.MatchString(username) {
+		c.Error(response.ErrBadRequest(errors.New(
+			"username must be 3-30 characters and contain only letters, numbers, dots and underscores",
+		)))
+		return
+	}
+
+	if len(password) < 8 {
+		c.Error(response.ErrBadRequest(errors.New(
+			"password must be at least 8 characters",
+		)))
+		return
+	}
+
+	hasUpper := false
+	hasLower := false
+	hasNumber := false
+
+	for _, ch := range password {
+		switch {
+		case ch >= 'A' && ch <= 'Z':
+			hasUpper = true
+		case ch >= 'a' && ch <= 'z':
+			hasLower = true
+		case ch >= '0' && ch <= '9':
+			hasNumber = true
+		}
+	}
+
+	if !hasUpper || !hasLower || !hasNumber {
+		c.Error(response.ErrBadRequest(errors.New(
+			"password must contain at least one uppercase letter, one lowercase letter and one number",
+		)))
+		return
+	}
+
 	if email == "" || !strings.Contains(email, "@") {
-		c.Error(response.ErrBadRequest(errors.New("invalid email")))
+		c.Error(response.ErrBadRequest(errors.New("Invalid email")))
 		return
 	}
 	if username == "" {
-		c.Error(response.ErrBadRequest(errors.New("username required")))
+		c.Error(response.ErrBadRequest(errors.New("Username required")))
 		return
 	}
 	if password == "" {
-		c.Error(response.ErrBadRequest(errors.New("password required")))
+		c.Error(response.ErrBadRequest(errors.New("Password required")))
 		return
 	}
 	if request.VerificationToken == "" {
-		c.Error(response.ErrBadRequest(errors.New("missing verification token")))
+		c.Error(response.ErrBadRequest(errors.New("Missing verification token")))
 		return
 	}
 
@@ -101,7 +140,7 @@ func CreateUser(c *gin.Context) {
 		signupSecret = os.Getenv("AccessTokenSecret")
 	}
 	if signupSecret == "" {
-		c.Error(response.ErrInternalServerError(errors.New("signup token secret not set")))
+		c.Error(response.ErrInternalServerError(errors.New("Signup token secret not set")))
 		return
 	}
 
@@ -113,17 +152,17 @@ func CreateUser(c *gin.Context) {
 		},
 	)
 	if err != nil || !token.Valid {
-		c.Error(response.ErrUnauthorised(errors.New("invalid verification token")))
+		c.Error(response.ErrUnauthorised(errors.New("Invalid verification token")))
 		return
 	}
 
 	claims, ok := token.Claims.(*jwt.RegisteredClaims)
 	if !ok || claims.Subject != email {
-		c.Error(response.ErrUnauthorised(errors.New("verification token mismatch")))
+		c.Error(response.ErrUnauthorised(errors.New("Verification token mismatch")))
 		return
 	}
 	if claims.ExpiresAt != nil && claims.ExpiresAt.Time.Before(time.Now()) {
-		c.Error(response.ErrUnauthorised(errors.New("verification token expired")))
+		c.Error(response.ErrUnauthorised(errors.New("Verification token expired")))
 		return
 	}
 
@@ -135,8 +174,6 @@ func CreateUser(c *gin.Context) {
 
 	var user struct {
 		ID           string
-		FirstName    string
-		LastName     string
 		Username     string
 		Email        string
 		PasswordHash string
@@ -146,29 +183,21 @@ func CreateUser(c *gin.Context) {
 	err = db.Pool.QueryRow(
 		c.Request.Context(),
 		`INSERT INTO users (
-			first_name,
-			last_name,
-			username,
-			email,
-			password_hash
-		) VALUES ($1, $2, $3, $4, $5)
-		RETURNING
-			id,
-			first_name,
-			last_name,
-			username,
-			email,
-			password_hash,
-			created_on`,
 		username,
-		"",
+		email,
+		password_hash
+	) VALUES ($1, $2, $3)
+	RETURNING
+		id,
+		username,
+		email,
+		password_hash,
+		created_on`,
 		username,
 		email,
 		string(passwordHash),
 	).Scan(
 		&user.ID,
-		&user.FirstName,
-		&user.LastName,
 		&user.Username,
 		&user.Email,
 		&user.PasswordHash,
@@ -180,11 +209,11 @@ func CreateUser(c *gin.Context) {
 			case "23505":
 				switch pgErr.ConstraintName {
 				case "users_email_key":
-					c.Error(response.ErrStatusConflict(errors.New("email already in use")))
+					c.Error(response.ErrStatusConflict(errors.New("Email already in use")))
 				case "users_username_key":
-					c.Error(response.ErrStatusConflict(errors.New("username already in use")))
+					c.Error(response.ErrStatusConflict(errors.New("Username already in use")))
 				default:
-					c.Error(response.ErrStatusConflict(errors.New("email or username already in use")))
+					c.Error(response.ErrStatusConflict(errors.New("Email or username already in use")))
 				}
 				return
 			case "23502":
@@ -211,8 +240,6 @@ func CreateUser(c *gin.Context) {
 	response.Success(c, http.StatusCreated, gin.H{
 		"user": gin.H{
 			"id":        user.ID,
-			"firstName": user.FirstName,
-			"lastName":  user.LastName,
 			"username":  user.Username,
 			"email":     user.Email,
 			"createdOn": user.CreatedOn,

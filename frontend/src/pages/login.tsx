@@ -45,7 +45,7 @@ export function LoginForm() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ email: loginEmail }),
+      body: JSON.stringify({ email: loginEmail, flow: "login" }),
     });
 
     const text = await res.text();

@@ -18,6 +18,7 @@ import (
 
 type RequestEmailCodeRequest struct {
 	Email string `json:"email"`
+	Flow  string `json:"flow"`
 }
 
 func generateCode() (string, error) {
@@ -45,21 +46,33 @@ func RequestEmailCode(c *gin.Context) {
 	err := db.Pool.QueryRow(
 		c.Request.Context(),
 		`SELECT id
-		 FROM users
-		 WHERE email = $1
-		 LIMIT 1`,
+	 FROM users
+	 WHERE email = $1
+	 LIMIT 1`,
 		email,
 	).Scan(&existingUserID)
 
-	if err == nil {
-		c.Error(response.ErrBadRequest(errors.New("An account with this email already exists. Please log in instead.")))
+	flow := strings.ToLower(strings.TrimSpace(req.Flow))
+	if flow != "login" && flow != "signup" {
+		c.Error(response.ErrBadRequest(errors.New("Invalid flow")))
 		return
 	}
-	if !errors.Is(err, pgx.ErrNoRows) {
+
+	userExists := err == nil
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		c.Error(response.ErrInternalServerError(err))
 		return
 	}
 
+	if flow == "signup" && userExists {
+		c.Error(response.ErrBadRequest(errors.New("An account with this email already exists. Please log in instead.")))
+		return
+	}
+
+	if flow == "login" && !userExists {
+		c.Error(response.ErrBadRequest(errors.New("Account not found. Please sign up instead.")))
+		return
+	}
 	code, err := generateCode()
 	if err != nil {
 		c.Error(response.ErrInternalServerError(err))
@@ -87,7 +100,7 @@ func RequestEmailCode(c *gin.Context) {
 		return
 	}
 
-	if err := sendGmailCode(email, code); err != nil {
+	if err := sendEmailCode(email, code); err != nil {
 		c.Error(response.ErrInternalServerError(errors.New("Could not send verification code right now. Please try again later.")))
 		return
 	}

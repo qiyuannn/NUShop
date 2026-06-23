@@ -85,7 +85,7 @@ export function Listing() {
           throw new Error(json2?.error?.code ?? "INTERNAL_ERROR");
         }
         setSeller(json2.data.user);
-      } catch (error) {
+      } catch {
         setErr(true);
       }
     }
@@ -133,9 +133,7 @@ export function Listing() {
                   </Avatar>
                 </ItemMedia>
                 <ItemContent className="gap-0">
-                  <ItemTitle>
-                    {seller.username || "Unknown seller"}
-                  </ItemTitle>
+                  <ItemTitle>{seller.username || "Unknown seller"}</ItemTitle>
                   <ItemDescription>
                     Joined since {new Date(seller.createdOn).getFullYear()}
                   </ItemDescription>

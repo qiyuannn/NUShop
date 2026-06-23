@@ -5,23 +5,23 @@ import type { Message, WSMessage } from "@/types";
 import React from "react";
 import { useParams } from "react-router-dom";
 import useWebSocket from "react-use-websocket";
-import throttle from "lodash.throttle"
+import throttle from "lodash.throttle";
 import { Item, ItemGroup } from "../ui/item";
 import { formatMessageTime } from "@/lib/fomatTime";
 import { Check } from "lucide-react";
 
 export function ChatMessages() {
-  const { token } = useAuth()
-  const param = useParams()
-  const authApiFetch = useAuthApiFetch()
+  const { token } = useAuth();
+  const param = useParams();
+  const authApiFetch = useAuthApiFetch();
 
   const [messages, setMessages] = React.useState<Message[]>([]);
-  const [loadErr, setLoadErr] = React.useState(false)
+  const [_, setLoadErr] = React.useState(false);
   const [otherLastReadID, setOtherLastReadID] = React.useState("");
-  const [selfLastReadID, setSelfLastReadID] = React.useState("")
+  const [selfLastReadID, setSelfLastReadID] = React.useState("");
 
-  const messageRefs = React.useRef<Map<string, HTMLDivElement>>(new Map())
-  const pendingReadID = React.useRef<string>("")
+  const messageRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
+  const pendingReadID = React.useRef<string>("");
 
   const bottomRef = React.useRef<HTMLDivElement>(null);
 
@@ -56,7 +56,7 @@ export function ChatMessages() {
     onClose: () => {
       console.log("conn closed");
     },
-    onMessage
+    onMessage,
   });
 
   // Other person reads my messages
@@ -71,80 +71,79 @@ export function ChatMessages() {
     [messages, selfLastReadID],
   );
 
-  const sendRead = React.useCallback(
-    
-    () => {
-      if (!pendingReadID.current) {
-        return
-      }
-      const readMsg: WSMessage = {
-        type: "read",
-        read: {
-          userID: "",
-          otherID: param.otherID!,
-          listingID: param.listingID!,
-          lastReadID: pendingReadID.current
-        }
-      }
+  const sendRead = React.useCallback(() => {
+    if (!pendingReadID.current) {
+      return;
+    }
+    const readMsg: WSMessage = {
+      type: "read",
+      read: {
+        userID: "",
+        otherID: param.otherID!,
+        listingID: param.listingID!,
+        lastReadID: pendingReadID.current,
+      },
+    };
 
-      sendJsonMessage(readMsg)
-      pendingReadID.current = ""
-    }, [param.otherID, param.listingID]
-  )
+    sendJsonMessage(readMsg);
+    pendingReadID.current = "";
+  }, [param.otherID, param.listingID]);
 
   const throttleFn = React.useMemo(
-    () => throttle(sendRead, 300, { leading: true, trailing: true })
-  , [sendRead])
+    () => throttle(sendRead, 300, { leading: true, trailing: true }),
+    [sendRead],
+  );
 
   React.useEffect(() => () => throttleFn.cancel(), [throttleFn]);
 
   React.useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return
-        
-        const id = entry.target.getAttribute("data-message-id")
-        const currIndex = messages.findIndex((m) => m.id == id)
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
 
-        if (currIndex > selfLastReadIndex) {
-          setSelfLastReadID(id!)
-          pendingReadID.current = id!
-          throttleFn()
-        }
+          const id = entry.target.getAttribute("data-message-id");
+          const currIndex = messages.findIndex((m) => m.id == id);
 
-        observer.unobserve(entry.target)
-      })
-    }, {threshold: 0.5})
+          if (currIndex > selfLastReadIndex) {
+            setSelfLastReadID(id!);
+            pendingReadID.current = id!;
+            throttleFn();
+          }
 
-    messageRefs.current.forEach((el) => observer.observe(el))
-    return () => observer.disconnect()
-  }, [messages, selfLastReadIndex, throttleFn])
+          observer.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.5 },
+    );
 
+    messageRefs.current.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [messages, selfLastReadIndex, throttleFn]);
 
   // on load
   React.useEffect(() => {
-    setLoadErr(false)
+    setLoadErr(false);
     async function fetchData() {
       try {
-        const res = await authApiFetch(`${API_URL}/chat/${param.listingID}/${param.otherID}`)
-        const json = await res.json()
+        const res = await authApiFetch(`${API_URL}/chat/${param.listingID}/${param.otherID}`);
+        const json = await res.json();
         if (!res.ok) {
-          throw new Error(json?.error?.code ?? "INTERNAL_ERROR")
+          throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
         }
-        setMessages(json?.data?.messages ?? [])
-        setOtherLastReadID(json?.data?.otherLastReadID ?? "")
-        setSelfLastReadID(json?.data?.selfLastReadID ?? "")
+        setMessages(json?.data?.messages ?? []);
+        setOtherLastReadID(json?.data?.otherLastReadID ?? "");
+        setSelfLastReadID(json?.data?.selfLastReadID ?? "");
       } catch {
-        setLoadErr(true)
+        setLoadErr(true);
       }
     }
-    fetchData()
-  }, [])
+    fetchData();
+  }, []);
 
   React.useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "instant" });
   }, [messages]);
-
 
   return (
     <div>
@@ -155,15 +154,18 @@ export function ChatMessages() {
 
           return (
             <Item
-            key={message.id}
-            data-message-id={message.id}
-            ref={(el) => {
-              if (otherMessage) {
-                if (el) {messageRefs.current.set(message.id, el);}
-                else {messageRefs.current.delete(message.id); }
-              }
-            }}
-            className={otherMessage ? "justify-start p-1" : "justify-end p-1"}
+              key={message.id}
+              data-message-id={message.id}
+              ref={(el) => {
+                if (otherMessage) {
+                  if (el) {
+                    messageRefs.current.set(message.id, el);
+                  } else {
+                    messageRefs.current.delete(message.id);
+                  }
+                }
+              }}
+              className={otherMessage ? "justify-start p-1" : "justify-end p-1"}
             >
               <div className="line-clamp-none max-w-4/5 p-2 bg-teal-500 rounded-sm">
                 <h1 className="text-wrap break-all text-black">{message.content}</h1>
@@ -171,12 +173,12 @@ export function ChatMessages() {
                   {formatMessageTime(message.createdOn)}
                 </h1>
               </div>
-              {isRead && <Check size={15}/>}
+              {isRead && <Check size={15} />}
             </Item>
           );
         })}
-      </ItemGroup>  
-       <div ref={bottomRef} />
+      </ItemGroup>
+      <div ref={bottomRef} />
     </div>
-  )
+  );
 }

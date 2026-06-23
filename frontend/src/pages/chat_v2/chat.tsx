@@ -6,14 +6,14 @@ export function Chat() {
   return (
     <div className="flex flex-col h-[calc(100vh-3rem)]">
       <div>
-        <ChatHeader/>
+        <ChatHeader />
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto">
-        <ChatMessages/>
+        <ChatMessages />
       </div>
       <div className="p-2">
-        <ChatInput/>
+        <ChatInput />
       </div>
-    </div> 
+    </div>
   );
 }

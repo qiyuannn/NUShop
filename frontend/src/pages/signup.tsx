@@ -38,10 +38,7 @@ export function SignupForm() {
 
   const usernameValid = /^[a-zA-Z0-9._]{3,30}$/.test(username);
   const passwordValid =
-    password.length >= 8 &&
-    /[A-Z]/.test(password) &&
-    /[a-z]/.test(password) &&
-    /\d/.test(password);
+    password.length >= 8 && /[A-Z]/.test(password) && /[a-z]/.test(password) && /\d/.test(password);
 
   async function sendCode() {
     setLoading(true);

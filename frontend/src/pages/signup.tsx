@@ -38,7 +38,7 @@ export function SignupForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({ email: email.trim(), flow: "signup" }),
       });
 
       const text = await res.text();

@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func sendGmailCode(to string, code string) error {
+func sendEmailCode(to string, code string) error {
 	host := os.Getenv("SMTP_HOST")
 	if host == "" {
 		host = "smtp.gmail.com"

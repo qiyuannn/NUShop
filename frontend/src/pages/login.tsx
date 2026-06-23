@@ -39,6 +39,12 @@ export function LoginForm() {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [code, setCode] = React.useState("");
+  React.useEffect(() => {
+    const active = document.activeElement;
+    if (active instanceof HTMLElement) {
+      active.blur();
+    }
+  }, [step]);
 
   async function sendLoginCode(loginEmail: string) {
     const res = await fetch(`${API_URL}/auth/request_code`, {

@@ -28,6 +28,14 @@ export function SignupForm() {
   const [verificationToken, setVerificationToken] = React.useState("");
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
+
+  React.useEffect(() => {
+    const active = document.activeElement;
+    if (active instanceof HTMLElement) {
+      active.blur();
+    }
+  }, [step]);
+
   const usernameValid = /^[a-zA-Z0-9._]{3,30}$/.test(username);
   const passwordValid =
     password.length >= 8 &&

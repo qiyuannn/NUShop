@@ -10,20 +10,21 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
 )
+
 func GetUser(c *gin.Context) {
 	userUUID := c.Param("userID")
 
 	var user models.User
 	if err := db.Pool.QueryRow(
 		c.Request.Context(),
-		`SELECT 
-		created_on
-		FROM users WHERE 
-		id = $1`, 
+		`SELECT id, username, email, created_on
+	 FROM users
+	 WHERE id = $1`,
 		userUUID,
 	).Scan(
-		&user.FirstName, 
-		&user.LastName, 
+		&user.ID,
+		&user.Username,
+		&user.Email,
 		&user.CreatedOn,
 	); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -35,7 +36,7 @@ func GetUser(c *gin.Context) {
 	}
 
 	response.Success(c, http.StatusOK, gin.H{
-		"user": user,
+		"user":    user,
 		"message": "user getfetched",
 	})
 }

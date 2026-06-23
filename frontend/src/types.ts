@@ -1,7 +1,5 @@
 export type User = {
   id: string;
-  firstName: string;
-  lastName: string;
   username: string;
   email: string;
   createdOn: string;
@@ -29,8 +27,7 @@ export type AuthApiFetch = (url: string, options?: RequestInit) => Promise<Respo
 
 export type lastMessage = {
   chatID: string;
-  firstName: string;
-  lastName: string;
+  username: string;
   lastMessage: string;
   lastMessageSender: string;
   lastMessageOn: string;

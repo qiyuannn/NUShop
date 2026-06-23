@@ -13,8 +13,7 @@ import (
 
 type Conversation struct {
 	ChatID            string    `json:"chatID"`
-	FirstName         string    `json:"firstName"`
-	LastName          string    `json:"lastName"`
+	Username          string    `json:"username"`
 	LastMessage       string    `json:"lastMessage"`
 	LastMessageSender string    `json:"lastMessageSender"`
 	LastMessageOn     time.Time `json:"lastMessageOn"`
@@ -68,7 +67,7 @@ func GetConversations(c *gin.Context) {
 	conversations := make([]Conversation, 0)
 	for rows.Next() {
 		var conv Conversation
-		if err := rows.Scan(&conv.ChatID, &conv.FirstName, &conv.LastName, &conv.LastMessage, &conv.LastMessageSender, &conv.LastMessageOn, &conv.Read); err != nil {
+		if err := rows.Scan(&conv.ChatID, &conv.Username, &conv.LastMessage, &conv.LastMessageSender, &conv.LastMessageOn, &conv.Read); err != nil {
 			c.Error(response.ErrInternalServerError(err))
 			return
 		}

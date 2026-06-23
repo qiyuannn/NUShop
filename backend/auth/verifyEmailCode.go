@@ -70,20 +70,16 @@ func VerifyEmailCode(c *gin.Context) {
 	err = db.Pool.QueryRow(
 		c.Request.Context(),
 		`SELECT
-			id,
-			first_name,
-			last_name,
-			username,
-			email,
-			password_hash,
-			created_on
-		FROM users
-		WHERE email = $1`,
+		id,
+		username,
+		email,
+		password_hash,
+		created_on
+	FROM users
+	WHERE email = $1`,
 		email,
 	).Scan(
 		&user.ID,
-		&user.FirstName,
-		&user.LastName,
 		&user.Username,
 		&user.Email,
 		&user.PasswordHash,

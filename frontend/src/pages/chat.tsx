@@ -18,8 +18,7 @@ export function Chat() {
   const param = useParams();
   const authApiFetch = useAuthApiFetch();
   const [user, setUser] = React.useState({
-    firstName: "",
-    lastName: "",
+    username: "",
   });
   const [messages, setMessages] = React.useState<Message[]>([]);
   const { token } = useAuth();
@@ -58,7 +57,7 @@ export function Chat() {
     async function fetchData() {
       const res2 = await fetch(`${API_URL}/user/${param.userID}`);
       const json2 = await res2.json();
-      setUser({ firstName: json2.data.user.firstName, lastName: json2.data.user.lastName });
+      setUser({ username: json2.data.user.username ?? "" });
       console.log(token);
       if (token) {
         const res1 = await authApiFetch(`${API_URL}/chat/${param.userID}`);
@@ -80,7 +79,7 @@ export function Chat() {
             </Avatar>
           </ItemMedia>
           <ItemTitle className="font-bold">
-            {user.firstName} {user.lastName}
+            {user.username || "Unknown user"}
           </ItemTitle>
         </Item>
       </div>

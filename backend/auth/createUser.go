@@ -174,8 +174,6 @@ func CreateUser(c *gin.Context) {
 
 	var user struct {
 		ID           string
-		FirstName    string
-		LastName     string
 		Username     string
 		Email        string
 		PasswordHash string
@@ -185,29 +183,21 @@ func CreateUser(c *gin.Context) {
 	err = db.Pool.QueryRow(
 		c.Request.Context(),
 		`INSERT INTO users (
-			first_name,
-			last_name,
-			username,
-			email,
-			password_hash
-		) VALUES ($1, $2, $3, $4, $5)
-		RETURNING
-			id,
-			first_name,
-			last_name,
-			username,
-			email,
-			password_hash,
-			created_on`,
 		username,
-		"",
+		email,
+		password_hash
+	) VALUES ($1, $2, $3)
+	RETURNING
+		id,
+		username,
+		email,
+		password_hash,
+		created_on`,
 		username,
 		email,
 		string(passwordHash),
 	).Scan(
 		&user.ID,
-		&user.FirstName,
-		&user.LastName,
 		&user.Username,
 		&user.Email,
 		&user.PasswordHash,
@@ -219,11 +209,11 @@ func CreateUser(c *gin.Context) {
 			case "23505":
 				switch pgErr.ConstraintName {
 				case "users_email_key":
-					c.Error(response.ErrStatusConflict(errors.New("email already in use")))
+					c.Error(response.ErrStatusConflict(errors.New("Email already in use")))
 				case "users_username_key":
-					c.Error(response.ErrStatusConflict(errors.New("username already in use")))
+					c.Error(response.ErrStatusConflict(errors.New("Username already in use")))
 				default:
-					c.Error(response.ErrStatusConflict(errors.New("email or username already in use")))
+					c.Error(response.ErrStatusConflict(errors.New("Email or username already in use")))
 				}
 				return
 			case "23502":
@@ -250,8 +240,6 @@ func CreateUser(c *gin.Context) {
 	response.Success(c, http.StatusCreated, gin.H{
 		"user": gin.H{
 			"id":        user.ID,
-			"firstName": user.FirstName,
-			"lastName":  user.LastName,
 			"username":  user.Username,
 			"email":     user.Email,
 			"createdOn": user.CreatedOn,

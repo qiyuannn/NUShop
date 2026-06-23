@@ -81,8 +81,7 @@ export function ChatList() {
           }
           const newChat: lastMessage = {
             chatID: msg.chatID,
-            firstName: json?.data?.user?.firstName ?? "Failed to load Name",
-            lastName: json?.data?.user?.lastName ?? "",
+            username: json?.data?.user?.username ?? "Failed to load username",
             lastMessage: msg.message.content,
             lastMessageSender: msg.message.senderID,
             lastMessageOn: msg.message.createdOn,
@@ -145,7 +144,7 @@ export function ChatList() {
             </ItemMedia>
             <ItemContent className="gap-0">
               <ItemTitle className="font-bold">
-                {message.firstName} {message.lastName}
+                {message.username}
               </ItemTitle>
               <ItemDescription className="overflow-wrap break-all">
                 {message.lastMessage}

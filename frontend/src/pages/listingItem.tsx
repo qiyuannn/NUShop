@@ -47,11 +47,9 @@ export function Listing() {
   });
   const [err, setErr] = React.useState(false);
   const [seller, setSeller] = React.useState({
-    firstName: "",
-    lastName: "",
+    username: "",
     createdOn: "",
   });
-
   const handleAddToCart = async () => {
     if (!token) {
       toast.message("Log in to add item to cart.");
@@ -136,7 +134,7 @@ export function Listing() {
                 </ItemMedia>
                 <ItemContent className="gap-0">
                   <ItemTitle>
-                    {seller.firstName} {seller.lastName}
+                    {seller.username || "Unknown seller"}
                   </ItemTitle>
                   <ItemDescription>
                     Joined since {new Date(seller.createdOn).getFullYear()}

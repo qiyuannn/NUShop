@@ -41,25 +41,27 @@ func GetChats(c *gin.Context) {
 
 	rows, err := db.Pool.Query(
 		c.Request.Context(),
-		`SELECT DISTINCT ON (m.listing_id, u.id)
-			m.listing_id, 
-			m.content,
-			m.created_on,
-			u.username,
-			u.id,
-			i.file_url,
-			l.title
-		FROM messages m
-		JOIN users u
-			ON u.id = CASE
-				WHEN m.sender_id = $1 THEN m.receiver_id
-				WHEN m.receiver_id = $1 THEN m.sender_id
-			END
-		LEFT JOIN images i
-			ON i.listing_id = m.listing_id
-		JOIN listings l
-			ON l.id = m.listing_id
-		ORDER BY m.listing_id, u.id, m.created_on DESC`,
+		`SELECT * FROM 
+			(SELECT DISTINCT ON (m.listing_id, u.id)
+				m.listing_id, 
+				m.content,
+				m.created_on,
+				u.username,
+				u.id,
+				i.file_url,
+				l.title
+			FROM messages m
+			JOIN users u
+				ON u.id = CASE
+					WHEN m.sender_id = $1 THEN m.receiver_id
+					WHEN m.receiver_id = $1 THEN m.sender_id
+				END
+			LEFT JOIN images i
+				ON i.listing_id = m.listing_id
+			JOIN listings l
+				ON l.id = m.listing_id
+			ORDER BY m.listing_id, u.id) _
+		ORDER BY created_on DESC`,
 		userIDStr,
 	)
 

@@ -44,7 +44,7 @@ export function ChatHeader() {
             </div>
           ) : (
             <img
-              src={`${API_URL}${chatInfo.image}`}
+              src={chatInfo.image.startsWith("http") ? chatInfo.image : `${API_URL}${chatInfo.image}`}
               className="aspect-square object-cover border rounded-sm w-12"
             />
           )}

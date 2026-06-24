@@ -65,11 +65,13 @@ func GetChatInfo(c *gin.Context) {
 	var title string
 	var username string
 	var image *string
+	var id string
 	if err := db.Pool.QueryRow(
 		c.Request.Context(),
 		`SELECT 
 		l.title,
 		u.username,
+		u.id,
 		i.file_url
 		FROM listings l
 		JOIN users u 
@@ -79,7 +81,7 @@ func GetChatInfo(c *gin.Context) {
 		WHERE l.id = $1
 		LIMIT 1`,
 		listingID, otherUserID,
-	).Scan(&title, &username, &image); err != nil {
+	).Scan(&title, &username, &id, &image); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			c.Error(response.ErrBadRequest(err))
 			return
@@ -92,6 +94,7 @@ func GetChatInfo(c *gin.Context) {
 	response.Success(c, http.StatusOK, gin.H{
 		"title": title,
 		"otherName": username,
+		"otherID": id,
 		"image": image,
 	})
 }

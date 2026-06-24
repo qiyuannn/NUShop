@@ -176,7 +176,7 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
   };
 
   return (
-    <Card>
+    <Card className="ring-0">
       <div className="sm:pl-16 sm:pr-16">
         <ListingFormCarousel files={formData.files} setFormData={setFormData} />
       </div>
@@ -357,7 +357,7 @@ export function ListingFormCarousel({
               <Item>
                 <ItemContent className="border rounded-sm">
                   <img
-                    className="w-full h-auto object-contain"
+                    className="aspect-square w-full h-auto object-cover rounded-lg"
                     src={
                       typeof file === "string"
                         ? file.startsWith("http")

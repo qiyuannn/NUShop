@@ -31,7 +31,6 @@ type getListingsQuery struct {
 func GetListings(c *gin.Context) { //multiple
 	fmt.Println(c.Request.URL.RawQuery)
 
-fmt.Printf("cursor_id = %q\n", c.Query("cursor_id"))
 	var query getListingsQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
 		c.Error(response.ErrBadRequest(err))

@@ -233,7 +233,7 @@ export function ListingItem({
         className={isManaging ? "rounded-b-none p-0 pb-4 border-0" : "p-0 border-0 pb-3"}
       >
         <Link to={`/listing/${listingID}`}>
-          <ItemHeader>
+          <ItemHeader className="aspect-square">
             {!image || imageError ? (
               <div className="aspect-square border rounded-lg w-full flex items-center justify-center bg-muted">
                 <div className="text-center">
@@ -244,7 +244,7 @@ export function ListingItem({
             ) : (
               <img
                 src={image.startsWith("http") ? image : `${API_URL}${image}`}
-                className="border object-contain rounded-lg w-full h-64"
+                className="aspect square border object-cover rounded-lg w-full h-full"
                 onError={() => setImageError(true)}
               />
             )}

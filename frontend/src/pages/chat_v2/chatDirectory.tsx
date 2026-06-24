@@ -86,6 +86,7 @@ export function ChatDirectory() {
           `${API_URL}/chat/info/${msg.message.listingID}/${msg.message.senderID}/${msg.message.receiverID}`,
         );
         const json = await res.json();
+        console.log(json)
 
         const newChat: chat = {
           listingID: message.listingID,
@@ -110,6 +111,8 @@ export function ChatDirectory() {
           method: "GET",
         });
         const json = await res.json();
+
+        console.log(json)
         if (!res.ok) {
           throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
         }
@@ -136,7 +139,7 @@ export function ChatDirectory() {
                   </div>
                 ) : (
                   <img
-                    src={`${API_URL}${chat.image}`}
+                    src={chat.image.startsWith("http") ? chat.image : `${API_URL}${chat.image}`}
                     className="aspect-square object-cover border rounded-sm w-17"
                   />
                 )}
@@ -144,7 +147,7 @@ export function ChatDirectory() {
               <ItemContent className="gap-0">
                 <ItemDescription>{chat.otherName}</ItemDescription>
                 <ItemTitle className="font-bold text-xl">{chat.title}</ItemTitle>
-                <ItemDescription>{chat.content}</ItemDescription>
+                <ItemDescription className="overflow-wrap break-all">{chat.content}</ItemDescription>
               </ItemContent>
               <ItemActions className="self-start">
                 <ItemDescription>{formatMessageTime(chat.createdOn)}</ItemDescription>

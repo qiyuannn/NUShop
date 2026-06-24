@@ -12,7 +12,6 @@ import { AuthProvider } from "./context/auth.tsx";
 import { Toaster } from "./components/ui/sonner.tsx";
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
     <ThemeProvider>
       <SidebarProvider defaultOpen={false}>
         <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
@@ -27,5 +26,4 @@ createRoot(document.getElementById("root")!).render(
         </GoogleOAuthProvider>
       </SidebarProvider>
     </ThemeProvider>
-  </StrictMode>,
 );

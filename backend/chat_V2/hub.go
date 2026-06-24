@@ -25,10 +25,12 @@ func (h *Hub) Run() {
 	for{
 		select{
 		case client := <- h.register:
+			log.Printf(">>> Hub registering client: %s", client.userID)
 			h.clients[client.userID] = client
 
 		case client := <- h.unregister:
 			if c, ok := h.clients[client.userID]; ok && c == client {
+				log.Printf("<<< Hub unregistering client: %s", c.userID)
 				delete(h.clients, client.userID)
 				close(client.send)
 			}

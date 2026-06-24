@@ -9,6 +9,7 @@ export function ChatInput() {
   const { token } = useAuth();
   const param = useParams();
   const [msg, setMsg] = React.useState("");
+  
 
   const { sendJsonMessage } = useWebSocket(token ? `${WS_URL}/ws` : null, {
     queryParams: { token: token! },

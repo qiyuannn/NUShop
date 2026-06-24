@@ -12,6 +12,7 @@ import (
 )
 
 
+
 type DeleteFromCartRequest struct {
 	ListingID string `json:"listingID"`
 }

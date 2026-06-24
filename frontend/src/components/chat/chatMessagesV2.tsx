@@ -96,7 +96,6 @@ export function ChatMessages() {
 
   React.useEffect(() => () => throttleFn.cancel(), [throttleFn]);
 
-  
   React.useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {

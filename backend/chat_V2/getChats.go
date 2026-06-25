@@ -60,7 +60,7 @@ func GetChats(c *gin.Context) {
 				ON i.listing_id = m.listing_id
 			JOIN listings l
 				ON l.id = m.listing_id
-			ORDER BY m.listing_id, u.id) _
+			ORDER BY m.listing_id, u.id, m.created_on DESC) _
 		ORDER BY created_on DESC`,
 		userIDStr,
 	)

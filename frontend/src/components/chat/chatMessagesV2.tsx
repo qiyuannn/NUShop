@@ -50,6 +50,9 @@ export function ChatMessages() {
     queryParams: { token: token! },
     share: true,
     shouldReconnect: () => true,
+    reconnectAttempts: 10,
+    reconnectInterval: (attemptNumber) =>
+      Math.min(Math.pow(2, attemptNumber) * 1000, 10000),
     onOpen: () => {
       console.log("conn open");
     },
@@ -90,7 +93,7 @@ export function ChatMessages() {
   }, [param.otherID, param.listingID]);
 
   const throttleFn = React.useMemo(
-    () => throttle(sendRead, 300, { leading: true, trailing: true }),
+    () => throttle(sendRead, 500, { leading: true, trailing: true }),
     [sendRead],
   );
 

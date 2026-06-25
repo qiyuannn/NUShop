@@ -14,7 +14,7 @@ CREATE TABLE read(
   last_read_id UUID
     NOT NULL
     REFERENCES messages(id)
-    ON DELETE CASCADE,
+    ON DELETE RESTRICT,
 
   PRIMARY KEY (user_id, other_id, listing_id)
 )

@@ -46,6 +46,13 @@ export function LoginForm() {
     }
   }, [step]);
 
+  function handleTryAgain() {
+    setErr(null);
+    setStep("password");
+    setCode("");
+    setLoading(false);
+  }
+
   async function sendLoginCode(loginEmail: string) {
     const res = await fetch(`${API_URL}/auth/request_code`, {
       method: "POST",
@@ -60,10 +67,10 @@ export function LoginForm() {
     if (!res.ok) {
       throw new Error(
         json?.error?.message ??
-          json?.message ??
-          json?.error ??
-          json?.error?.code ??
-          "INTERNAL_ERROR",
+        json?.message ??
+        json?.error ??
+        json?.error?.code ??
+        "INTERNAL_ERROR",
       );
     }
   }
@@ -90,10 +97,10 @@ export function LoginForm() {
       if (!res.ok) {
         throw new Error(
           json?.error?.message ??
-            json?.message ??
-            json?.error ??
-            json?.error?.code ??
-            "INTERNAL_ERROR",
+          json?.message ??
+          json?.error ??
+          json?.error?.code ??
+          "INTERNAL_ERROR",
         );
       }
 
@@ -127,10 +134,10 @@ export function LoginForm() {
       if (!res.ok) {
         throw new Error(
           json?.error?.message ??
-            json?.message ??
-            json?.error ??
-            json?.error?.code ??
-            "INTERNAL_ERROR",
+          json?.message ??
+          json?.error ??
+          json?.error?.code ??
+          "INTERNAL_ERROR",
         );
       }
 
@@ -205,7 +212,13 @@ export function LoginForm() {
       )}
 
       {err !== null && (
-        <FieldDescription className="text-center text-red-500">{err}</FieldDescription>
+        <div className="flex flex-col items-center gap-3">
+          <FieldDescription className="text-center text-red-500">{err}</FieldDescription>
+
+          <Button type="button" variant="outline" onClick={handleTryAgain}>
+            Try again
+          </Button>
+        </div>
       )}
 
       <FieldGroup>

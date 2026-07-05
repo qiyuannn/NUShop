@@ -51,18 +51,18 @@ func Login(c *gin.Context) {
 		&user.PasswordHash,
 		&user.CreatedOn,
 	); err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			c.Error(response.ErrUnauthorised(err))
-			return
-		}
+	if errors.Is(err, pgx.ErrNoRows) {
+		c.Error(response.ErrUnauthorised(errors.New("Invalid email or password")))
+		return
+	}
 		c.Error(response.ErrInternalServerError(err))
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(request.Password)); err != nil {
-		c.Error(response.ErrUnauthorised(err))
-		return
-	}
+if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(request.Password)); err != nil {
+    c.Error(response.ErrUnauthorised(errors.New("Invalid email or password")))
+    return
+}
 
 	response.Success(c, http.StatusOK, gin.H{
 		"passwordVerified": true,

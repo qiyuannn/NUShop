@@ -39,6 +39,7 @@ export function LoginForm() {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [code, setCode] = React.useState("");
+  const [formKey, setFormKey] = React.useState(0);
   React.useEffect(() => {
     const active = document.activeElement;
     if (active instanceof HTMLElement) {
@@ -50,7 +51,9 @@ export function LoginForm() {
     setErr(null);
     setStep("password");
     setCode("");
+    setPassword("");
     setLoading(false);
+    setFormKey((k) => k + 1);
   }
 
   async function sendLoginCode(loginEmail: string) {
@@ -152,7 +155,7 @@ export function LoginForm() {
   }
 
   return (
-    <FieldSet>
+    <FieldSet key={formKey}>
       <FieldLegend className="flex flex-col items-center gap-2 text-center font-semibold">
         <Link to="">
           <ShoppingBag />

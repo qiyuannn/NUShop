@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/item";
 import { Separator } from "@/components/ui/separator";
 import { Unauthorised } from "@/components/unauthorised";
-import { useAuth } from "@/context/auth";
+import { useAuthStore } from "@/context/authStoreV2";
 import { useCartStore } from "@/context/cartStore";
 import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
 import { API_URL } from "@/lib/api";
@@ -32,7 +32,7 @@ import { useNavigate } from "react-router-dom";
 export function CartPage() {
   const cartItems = useCartStore((state) => state.cartItems);
   const [total, setTotal] = React.useState(0);
-  const { token } = useAuth();
+  const token = useAuthStore((s) => s.token);
 
   React.useEffect(() => {
     var total = 0;

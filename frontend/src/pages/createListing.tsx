@@ -1,9 +1,9 @@
 import { ListingForm } from "@/components/listingForm";
 import { Unauthorised } from "@/components/unauthorised";
-import { useAuth } from "@/context/auth";
+import { useAuthStore } from "@/context/authStoreV2";
 
 export function CreateListingPage() {
-  const { token } = useAuth();
+  const token = useAuthStore((s) => s.token);
   if (!token) {
     return <Unauthorised />;
   }

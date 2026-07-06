@@ -1,14 +1,15 @@
 import { InputGroup, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
-import { useAuth } from "@/context/auth";
+import { useAuthStore } from "@/context/authStoreV2";
 import { WS_URL } from "@/lib/api";
 import React from "react";
 import { useParams } from "react-router-dom";
 import useWebSocket from "react-use-websocket";
 
 export function ChatInput() {
-  const { token } = useAuth();
+  const token = useAuthStore((state) => state.token);
   const param = useParams();
   const [msg, setMsg] = React.useState("");
+  const userID = useAuthStore((s) => s.userID);
 
   const { sendJsonMessage } = useWebSocket(token ? `${WS_URL}/ws` : null, {
     queryParams: { token: token! },
@@ -52,7 +53,7 @@ export function ChatInput() {
             handleSend();
           }
         }}
-        disabled={!token}
+        disabled={!token || userID == param.otherID}
       />
       <InputGroupButton onClick={handleSend}>Send</InputGroupButton>
     </InputGroup>

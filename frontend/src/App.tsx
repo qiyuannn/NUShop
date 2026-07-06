@@ -11,18 +11,19 @@ import { ProfilePage } from "./pages/profile";
 import React from "react";
 import { useCartStore } from "./context/cartStore";
 import { useAuthApiFetch } from "./hooks/use-authApiFetch";
-import { useAuth } from "./context/auth";
 import { toast } from "sonner";
 import { CartPage } from "./pages/cart";
 import { WS_URL } from "./lib/api";
 import useWebSocket from "react-use-websocket";
 import { ChatDirectoryMain } from "./pages/chat_v2/chatDirectory";
 import { Chat } from "./pages/chat_v2/chat";
+import { useAuthStore } from "./context/authStoreV2";
 
 export function App() {
   const initCart = useCartStore((state) => state.initCart);
   const authApiFetch = useAuthApiFetch();
-  const { token } = useAuth();
+  const token = useAuthStore((s) => s.token);
+  const refreshToken = useAuthStore((s) => s.refreshToken);
 
   useWebSocket(token ? `${WS_URL}/ws` : null, {
     queryParams: { token: token! },
@@ -50,9 +51,15 @@ export function App() {
         }
       }
     }
-
     initcart();
   }, [token]);
+
+  React.useEffect(() => {
+    async function refresh() {
+      await refreshToken();
+    }
+    refresh();
+  }, []);
 
   return (
     <Routes>

@@ -7,7 +7,7 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item";
-import { useAuth } from "@/context/auth";
+import { useAuthStore } from "@/context/authStoreV2";
 import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
 import { API_URL, WS_URL } from "@/lib/api";
 import { formatMessageTime } from "@/lib/fomatTime";
@@ -34,7 +34,7 @@ export function ChatDirectoryMain() {
 }
 
 export function ChatDirectory() {
-  const { token } = useAuth();
+  const token = useAuthStore((s) => s.token);
   const authApiFetch = useAuthApiFetch();
   const [chats, setChats] = React.useState<chat[]>([]);
   const [_, setErr] = React.useState(false);
@@ -86,7 +86,7 @@ export function ChatDirectory() {
           `${API_URL}/chat/info/${msg.message.listingID}/${msg.message.senderID}/${msg.message.receiverID}`,
         );
         const json = await res.json();
-        console.log(json)
+        console.log(json);
 
         const newChat: chat = {
           listingID: message.listingID,
@@ -112,7 +112,7 @@ export function ChatDirectory() {
         });
         const json = await res.json();
 
-        console.log(json)
+        console.log(json);
         if (!res.ok) {
           throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
         }
@@ -147,7 +147,9 @@ export function ChatDirectory() {
               <ItemContent className="gap-0">
                 <ItemDescription>{chat.otherName}</ItemDescription>
                 <ItemTitle className="font-bold text-xl">{chat.title}</ItemTitle>
-                <ItemDescription className="overflow-wrap break-all">{chat.content}</ItemDescription>
+                <ItemDescription className="overflow-wrap break-all">
+                  {chat.content}
+                </ItemDescription>
               </ItemContent>
               <ItemActions className="self-start">
                 <ItemDescription>{formatMessageTime(chat.createdOn)}</ItemDescription>

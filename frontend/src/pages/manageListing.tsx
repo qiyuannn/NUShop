@@ -3,12 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Item, ItemActions, ItemContent, ItemDescription, ItemHeader } from "@/components/ui/item";
 import { Separator } from "@/components/ui/separator";
 import { Unauthorised } from "@/components/unauthorised";
-import { useAuth } from "@/context/auth";
+import { useAuthStore } from "@/context/authStoreV2";
 import { Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export function ManageListing() {
-  const { token } = useAuth();
+  const token = useAuthStore((s) => s.token);
   const navigate = useNavigate();
 
   if (!token) {

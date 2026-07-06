@@ -1,59 +1,61 @@
-import { API_URL } from "@/lib/api";
-import React, { createContext, useContext } from "react";
-import type { User } from "@/types";
+// This is replaced by zustand authStore
 
-type AuthContextType = {
-  token: string | null;
-  setToken: (token: string | null) => void;
-  ready: boolean;
-  user: User | null;
-  setUser: React.Dispatch<React.SetStateAction<User | null>>;
-};
+// import { API_URL } from "@/lib/api";
+// import React, { createContext, useContext } from "react";
+// import type { User } from "@/types";
 
-const AuthContext = createContext<AuthContextType | null>(null);
+// type AuthContextType = {
+//   token: string | null;
+//   setToken: (token: string | null) => void;
+//   ready: boolean;
+//   user: User | null;
+//   setUser: React.Dispatch<React.SetStateAction<User | null>>;
+// };
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [token, setToken] = React.useState<string | null>(null);
-  const [ready, setReady] = React.useState(false);
-  const [user, setUser] = React.useState<User | null>(null);
+// const AuthContext = createContext<AuthContextType | null>(null);
 
-  React.useEffect(() => {
-    async function refresh() {
-      try {
-        const res = await fetch(`${API_URL}/auth/refresh`, {
-          method: "POST",
-          credentials: "include",
-        });
-        if (res.ok) {
-          const json = await res.json();
-          setToken(json.data.token ?? null);
-        }
-      } finally {
-        setReady(true);
-      }
-    }
-    refresh();
-  }, []);
+// export function AuthProvider({ children }: { children: React.ReactNode }) {
+//   const [token, setToken] = React.useState<string | null>(null);
+//   const [ready, setReady] = React.useState(false);
+//   const [user, setUser] = React.useState<User | null>(null);
 
-  return (
-    <AuthContext.Provider
-      value={{
-        token,
-        setToken,
-        ready,
-        user,
-        setUser,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
-}
+//   React.useEffect(() => {
+//     async function refresh() {
+//       try {
+//         const res = await fetch(`${API_URL}/auth/refresh`, {
+//           method: "POST",
+//           credentials: "include",
+//         });
+//         if (res.ok) {
+//           const json = await res.json();
+//           setToken(json.data.token ?? null);
+//         }
+//       } finally {
+//         setReady(true);
+//       }
+//     }
+//     refresh();
+//   }, []);
 
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth() must be used inside AuthProvider");
-  }
-  return context;
-}
+//   return (
+//     <AuthContext.Provider
+//       value={{
+//         token,
+//         setToken,
+//         ready,
+//         user,
+//         setUser,
+//       }}
+//     >
+//       {children}
+//     </AuthContext.Provider>
+//   );
+// }
+
+// export function useAuth() {
+//   const context = useContext(AuthContext);
+//   if (!context) {
+//     throw new Error("useAuth() must be used inside AuthProvider");
+//   }
+//   return context;
+// }

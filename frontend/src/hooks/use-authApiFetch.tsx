@@ -1,10 +1,10 @@
-import { useAuth } from "@/context/auth";
-import { API_URL } from "@/lib/api";
+import { useAuthStore } from "@/context/authStoreV2";
 
 export function useAuthApiFetch() {
-  const { token, setToken } = useAuth();
+  const refresh = useAuthStore((s) => s.refreshToken);
 
   async function ApiFetch(url: string, options: RequestInit = {}) {
+    let token = useAuthStore.getState().token;
     const res = await fetch(url, {
       ...options,
       headers: {
@@ -18,23 +18,15 @@ export function useAuthApiFetch() {
       return res;
     }
 
-    const refreshTokenRes = await fetch(`${API_URL}/auth/refresh`, {
-      method: "POST",
-      credentials: "include",
-    });
-    if (!refreshTokenRes.ok) {
-      return res;
-    }
+    await refresh();
 
-    const json = await refreshTokenRes.json();
-    const newToken = json.data.token;
-    setToken(newToken);
+    token = useAuthStore.getState().token;
 
     const newRes = await fetch(url, {
       ...options,
       headers: {
         ...options.headers,
-        ...(newToken !== null ? { Authorization: `Bearer ${newToken}` } : {}),
+        ...(token !== null ? { Authorization: `Bearer ${token}` } : {}),
       },
       credentials: "include",
     });

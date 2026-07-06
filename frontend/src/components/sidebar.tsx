@@ -23,15 +23,15 @@ import {
   Moon,
   User,
 } from "lucide-react";
-import { useAuth } from "@/context/auth";
 import { useLogout } from "@/hooks/use-logout";
 import { Badge } from "./ui/badge";
 import { useCartStore } from "@/context/cartStore";
 import { useTheme } from "./theme-provider";
+import { useAuthStore } from "@/context/authStoreV2";
 
 export function AppSidebar() {
   const navigate = useNavigate();
-  const { token } = useAuth();
+  const token = useAuthStore((state) => state.token);
   const logout = useLogout();
   const cartItems = useCartStore((state) => state.cartItems);
   const { theme, setTheme } = useTheme();

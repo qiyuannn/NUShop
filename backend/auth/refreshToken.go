@@ -64,8 +64,8 @@ func RefreshToken(c *gin.Context) {
 	if err := tx.QueryRow(
 		c.Request.Context(),
 		`SELECT id, user_id, exp_on, created_on, revoked_on, replaced_by
-		FROM refresh_tokens WHERE id = $1`,
-		claims.ID,
+		FROM refresh_tokens WHERE id = $1 and user_id = $2`,
+		claims.ID, claims.Subject,
 	).Scan(&t.ID, &t.UserID, &t.ExpOn, &t.CreatedOn, &t.RevokedOn, &t.ReplacedBy); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			c.Error(response.ErrNotFound(err))
@@ -145,5 +145,6 @@ func RefreshToken(c *gin.Context) {
 	//return accesstoken
 	response.Success(c, http.StatusCreated, gin.H{
 		"token":    newAccessToken,
+		"userID" : t.UserID,
 	})
 }

@@ -2,10 +2,10 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ShoppingBag } from "lucide-react";
 import { API_URL } from "@/lib/api";
-import { useAuth } from "@/context/auth";
 import { FieldDescription, FieldLegend, FieldSeparator, FieldSet } from "../components/ui/field";
 import { Spinner } from "../components/ui/spinner";
 import { Button } from "../components/ui/button";
+import { useAuthStore } from "@/context/authStoreV2";
 
 export function SignupPage() {
   return (
@@ -19,7 +19,7 @@ export function SignupPage() {
 
 export function SignupForm() {
   const navigate = useNavigate();
-  const { setUser, setToken } = useAuth();
+  const setAuth = useAuthStore((s) => s.setAuth);
   const [loading, setLoading] = React.useState(false);
   const [err, setErr] = React.useState<string | null>(null);
   const [email, setEmail] = React.useState("");
@@ -126,8 +126,7 @@ export function SignupForm() {
         throw new Error(json?.error?.message ?? json?.error?.code ?? "INTERNAL_ERROR");
       }
 
-      setUser(json.data.user);
-      setToken(json.data.token);
+      setAuth(json?.data?.token ?? null, json?.data?.user?.id ?? null);
       navigate("/");
     } catch (error) {
       setErr(error instanceof Error ? error.message : "INTERNAL_ERROR");

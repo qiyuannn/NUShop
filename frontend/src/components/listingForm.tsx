@@ -27,11 +27,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAuthStore } from "@/context/authStoreV2";
 import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
 import { API_URL } from "@/lib/api";
 import { AlertCircleIcon, DollarSign, Trash2 } from "lucide-react";
 import React, { type SetStateAction } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { Unauthorised } from "./unauthorised";
 
 type FormDataType = {
   title: string;
@@ -59,6 +61,8 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
   });
   const [err, setErr] = React.useState(false);
   const apiFetch = useAuthApiFetch();
+  const [listingOwner, setListingOwner] = React.useState("")
+  const userID = useAuthStore.getState().userID
 
   React.useEffect(() => {
     if (!listingID) return;
@@ -69,7 +73,6 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
         setErr(true);
         return;
       }
-      console.log("category from API:", json.data.listing.categoryName);
       setFormData({
         title: json.data.listing.title ?? "",
         category: (json.data.listing.categoryName ?? "").trim(),
@@ -79,6 +82,7 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
         condition: json.data.listing.condition ?? "",
         files: json.data.listing.images ?? [],
       });
+      setListingOwner(json?.data?.listing?.sellerID ?? "")
     }
     fetchListing();
   }, [listingID]);
@@ -174,6 +178,13 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
       setLoading(false);
     }
   };
+
+  if (!typeCreate && listingOwner != userID) {
+    console.log(listingOwner, userID)
+    return (
+      <Unauthorised/>
+    )
+  }
 
   return (
     <Card className="ring-0">

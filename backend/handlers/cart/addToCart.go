@@ -42,8 +42,23 @@ func AddToCart(c *gin.Context){
 		return
 	}
 
-	var cart models.Cart
+	var sellerID string
+	if err := db.Pool.QueryRow(
+		c.Request.Context(),
+		`SELECT seller_id 
+		FROM listings WHERE id = $1`, 
+		addToCartRequest.ListingID,
+	).Scan(&sellerID); err != nil {
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
 
+	if sellerID == userIdStr {
+		c.Error(response.ErrBadRequest(errors.New("Unable to add your own lisitng to cart")))
+		return
+	}
+
+	var cart models.Cart
 	if err := db.Pool.QueryRow(
 		c.Request.Context(),
 		`INSERT INTO cart 

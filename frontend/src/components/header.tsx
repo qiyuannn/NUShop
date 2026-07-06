@@ -5,13 +5,13 @@ import { ButtonGroup } from "./ui/button-group";
 import { Input } from "./ui/input";
 import { SidebarTrigger, useSidebar } from "./ui/sidebar";
 import { Separator } from "./ui/separator";
-import { useAuth } from "@/context/auth";
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { useAuthStore } from "@/context/authStoreV2";
 
 export function AppHeader() {
   const { toggleSidebar } = useSidebar();
-  const { token } = useAuth();
+  const token = useAuthStore((state) => state.token);
   const navigate = useNavigate();
   const [search, setSearch] = React.useState("");
   const location = useLocation();

@@ -24,14 +24,15 @@ import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/context/cartStore";
 import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
 import { toast } from "sonner";
-import { useAuth } from "@/context/auth";
+import { useAuthStore } from "@/context/authStoreV2";
 
 export function Listing() {
   const { listingID } = useParams();
   const addToCart = useCartStore((state) => state.addToCart);
   const authApiFetch = useAuthApiFetch();
   const nav = useNavigate();
-  const { token } = useAuth();
+  const token = useAuthStore((s) => s.token);
+  const userID = useAuthStore.getState().userID;
 
   const [listing, setListing] = React.useState<Listing>({
     id: "",
@@ -102,6 +103,12 @@ export function Listing() {
 
   return (
     <div className="flex h-[calc(100dvh-3.5rem)] flex-col overflow-hidden">
+      {userID == listing.sellerID && (
+        <div className="h-12 flex items-center justify-center bg-yellow-50">
+          <p className="text-muted-foreground">You are viewing your own listing</p>
+        </div>
+      )}
+
       <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
         <Item className="pb-0">
           <ItemHeader className="sm:pl-16 sm:pr-16">
@@ -149,13 +156,24 @@ export function Listing() {
           size="default"
           className="h-full flex-[1.6] rounded-none"
           onClick={() => nav(`/chat/${listing.id}/${listing.sellerID}`)}
+          disabled={userID == listing.sellerID}
         >
           Chat with seller
         </Button>
-        <Button size="default" className="h-full flex-[1.6] rounded-none" onClick={handleAddToCart}>
+        <Button
+          size="default"
+          className="h-full flex-[1.6] rounded-none"
+          onClick={handleAddToCart}
+          disabled={userID == listing.sellerID}
+        >
           Add to cart
         </Button>
-        <Button size="default" className="h-full flex-[1.6] rounded-none" variant="destructive">
+        <Button
+          size="default"
+          className="h-full flex-[1.6] rounded-none"
+          variant="destructive"
+          disabled={userID == listing.sellerID}
+        >
           Buy now
         </Button>
       </div>

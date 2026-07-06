@@ -1,4 +1,3 @@
-import { useAuth } from "@/context/auth";
 import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
 import { API_URL, WS_URL } from "@/lib/api";
 import type { Message, WSMessage } from "@/types";
@@ -9,9 +8,10 @@ import throttle from "lodash.throttle";
 import { Item, ItemGroup } from "../ui/item";
 import { formatMessageTime } from "@/lib/fomatTime";
 import { Check } from "lucide-react";
+import { useAuthStore } from "@/context/authStoreV2";
 
 export function ChatMessages() {
-  const { token } = useAuth();
+  const token = useAuthStore((state) => state.token);
   const param = useParams();
   const authApiFetch = useAuthApiFetch();
 

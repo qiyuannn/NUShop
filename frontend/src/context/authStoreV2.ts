@@ -14,7 +14,6 @@ export const useAuthStore = create<authStoreType>((set) => ({
 
   setAuth: (token: string | null, userID: string | null) => {
     set({ token: token, userID: userID });
-    console.log(token, userID);
   },
 
   refreshToken: async () => {
@@ -29,7 +28,6 @@ export const useAuthStore = create<authStoreType>((set) => ({
         token: json?.data?.token ?? null,
         userID: json?.data?.userID ?? null,
       });
-      console.log(json?.data?.token, json?.data?.userID);
     }
   },
 }));

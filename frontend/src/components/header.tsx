@@ -17,7 +17,19 @@ export function AppHeader() {
   const location = useLocation();
 
   const q = new URLSearchParams(location.search);
-  q.set("search", search);
+  if (search.trim()) {
+    q.set("search", search.trim());
+  } else {
+    q.delete("search");
+  }
+
+  const handleNav = () => {
+    if (location.pathname.includes("manage") || location.pathname.includes("user")) {
+      navigate(`${location.pathname}?${q}`)
+    } else {
+      navigate(`/results?${q}`)
+    }
+  }
 
   return (
     <header className="sticky top-0 z-50 flex items-center h-12 p-2 pl-4 pr-4 gap-4 w-full bg-secondary">
@@ -36,14 +48,14 @@ export function AppHeader() {
           onChange={(e) => setSearch(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              navigate(`${location.pathname}?${q}`);
+              handleNav();
             }
           }}
         />
         <Button
           variant="outline"
           aria-label="search"
-          onClick={() => navigate(`${location.pathname}?${q}`)}
+          onClick={handleNav}
           className="hidden sm:flex"
         >
           <SearchIcon />

@@ -20,9 +20,10 @@ type ErrorInfo struct {
 }
 
 type Cursor struct {
-	CursorTime time.Time `json:"cursor_time,omitempty"`
-	CursorID   string    `json:"cursor_id,omitempty"`
-	HasMore    bool      `json:"has_more"`
+	CursorTime time.Time `json:"cursorTime,omitempty"`
+	CursorID   string    `json:"cursorID,omitempty"`
+	CursorRank float64 `json:"cursorRank,omitempty"`
+	HasMore    bool      `json:"hasMore"`
 }
 
 type AppError struct {

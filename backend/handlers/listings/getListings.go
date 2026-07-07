@@ -17,7 +17,6 @@ import (
 
 type getListingsQuery struct {
 	SellerID string `form:"seller_id"`
-	Search   string    `form:"search"`
 	MinPrice int64     `form:"min_price" binding:"gte=0,ltefield=MaxPrice"`
 	MaxPrice int64     `form:"max_price" binding:"gte=0,gtefield=MinPrice"`
 	Category string    `form:"category"`
@@ -29,7 +28,6 @@ type getListingsQuery struct {
 }
 
 func GetListings(c *gin.Context) { //multiple
-	fmt.Println(c.Request.URL.RawQuery)
 
 	var query getListingsQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
@@ -49,10 +47,11 @@ func GetListings(c *gin.Context) { //multiple
 		_, err := uuid.Parse(query.SellerID)
 		if err != nil {
 			c.Error(response.ErrBadRequest(err))
+			return
 		}
 	}
 
-	if c.FullPath() == "/listings/me" {
+	if c.FullPath() == "/listings/manage" {
 		userIDValue, ok := c.Get("userID")
 		if !ok {
 			c.Error(response.ErrUnauthorised(errors.New("user not logged in")))
@@ -81,15 +80,6 @@ func GetListings(c *gin.Context) { //multiple
 	if query.SellerID != "" {
 		conditions = append(conditions, "seller_id = $"+strconv.Itoa(argsIndex))
 		args = append(args, query.SellerID)
-		argsIndex++
-	}
-
-	if query.Search != "" {
-		conditions = append(
-			conditions,
-			"title ILIKE $"+strconv.Itoa(argsIndex),
-		)
-		args = append(args, "%"+query.Search+"%")
 		argsIndex++
 	}
 

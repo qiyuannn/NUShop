@@ -164,7 +164,11 @@ export function CategoryFilter() {
       q.set("category", e.currentTarget.value);
     }
 
-    navigate(`${location.pathname}?${q}`);
+    if (location.pathname.includes("manage") || location.pathname.includes("user")) {
+      navigate(`${location.pathname}?${q}`)
+    } else {
+      navigate(`/results?${q}`);
+    }
   };
 
   React.useEffect(() => {

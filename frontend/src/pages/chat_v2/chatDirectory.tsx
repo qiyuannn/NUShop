@@ -86,7 +86,6 @@ export function ChatDirectory() {
           `${API_URL}/chat/info/${msg.message.listingID}/${msg.message.senderID}/${msg.message.receiverID}`,
         );
         const json = await res.json();
-        console.log(json);
 
         const newChat: chat = {
           listingID: message.listingID,
@@ -112,7 +111,6 @@ export function ChatDirectory() {
         });
         const json = await res.json();
 
-        console.log(json);
         if (!res.ok) {
           throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
         }

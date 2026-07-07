@@ -4,7 +4,7 @@ import { useAuthStore } from "@/context/authStoreV2";
 
 export function EditListingPage() {
   const token = useAuthStore((s) => s.token);
-  
+
   if (!token) {
     return <Unauthorised />;
   }

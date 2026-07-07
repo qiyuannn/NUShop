@@ -17,8 +17,18 @@ CREATE TABLE listings (
         ON DELETE SET DEFAULT
         NOT NULL,
     created_on TIMESTAMPTZ DEFAULT NOW()
-        NOT NULL
+        NOT NULL,
+
+    search_vector tsvector
+      GENERATED ALWAYS AS (
+        setweight(to_tsvector('english', title), 'A') ||
+        setweight(to_tsvector('english', description), 'B') ||
+        setweight(to_tsvector('english', category_name), 'C')
+      ) STORED 
 );
 
 CREATE INDEX idx_listings_created_id
     ON listings (created_on, id);
+
+CREATE INDEX idx_listings_search
+  ON listings using GIN(search_vector);

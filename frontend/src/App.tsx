@@ -18,6 +18,7 @@ import useWebSocket from "react-use-websocket";
 import { ChatDirectoryMain } from "./pages/chat_v2/chatDirectory";
 import { Chat } from "./pages/chat_v2/chat";
 import { useAuthStore } from "./context/authStoreV2";
+import { Results } from "./pages/results";
 
 export function App() {
   const initCart = useCartStore((state) => state.initCart);
@@ -68,9 +69,12 @@ export function App() {
 
       <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />
+        <Route path="/results" element={<Results/>}/>
+
+        <Route path="/listings/manage" element={<ManageListing />} />
+
         <Route path="/listings/:listingID/edit" element={<EditListingPage />} />
         <Route path="/listings/create" element={<CreateListingPage />} />
-        <Route path="/listings/manage" element={<ManageListing />} />
         <Route path="/listing/:listingID" element={<Listing />} />
         <Route path="/user/:userID" element={<ProfilePage />} />
         <Route path="/cart" element={<CartPage />} />

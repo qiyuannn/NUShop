@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { SearchResults } from "./searchResults";
 import type { Listing } from "@/types";
 import React from "react";
@@ -13,6 +13,7 @@ import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
 
 export function NormalResults({isManaging}: {isManaging: boolean}) {
   const [params] = useSearchParams()
+  const { userID } = useParams()
   const category = params.get("category")
   const search = params.get("search")
   const authApiFetch = useAuthApiFetch()
@@ -31,15 +32,18 @@ export function NormalResults({isManaging}: {isManaging: boolean}) {
   const handleLoadMore = async () => {
     const searchParams = new URLSearchParams()
     if (minPrice != "") {
-      searchParams.set("min_price", minPrice)
+      searchParams.set("minPrice", minPrice)
     }
     if (maxPrice != "") {
-      searchParams.set("max_price", maxPrice)
+      searchParams.set("maxPrice", maxPrice)
     }
     condition.forEach((condition) => searchParams.append("condition", condition))
     const category = params.get("category")
     if (category != null) {
       searchParams.set("category", category)
+    }
+    if (userID != null) {
+      searchParams.set("sellerID", userID)
     }
     if (cursor && cursor.hasMore && cursor.cursorID && cursor.cursorTime) {
       searchParams.set("cursorID", cursor.cursorID)
@@ -67,6 +71,7 @@ export function NormalResults({isManaging}: {isManaging: boolean}) {
   React.useEffect(() => {
     if (search) { return }
     setLoading(true)
+    setErr(null)
 
     async function fetchListings() {
       const searchParams = new URLSearchParams()
@@ -80,6 +85,9 @@ export function NormalResults({isManaging}: {isManaging: boolean}) {
       const category = params.get("category")
       if (category != null) {
         searchParams.set("category", category)
+      }
+      if (userID != null) {
+        searchParams.set("sellerID", userID)
       }
 
       try {
@@ -101,7 +109,7 @@ export function NormalResults({isManaging}: {isManaging: boolean}) {
     }
 
     fetchListings()
-  }, [params])
+  }, [params, minPrice, maxPrice, condition])
 
   if (search) {
     return <SearchResults isManaging={isManaging}/>

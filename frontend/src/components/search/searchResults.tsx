@@ -6,7 +6,7 @@ import { useFilterStore } from "@/context/filterStore"
 import { API_URL } from "@/lib/api"
 import type { Listing } from "@/types"
 import React from "react"
-import { useSearchParams } from "react-router-dom"
+import { useParams, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
 import { Spinner } from "../ui/spinner"
 import { NormalResults } from "./normalResults"
@@ -18,6 +18,7 @@ export function SearchResults({isManaging} : {isManaging: boolean}) {
   const category = params.get("category")
   const search = params.get("search")
   const authApiFetch = useAuthApiFetch()
+  const { userID } = useParams()
 
   const [listings, setListings] = React.useState<Listing[]>([])
   const [cursor, setCursor] = React.useState<{
@@ -43,6 +44,9 @@ export function SearchResults({isManaging} : {isManaging: boolean}) {
     if (category != null) {
       searchParams.set("category", category)
     }
+    if (userID != null) {
+      searchParams.set("sellerID", userID)
+    }
     if (cursor != null && cursor.hasMore && cursor.cursorRank && cursor.cursorID) {
       searchParams.set("cursorRank", cursor.cursorRank.toString())
       searchParams.set("cursorID", cursor.cursorID)
@@ -67,6 +71,7 @@ export function SearchResults({isManaging} : {isManaging: boolean}) {
   React.useEffect(() => {
     if (!search) { return }
     setLoading(true)
+    setErr(null)
 
     async function fetchListings() {
       const searchParams = new URLSearchParams()
@@ -81,6 +86,9 @@ export function SearchResults({isManaging} : {isManaging: boolean}) {
       const category = params.get("category")
       if (category != null) {
         searchParams.set("category", category)
+      }
+      if (userID != null) {
+        searchParams.set("sellerID", userID)
       }
 
       try {
@@ -102,7 +110,7 @@ export function SearchResults({isManaging} : {isManaging: boolean}) {
     }
 
     fetchListings()
-  }, [params])
+  }, [params, minPrice, maxPrice, condition])
 
   if (!search) {
     return <NormalResults isManaging={isManaging}/>

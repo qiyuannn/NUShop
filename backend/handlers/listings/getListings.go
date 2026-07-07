@@ -16,15 +16,15 @@ import (
 )
 
 type getListingsQuery struct {
-	SellerID string `form:"seller_id"`
-	MinPrice int64     `form:"min_price" binding:"gte=0,ltefield=MaxPrice"`
-	MaxPrice int64     `form:"max_price" binding:"gte=0,gtefield=MinPrice"`
+	SellerID string `form:"sellerID"`
+	MinPrice int64     `form:"minPrice" binding:"gte=0,ltefield=MaxPrice"`
+	MaxPrice int64     `form:"maxPrice" binding:"gte=0,gtefield=MinPrice"`
 	Category string    `form:"category"`
 	Condition []string `form:"condition" collection_format:"multi"`
 	Limit    int       `form:"limit,default=20" binding:"gte=1,lte=100"`
 
-	CursorTime time.Time `form:"cursor_time"`
-	CursorID  string `form:"cursor_id"`
+	CursorTime time.Time `form:"cursorTime"`
+	CursorID  string `form:"cursorID"`
 }
 
 func GetListings(c *gin.Context) { //multiple

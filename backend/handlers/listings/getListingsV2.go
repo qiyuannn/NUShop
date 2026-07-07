@@ -5,7 +5,6 @@ import (
 	"backend/response"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -16,10 +15,10 @@ import (
 )
 
 type getListingsV2Query struct {
-	SellerID string `form:"seller_id"`
+	SellerID string `form:"sellerID"`
 	Search   string    `form:"search"`
-	MinPrice int64     `form:"min_price" binding:"gte=0,ltefield=MaxPrice"`
-	MaxPrice int64     `form:"max_price" binding:"gte=0,gtefield=MinPrice"`
+	MinPrice int64     `form:"minPrice" binding:"gte=0,ltefield=MaxPrice"`
+	MaxPrice int64     `form:"maxPrice" binding:"gte=0,gtefield=MinPrice"`
 	Category string    `form:"category"`
 	Condition []string `form:"condition" collection_format:"multi"`
 	Limit    int       `form:"limit,default=20" binding:"gte=1,lte=100"`
@@ -193,6 +192,70 @@ func GetListingsV2(c *gin.Context) { //multiple
 		return
 	}
 
+	rows.Close()
+
+	if len(listings) == 0 {
+		newQuery := `
+		SELECT
+		id,
+		seller_id,
+		title,
+		description,
+		price,
+		quantity,
+		condition,
+		category_name,
+		created_on,
+		GREATEST (
+			word_similarity(title, $1),
+			word_similarity(description, $1),
+			word_similarity(category_name, $1)
+			) as rank
+		FROM listings
+		`
+		conditions = conditions[1:]
+		conditions = append(conditions, "title % $1 OR category_name % $1 OR description % $1")
+
+		if len(conditions) > 0 {
+			newQuery += " WHERE " + strings.Join(conditions, " AND ")
+		}
+
+		newQuery += " ORDER BY rank DESC, id DESC"
+		newQuery += " LIMIT " + strconv.Itoa(query.Limit+1)
+
+		rows, err := db.Pool.Query(c.Request.Context(), newQuery, args...)
+		if err != nil {
+			c.Error(response.ErrInternalServerError(err))
+			return
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+			var l searchListing
+			if err := rows.Scan(
+				&l.ID,
+				&l.SellerID,
+				&l.Title,
+				&l.Description,
+				&l.Price,
+				&l.Quantity,
+				&l.Condition,
+				&l.CategoryName,
+				&l.CreatedOn,
+				&l.Rank,
+			); err != nil {
+				c.Error(response.ErrInternalServerError(err))
+				return
+			}
+			listings = append(listings, l)
+		}
+
+		if err := rows.Err(); err != nil {
+			c.Error(response.ErrInternalServerError(err))
+			return
+		}
+	}
+
 	ids := make([]string, 0, len(listings))
 	for _, l := range listings {
 		ids = append(ids, l.ID)
@@ -238,8 +301,6 @@ func GetListingsV2(c *gin.Context) { //multiple
 
 	hasMore := len(listings) > query.Limit
 	cursor := response.Cursor{HasMore: hasMore}
-
-	log.Print(cursor)
 
 	if hasMore {
 		listings = listings[:query.Limit]

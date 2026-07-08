@@ -30,14 +30,13 @@ export function ListingsGalleryV2({
   setListings: React.Dispatch<SetStateAction<Listing[]>>;
   isManaging: boolean;
 }) {
-
   if (listings.length == 0) {
     return (
       <div className="flex items-center justify-center h-full">
         <p className="text-center font-bold">No listings found</p>
       </div>
-    )
-  } 
+    );
+  }
 
   return (
     <div className="grid grid-cols-2 gap-2 p-3 md:grid-cols-3 lg:grid-cols-4">

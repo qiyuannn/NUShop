@@ -69,7 +69,7 @@ export function App() {
 
       <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />
-        <Route path="/results" element={<Results/>}/>
+        <Route path="/results" element={<Results />} />
 
         <Route path="/listings/manage" element={<ManageListing />} />
 

@@ -136,13 +136,13 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
     e.preventDefault();
 
     if (!formData.category) {
-      toast.error("Category cannot be empty")
-      return
+      toast.error("Category cannot be empty");
+      return;
     }
 
     if (!formData.condition) {
-      toast.error("Condition cannot be empty")
-      return
+      toast.error("Condition cannot be empty");
+      return;
     }
 
     if (loading) return;
@@ -224,7 +224,7 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
                   required
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a category"/>
+                    <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent position="popper">
                     {categories.map((category) => (

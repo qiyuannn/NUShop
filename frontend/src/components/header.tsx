@@ -25,11 +25,11 @@ export function AppHeader() {
 
   const handleNav = () => {
     if (location.pathname.includes("manage") || location.pathname.includes("user")) {
-      navigate(`${location.pathname}?${q}`)
+      navigate(`${location.pathname}?${q}`);
     } else {
-      navigate(`/results?${q}`)
+      navigate(`/results?${q}`);
     }
-  }
+  };
 
   return (
     <header className="sticky top-0 z-50 flex items-center h-12 p-2 pl-4 pr-4 gap-4 w-full bg-secondary">

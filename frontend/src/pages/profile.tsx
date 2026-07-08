@@ -1,12 +1,10 @@
-import { ListingGallery } from "@/components/listingsGallery";
-import { NormalResults } from "@/components/search/normalResults";
 import { SearchResults } from "@/components/search/searchResults";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@/components/ui/item";
 import { Separator } from "@/components/ui/separator";
 import { API_URL } from "@/lib/api";
 import React from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 export function ProfilePage() {
   const { userID } = useParams();
@@ -15,7 +13,6 @@ export function ProfilePage() {
     createdOn: "",
   });
   const [err, setErr] = React.useState(false);
-  const [params] = useSearchParams()
 
   React.useEffect(() => {
     setErr(false);
@@ -64,7 +61,7 @@ export function ProfilePage() {
       </Item>
       <Separator />
       <div className="flex-1">
-        { params.get("search") ? <SearchResults isManaging={false}/> : <NormalResults isManaging={false}/> }
+        <SearchResults isManaging={false} />
       </div>
     </div>
   );

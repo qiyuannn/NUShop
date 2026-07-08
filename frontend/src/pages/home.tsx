@@ -2,7 +2,6 @@ import { ListingGallery } from "@/components/listingsGallery";
 import { Separator } from "@/components/ui/separator";
 import { useSearchParams } from "react-router-dom";
 
-
 // To be revamped
 export function HomePage() {
   const [params] = useSearchParams();

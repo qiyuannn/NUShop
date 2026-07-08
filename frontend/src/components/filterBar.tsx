@@ -165,7 +165,7 @@ export function CategoryFilter() {
     }
 
     if (location.pathname.includes("manage") || location.pathname.includes("user")) {
-      navigate(`${location.pathname}?${q}`)
+      navigate(`${location.pathname}?${q}`);
     } else {
       navigate(`/results?${q}`);
     }

@@ -10,6 +10,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Spinner } from "../ui/spinner";
 import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
+import { useAuthStore } from "@/context/authStoreV2";
 
 export function SearchResults({ isManaging }: { isManaging: boolean }) {
   const [params] = useSearchParams();
@@ -17,6 +18,7 @@ export function SearchResults({ isManaging }: { isManaging: boolean }) {
   const search = params.get("search");
   const authApiFetch = useAuthApiFetch();
   const { userID } = useParams();
+  const token = useAuthStore((s) => s.token)
 
   const [listings, setListings] = React.useState<Listing[]>([]);
   const [cursor, setCursor] = React.useState<{
@@ -31,7 +33,9 @@ export function SearchResults({ isManaging }: { isManaging: boolean }) {
 
   const handleLoadMore = async () => {
     const searchParams = new URLSearchParams();
-    searchParams.set("search", search!);
+    if (search != null) {
+      searchParams.set("search", search);
+    }
     if (minPrice != "") {
       searchParams.set("minPrice", minPrice);
     }
@@ -53,7 +57,9 @@ export function SearchResults({ isManaging }: { isManaging: boolean }) {
     try {
       const res = await (!isManaging
         ? fetch(
-            `${API_URL}/listings${searchParams.toString() ? `?${searchParams.toString()}` : ""}`,
+            `${API_URL}/listings${searchParams.toString() ? `?${searchParams.toString()}` : ""}`, {
+              headers: { Authorization: `Bearer ${token}`}
+            }
           )
         : authApiFetch(
             `${API_URL}/listings/manage${searchParams.toString() ? `?${searchParams.toString()}` : ""}`,
@@ -75,7 +81,9 @@ export function SearchResults({ isManaging }: { isManaging: boolean }) {
 
     async function fetchListings() {
       const searchParams = new URLSearchParams();
-      searchParams.set("search", search!);
+      if (search != null) {
+        searchParams.set("search", search);
+      }
       if (minPrice != "") {
         searchParams.set("minPrice", minPrice);
       }
@@ -94,7 +102,9 @@ export function SearchResults({ isManaging }: { isManaging: boolean }) {
       try {
         const res = await (!isManaging
           ? fetch(
-              `${API_URL}/listings${searchParams.toString() ? `?${searchParams.toString()}` : ""}`,
+              `${API_URL}/listings${searchParams.toString() ? `?${searchParams.toString()}` : ""}`, {
+                headers: { Authorization: `Bearer ${token}`}
+              }
             )
           : authApiFetch(
               `${API_URL}/listings/manage${searchParams.toString() ? `?${searchParams.toString()}` : ""}`,
@@ -118,16 +128,18 @@ export function SearchResults({ isManaging }: { isManaging: boolean }) {
 
   return (
     <div className="flex flex-col h-full w-full">
-      <div className="p-2 pl-4">
-        <span>Showing results for </span>
-        <span className="font-bold">{search} </span>
-        {category && (
-          <>
-            <span>in </span>
-            <span className="font-bold">{category}</span>
-          </>
-        )}
-      </div>
+      { (category || search) && 
+        <div className="p-2 pl-4">
+          <span>Showing results for </span>
+          <span className="font-bold">{search} </span>
+          {category && (
+            <>
+              <span>in </span>
+              <span className="font-bold">{category}</span>
+            </>
+          )}
+        </div>
+      }
       <Separator />
       <FilterBar />
       <Separator />

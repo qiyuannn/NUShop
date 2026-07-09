@@ -70,7 +70,7 @@ export function Listing() {
     async function fetchData() {
       try {
         const res1 = await fetch(`${API_URL}/listings/${listingID}`, {
-          method: "GET",
+          headers: { Authorization: `Bearer ${token}`}
         });
         const json1 = await res1.json();
         if (!res1.ok) {

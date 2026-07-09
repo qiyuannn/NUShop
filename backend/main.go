@@ -44,6 +44,9 @@ func main() {
 	private := router.Group("/")
 	private.Use(auth.AuthHandler())
 
+	optionalAuth := router.Group("/")
+	optionalAuth.Use(auth.OptionalAuthHandler())
+
 	//Auth
 	router.POST("/auth/refresh", auth.RefreshToken)
 	router.PUT("/auth/logout", auth.Logout)
@@ -60,9 +63,9 @@ func main() {
 	router.GET("/categories", categories.GetCategories)
 
 	//listing handlers
-	router.GET("/listings/:listingID", listings.GetListing)
+	optionalAuth.GET("/listings/:listingID", listings.GetListing)
 
-	router.GET("/listings", listings.GetListingsV3)
+	optionalAuth.GET("/listings", listings.GetListingsV3)
 	private.GET("/listings/manage", listings.GetListingsV3)
 
 	private.POST("/listings", listings.CreateListing)

@@ -2,6 +2,7 @@ package listings
 
 import (
 	db "backend/database"
+	"backend/models"
 	"backend/response"
 	"errors"
 	"log"
@@ -20,7 +21,7 @@ func SearchPresentHelper(
 	limit int,
 	cursorRank *float64,
 	cursorID *string,
-) ([]searchListing, *response.Cursor) {
+) ([]models.SearchListing, *response.Cursor) {
 	if search == nil {
 		c.Error(response.ErrInternalServerError(errors.New("wrong search helper used")))
 		return nil, nil
@@ -81,10 +82,10 @@ func SearchPresentHelper(
 	}
 	defer rows.Close()
 
-	listings := []searchListing{}
+	listings := []models.SearchListing{}
 
 	for rows.Next() {
-		var l searchListing
+		var l models.SearchListing
 		if err := rows.Scan(
 			&l.ID,
 			&l.SellerID,
@@ -156,7 +157,7 @@ func SearchPresentHelper(
 		defer rows.Close()
 
 		for rows.Next() {
-			var l searchListing
+			var l models.SearchListing
 			if err := rows.Scan(
 				&l.ID,
 				&l.SellerID,

@@ -2,6 +2,7 @@ package listings
 
 import (
 	db "backend/database"
+	"backend/models"
 	"backend/response"
 	"log"
 	"strconv"
@@ -15,7 +16,7 @@ func SearchAbsentHelper(
 	conditions []string, 
 	args []interface{},
 	limit int,
-) ([]searchListing, *response.Cursor) {
+) ([]models.SearchListing, *response.Cursor) {
 	log.Print("Normal Query ran")
 	sqlQuery :=
 		`
@@ -47,10 +48,10 @@ func SearchAbsentHelper(
 
 	defer rows.Close()
 
-	listings := []searchListing{}
+	listings := []models.SearchListing{}
 
 	for rows.Next() {
-		var l searchListing
+		var l models.SearchListing
 		if err := rows.Scan(
 			&l.ID,
 			&l.SellerID,

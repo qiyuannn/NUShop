@@ -2,6 +2,8 @@ package listings
 
 import (
 	db "backend/database"
+	"backend/models"
+	"backend/recommendation"
 	"backend/response"
 	"errors"
 	"fmt"
@@ -26,21 +28,6 @@ type getListingsV3Query struct {
 	CursorRank *float64 `form:"cursorRank"`
 	CursorID *string `form:"cursorID"`
 	CursorTime *time.Time `form:"cursorTime"`
-}
-
-type searchListing struct {
-	ID         string `json:"id"`
-	SellerID   string `json:"sellerID"`
-	Title        string    `json:"title"`
-	Description  string    `json:"description"`
-	Price        int64     `json:"price" binding:"gte=0"`
-	Quantity     int64     `json:"quantity" binding:"gte=0"`
-	Condition    string    `json:"condition"`
-	CategoryName string `json:"categoryName"`
-	CreatedOn    time.Time `json:"createdOn"`
-	Images       []string  `json:"images"`
-
-	Rank *float64
 }
 
 func GetListingsV3(c * gin.Context) {
@@ -102,7 +89,7 @@ func GetListingsV3(c * gin.Context) {
 	}
 
 	// Split into search query vs no search query
-	var listings []searchListing
+	var listings []models.SearchListing
 	var cursor *response.Cursor
 	if query.Search != nil { // search query present
 
@@ -168,6 +155,11 @@ func GetListingsV3(c * gin.Context) {
 
 	for i := range listings {
 		listings[i].Images = imageMap[listings[i].ID]
+	}
+
+	if userID, exists := c.Get("userID"); exists && c.FullPath() != "/listings/manage" {
+		userIDstr := userID.(string)
+		go recommendation.TrackSearch(userIDstr, listings)
 	}
 
 	response.Success(c, http.StatusOK, gin.H{

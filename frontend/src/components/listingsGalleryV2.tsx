@@ -1,6 +1,6 @@
 import React, { type SetStateAction, useState } from "react";
 import { API_URL } from "@/lib/api";
-import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type { Listing } from "@/types";
 import { Item, ItemContent, ItemDescription, ItemHeader, ItemTitle } from "./ui/item";
 import { Separator } from "./ui/separator";

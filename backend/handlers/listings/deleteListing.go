@@ -31,8 +31,8 @@ func DeleteListing(c *gin.Context) {
 	if err != nil {
 		c.Error(response.ErrBadRequest(err))
 		return
-
 	}
+	
 	rows, err := db.Pool.Query(
 		c.Request.Context(),
 		`SELECT i.public_id

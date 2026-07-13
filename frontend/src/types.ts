@@ -16,6 +16,8 @@ export type Listing = {
   categoryName: string;
   createdOn: string;
   images: string[];
+
+  rank: number;
 };
 
 export type CartItem = {

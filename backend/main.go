@@ -8,6 +8,7 @@ import (
 	"backend/handlers/categories"
 	"backend/handlers/listings"
 	"backend/handlers/users"
+	"backend/recommendation"
 	"backend/response"
 	"log"
 	"os"
@@ -71,6 +72,9 @@ func main() {
 	private.POST("/listings", listings.CreateListing)
 	private.PUT("/listings/:id", listings.UpdateListing)
 	private.DELETE("/listings/:id", listings.DeleteListing)
+
+	// Reccomendations handlers
+	private.GET("/reccomendations", recommendation.PersonalisedReccsV2)
 
 	//cart handlers
 	private.GET("/cart", cart.GetCart)

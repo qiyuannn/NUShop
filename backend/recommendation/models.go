@@ -10,3 +10,8 @@ type UserEvent struct {
 	Category string 
 	CreatedOn time.Time // autofilled
 }
+
+type CategoryScore struct {
+	Category string 
+	Score int
+}

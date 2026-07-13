@@ -249,6 +249,15 @@ export function LoginForm() {
               />
             </Field>
 
+            <div className="flex justify-end">
+              <Link
+                to="/forgot-password"
+                className="text-sm text-neutral-400 hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
+
             <Field>
               <Button type="submit" disabled={loading || !email.trim() || !password.trim()}>
                 {loading ? "Checking..." : "Login"}

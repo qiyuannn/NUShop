@@ -20,6 +20,7 @@ import (
 type VerifyEmailCodeRequest struct {
 	Email string `json:"email"`
 	Code  string `json:"code"`
+	Flow  string `json:"flow"`
 }
 
 func VerifyEmailCode(c *gin.Context) {
@@ -63,6 +64,71 @@ func VerifyEmailCode(c *gin.Context) {
 
 	if err := bcrypt.CompareHashAndPassword([]byte(codeHash), []byte(req.Code)); err != nil {
 		c.Error(response.ErrUnauthorised(errors.New("Invalid code")))
+		return
+	}
+
+	flow := strings.ToLower(strings.TrimSpace(req.Flow))
+	if flow == "" {
+		flow = "login"
+	}
+
+	if flow == "reset" {
+		var user models.User
+		err = db.Pool.QueryRow(
+			c.Request.Context(),
+			`SELECT
+				id,
+				username,
+				email,
+				password_hash,
+				created_on
+			FROM users
+			WHERE email = $1`,
+			email,
+		).Scan(
+			&user.ID,
+			&user.Username,
+			&user.Email,
+			&user.PasswordHash,
+			&user.CreatedOn,
+		)
+
+		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				c.Error(response.ErrUnauthorised(errors.New("Account not found")))
+				return
+			}
+			c.Error(response.ErrInternalServerError(err))
+			return
+		}
+
+		resetSecret := os.Getenv("ResetTokenSecret")
+		if resetSecret == "" {
+			resetSecret = os.Getenv("AccessTokenSecret")
+		}
+		if resetSecret == "" {
+			c.Error(response.ErrInternalServerError(errors.New("Reset token secret not set")))
+			return
+		}
+
+		claims := jwt.RegisteredClaims{
+			Issuer:    "NUShop",
+			Subject:   email,
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(10 * time.Minute)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			ID:        uuid.NewString(),
+		}
+
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		resetToken, err := token.SignedString([]byte(resetSecret))
+		if err != nil {
+			c.Error(response.ErrInternalServerError(err))
+			return
+		}
+
+		response.Success(c, http.StatusOK, gin.H{
+			"resetToken": resetToken,
+		})
 		return
 	}
 

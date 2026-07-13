@@ -53,7 +53,12 @@ func RequestEmailCode(c *gin.Context) {
 	).Scan(&existingUserID)
 
 	flow := strings.ToLower(strings.TrimSpace(req.Flow))
-	if flow != "login" && flow != "signup" {
+	
+	if flow == "" {
+		flow = "login"
+	}
+
+	if flow != "login" && flow != "signup" && flow != "reset" {
 		c.Error(response.ErrBadRequest(errors.New("Invalid flow")))
 		return
 	}
@@ -73,6 +78,12 @@ func RequestEmailCode(c *gin.Context) {
 		c.Error(response.ErrBadRequest(errors.New("Account not found. Please sign up instead.")))
 		return
 	}
+
+	if flow == "reset" && !userExists {
+		c.Error(response.ErrBadRequest(errors.New("Account not found.")))
+		return
+	}
+
 	code, err := generateCode()
 	if err != nil {
 		c.Error(response.ErrInternalServerError(err))

@@ -4,6 +4,7 @@ import (
 	db "backend/database"
 	"backend/response"
 	"errors"
+	"log"
 	"net/http"
 	"os"
 	"regexp"
@@ -235,6 +236,10 @@ func CreateUser(c *gin.Context) {
 	if err != nil {
 		c.Error(response.ErrInternalServerError(err))
 		return
+	}
+
+	if err := sendWelcomeEmail(user.Email, user.Username); err != nil {
+		log.Printf("welcome email failed for %s: %v", user.Email, err)
 	}
 
 	response.Success(c, http.StatusCreated, gin.H{

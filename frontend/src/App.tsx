@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { LoginPage } from "./pages/login";
 import { SignupPage } from "./pages/signup";
+import { ForgotPasswordPage } from "./pages/forgotPassword";
 import { Layout } from "./components/layout";
 import { EditListingPage } from "./pages/editListing";
 import { HomePage } from "./pages/home";
@@ -61,6 +62,7 @@ export function App() {
     <Routes>
       <Route path="/login" element={false ? <Navigate to="/" replace /> : <LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
       <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />

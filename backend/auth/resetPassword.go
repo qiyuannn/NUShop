@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -129,6 +130,10 @@ func ResetPassword(c *gin.Context) {
 		`DELETE FROM email_login_codes WHERE email = $1`,
 		email,
 	)
+
+	if err := sendPasswordChangedEmail(email); err != nil {
+		fmt.Println("Failed to send password change notification:", err)
+	}
 
 	response.Success(c, http.StatusOK, gin.H{
 		"message": "password reset successful",

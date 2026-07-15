@@ -3,7 +3,7 @@ package chatv2
 import "time"
 
 type WSMessage struct {
-	Type string `json:"type"` // Read or Message
+	Type string `json:"type"`
 	Message *Mesage `json:"message,omitempty"`
 	Read *Read `json:"read,omitempty"`
 }

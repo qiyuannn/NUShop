@@ -1,10 +1,12 @@
 package chatv2
 
 import (
+	"backend/auth"
 	db "backend/database"
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"time"
 
@@ -13,16 +15,16 @@ import (
 )
 
 type Client struct {
-	hub *Hub
-	conn *websocket.Conn
+	hub    *Hub
+	conn   *websocket.Conn
 	userID string
-	send chan []byte
+	send   chan []byte
 }
 
 const (
-	pongWait = 60 * time.Second
-	pingInterval = 54 *time.Second
-	writeWait = 10 * time.Second
+	pongWait     = 60 * time.Second
+	pingInterval = 54 * time.Second
+	writeWait    = 10 * time.Second
 )
 
 func (c *Client) writePump() {
@@ -34,14 +36,14 @@ func (c *Client) writePump() {
 	}()
 
 	for {
-		select{
-		case <- ticker.C:
+		select {
+		case <-ticker.C:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				log.Printf("[Error] writePump ping error for %s: %s", c.userID, err)
 				return
 			}
-		case payload, ok := <- c.send:
+		case payload, ok := <-c.send:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
 				c.conn.WriteMessage(websocket.CloseMessage, nil)
@@ -50,20 +52,75 @@ func (c *Client) writePump() {
 			}
 			if err := c.conn.WriteMessage(websocket.TextMessage, payload); err != nil {
 				log.Printf("[Error] writePump write error for %s: %s", c.userID, err)
-				return 
+				return
 			}
 		}
 	}
 }
 
+func sendChatEmailNotification(receiverID, senderID, listingID, content string) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var receiverEmail string
+	var receiverUsername string
+	var senderUsername string
+	var listingTitle string
+
+	err := db.Pool.QueryRow(
+		ctx,
+		`
+        SELECT
+            r.email,
+            r.username,
+            s.username,
+            l.title
+        FROM users r
+        JOIN users s ON s.id = $2
+        JOIN listings l ON l.id = $3
+        WHERE r.id = $1
+        `,
+		receiverID,
+		senderID,
+		listingID,
+	).Scan(
+		&receiverEmail,
+		&receiverUsername,
+		&senderUsername,
+		&listingTitle,
+	)
+	if err != nil {
+		log.Printf("[Error] chat email lookup failed for receiver %s: %s", receiverID, err)
+		return
+	}
+
+	preview := content
+	if len(preview) > 160 {
+		preview = preview[:157] + "..."
+	}
+
+	subject := fmt.Sprintf("New message from %s on NUShop", senderUsername)
+	body := fmt.Sprintf(
+		"Hello %s,\r\n\r\nYou received a new message from %s about \"%s\".\r\n\r\nMessage:\r\n%s\r\n\r\nOpen NUShop to reply.\r\n\r\nNUShop Team",
+		receiverUsername,
+		senderUsername,
+		listingTitle,
+		preview,
+	)
+
+	if err := auth.SendEmail(receiverEmail, subject, body); err != nil {
+		log.Printf("[Error] sending chat email to %s: %s", receiverEmail, err)
+	}
+}
+
 func (c *Client) readPump() {
-	defer func ()  {
+	defer func() {
 		c.hub.unregister <- c
 		c.conn.Close()
 	}()
-	
+
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
-	c.conn.SetPongHandler( 
+	c.conn.SetPongHandler(
 		func(appData string) error {
 			c.conn.SetReadDeadline(time.Now().Add(pongWait))
 			return nil
@@ -80,18 +137,19 @@ func (c *Client) readPump() {
 		var wsMessage WSMessage
 		if err := json.Unmarshal(payload, &wsMessage); err != nil {
 			log.Printf("[Error] readPump failed to unmarshal JSON for %s: %s", c.userID, err)
-			continue 
+			continue
 		}
 
-		switch wsMessage.Type{
+		switch wsMessage.Type {
 		case "message":
 			if wsMessage.Message == nil {
 				continue
 			}
-			if wsMessage.Message.ReceiverID == c.userID { continue }
+			if wsMessage.Message.ReceiverID == c.userID {
+				continue
+			}
 
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second * 5)
-
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 
 			var saved Mesage
 			err := db.Pool.QueryRow(
@@ -128,10 +186,10 @@ func (c *Client) readPump() {
 			if err != nil {
 				log.Printf("[Error] writePump failed to saved message into database for %s: %s", c.userID, err)
 				errMsg, _ := json.Marshal(WSMessage{
-					Type: "error",
+					Type:    "error",
 					Message: wsMessage.Message,
 				})
-				select{
+				select {
 				case c.send <- errMsg:
 				default:
 					return
@@ -140,11 +198,18 @@ func (c *Client) readPump() {
 			}
 
 			msg := WSMessage{
-				Type: "message",
+				Type:    "message",
 				Message: &saved,
 			}
 
 			c.hub.route <- msg
+
+			go sendChatEmailNotification(
+				saved.ReceiverID,
+				saved.SenderID,
+				saved.ListingID,
+				saved.Content,
+			)
 
 		case "read":
 			if wsMessage.Read == nil {
@@ -153,7 +218,7 @@ func (c *Client) readPump() {
 
 			log.Print("read received")
 
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second * 5)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 
 			var readReciept Read
 			err := db.Pool.QueryRow(
@@ -209,5 +274,5 @@ func (c *Client) readPump() {
 }
 
 // READ
-// userID (reader) -> otherID 
+// userID (reader) -> otherID
 // message belong to other ID

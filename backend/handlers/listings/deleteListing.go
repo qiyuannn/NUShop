@@ -12,8 +12,6 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-//On delete cascade will delete image pointers in images
-
 func DeleteListing(c *gin.Context) {
 	userIDValue, ok := c.Get("userID")
 	if !ok {

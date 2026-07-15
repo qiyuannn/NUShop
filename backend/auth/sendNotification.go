@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func sendWelcomeEmail(to string, username string) error {
+func SendEmail(to, subject, body string) error {
 	host := os.Getenv("SMTP_HOST")
 	if host == "" {
 		host = "smtp.gmail.com"
@@ -78,12 +78,6 @@ func sendWelcomeEmail(to string, username string) error {
 		return fmt.Errorf("smtp data: %w", err)
 	}
 
-	subject := "Welcome to NUShop"
-	body := fmt.Sprintf(
-		"Hello %s,\r\n\r\nYour NUShop account has been created successfully.\r\n\r\nYou can now log in and start using your account.\r\n\r\nNUShop Team",
-		username,
-	)
-
 	msg := strings.Join([]string{
 		fmt.Sprintf("From: %s", displayFrom),
 		fmt.Sprintf("To: %s", to),
@@ -103,6 +97,14 @@ func sendWelcomeEmail(to string, username string) error {
 	}
 
 	return nil
+}
+
+func sendWelcomeEmail(to string, username string) error {
+	body := fmt.Sprintf(
+		"Hello %s,\r\n\r\nYour NUShop account has been created successfully.\r\n\r\nYou can now log in and start using your account.\r\n\r\nNUShop Team",
+		username,
+	)
+	return SendEmail(to, "Welcome to NUShop", body)
 }
 
 func sendPasswordChangedEmail(to string) error {

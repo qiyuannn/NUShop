@@ -21,7 +21,7 @@ func SearchPresentHelper(
 	limit int,
 	cursorRank *float64,
 	cursorID *string,
-) ([]models.SearchListing, *response.Cursor) {
+) ([]models.Listing, *response.Cursor) {
 	if search == nil {
 		c.Error(response.ErrInternalServerError(errors.New("wrong search helper used")))
 		return nil, nil
@@ -82,10 +82,10 @@ func SearchPresentHelper(
 	}
 	defer rows.Close()
 
-	listings := []models.SearchListing{}
+	listings := []models.Listing{}
 
 	for rows.Next() {
-		var l models.SearchListing
+		var l models.Listing
 		if err := rows.Scan(
 			&l.ID,
 			&l.SellerID,
@@ -96,7 +96,7 @@ func SearchPresentHelper(
 			&l.Condition,
 			&l.CategoryName,
 			&l.CreatedOn,
-			&l.Rank,
+			&l.Score,
 		); err != nil {
 			c.Error(response.ErrInternalServerError(err))
 			return nil, nil
@@ -157,7 +157,7 @@ func SearchPresentHelper(
 		defer rows.Close()
 
 		for rows.Next() {
-			var l models.SearchListing
+			var l models.Listing
 			if err := rows.Scan(
 				&l.ID,
 				&l.SellerID,
@@ -168,7 +168,7 @@ func SearchPresentHelper(
 				&l.Condition,
 				&l.CategoryName,
 				&l.CreatedOn,
-				&l.Rank,
+				&l.Score,
 			); err != nil {
 				c.Error(response.ErrInternalServerError(err))
 				return nil, nil
@@ -192,7 +192,7 @@ func SearchPresentHelper(
 	if len(listings) > 0 {
 		last := listings[len(listings)-1]
 		cursor.CursorID = &last.ID
-		cursor.CursorRank = last.Rank
+		cursor.CursorScore = last.Score
 	}
 
 	return listings, &cursor

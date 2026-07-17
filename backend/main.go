@@ -2,13 +2,13 @@ package main
 
 import (
 	"backend/auth"
-	chatv2 "backend/chat_V2"
 	"backend/database"
 	"backend/handlers/cart"
 	"backend/handlers/categories"
+	chatv2 "backend/handlers/chat_V2"
 	"backend/handlers/listings"
+	"backend/handlers/recommendation"
 	"backend/handlers/users"
-	"backend/recommendation"
 	"backend/response"
 	"log"
 	"os"
@@ -74,7 +74,11 @@ func main() {
 	private.DELETE("/listings/:id", listings.DeleteListing)
 
 	// Reccomendations handlers
-	private.GET("/reccomendations", recommendation.PersonalisedReccsV2)
+	private.GET("/reccomendations/personalised", recommendation.PersonalisedReccsV2)
+	router.GET("/reccomendations/categories", recommendation.CategoriesReccs)
+	router.GET("/reccomendations/recents", recommendation.RecentListings)
+	router.GET("/reccomendations/explore", recommendation.ExploreListings)
+
 
 	//cart handlers
 	private.GET("/cart", cart.GetCart)

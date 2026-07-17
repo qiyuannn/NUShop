@@ -1,15 +1,11 @@
 package listings
 
 import (
-	db "backend/database"
 	"backend/models"
-	"backend/recommendation"
 	"backend/response"
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -31,6 +27,8 @@ type getListingsV3Query struct {
 }
 
 func GetListingsV3(c * gin.Context) {
+	time.Sleep(1 *time.Second)
+
 	var query getListingsV3Query
 	if err := c.ShouldBindQuery(&query); err != nil {
 		c.Error(response.ErrBadRequest(err))
@@ -89,7 +87,7 @@ func GetListingsV3(c * gin.Context) {
 	}
 
 	// Split into search query vs no search query
-	var listings []models.SearchListing
+	var listings []models.Listing
 	var cursor *response.Cursor
 	if query.Search != nil { // search query present
 
@@ -117,49 +115,15 @@ func GetListingsV3(c * gin.Context) {
 	}
 
 	//Get images for listings
-	ids := make([]string, 0, len(listings))
-	for _, l := range listings {
-		ids = append(ids, l.ID)
-	}
-	imageMap := map[string][]string{}
-
-	if len(ids) > 0 {
-		placeholders := make([]string, len(ids))
-		args := make([]any, len(ids))
-		for i, id := range ids {
-			placeholders[i] = fmt.Sprintf("$%d", i+1)
-			args[i] = id
-		}
-		imageRows, err := db.Pool.Query(
-			c.Request.Context(),
-			`SELECT listing_id, file_url
-		 FROM images
-		 WHERE listing_id IN (`+strings.Join(placeholders, ",")+`)`,
-			args...,
-		)
-		if err != nil {
-			c.Error(response.ErrInternalServerError(err))
-			return
-		}
-		defer imageRows.Close()
-		for imageRows.Next() {
-			var listingID string
-			var fileURL string
-			if err := imageRows.Scan(&listingID, &fileURL); err != nil {
-				c.Error(response.ErrInternalServerError(err))
-				return
-			}
-			imageMap[listingID] = append(imageMap[listingID], fileURL)
-		}
-	}
-
-	for i := range listings {
-		listings[i].Images = imageMap[listings[i].ID]
+	listings, err := GetImagesHelper(c, listings)
+	if err != nil {
+		c.Error(response.ErrInternalServerError(err))
+		return
 	}
 
 	if userID, exists := c.Get("userID"); exists && c.FullPath() != "/listings/manage" {
 		userIDstr := userID.(string)
-		go recommendation.TrackSearch(userIDstr, listings)
+		go TrackSearch(userIDstr, listings)
 	}
 
 	response.Success(c, http.StatusOK, gin.H{

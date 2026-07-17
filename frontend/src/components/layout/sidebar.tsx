@@ -8,7 +8,7 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
-} from "./ui/sidebar";
+} from "../ui/sidebar";
 import {
   CopyPlus,
   LogIn,
@@ -17,16 +17,16 @@ import {
   Package,
   Plus,
   ShoppingBag,
-  ShoppingCart,
   SquareChartGantt,
   Sun,
   Moon,
   User,
+  ShoppingBasket,
 } from "lucide-react";
 import { useLogout } from "@/hooks/use-logout";
-import { Badge } from "./ui/badge";
+import { Badge } from "../ui/badge";
 import { useCartStore } from "@/context/cartStore";
-import { useTheme } from "./theme-provider";
+import { useTheme } from "../theme-provider";
 import { useAuthStore } from "@/context/authStoreV2";
 
 export function AppSidebar() {
@@ -37,7 +37,7 @@ export function AppSidebar() {
   const { theme, setTheme } = useTheme();
 
   return (
-    <Sidebar collapsible="icon" typeof="floating">
+    <Sidebar collapsible="icon" typeof="floating" variant="floating">
       <SidebarHeader>
         <SidebarMenuButton onClick={() => navigate("/")} tooltip="Home">
           <ShoppingBag />
@@ -70,7 +70,7 @@ export function AppSidebar() {
               <SidebarGroupLabel>Cart</SidebarGroupLabel>
               <SidebarMenu>
                 <SidebarMenuButton onClick={() => navigate("/cart")} tooltip="Cart">
-                  <ShoppingCart />
+                  <ShoppingBasket />
                   Cart
                   <Badge>{cartItems.size}</Badge>
                 </SidebarMenuButton>

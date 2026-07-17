@@ -1,4 +1,4 @@
-import { SearchResults } from "@/components/search/searchResults";
+import { SearchResultsV2 } from "@/components/search/searchResultsV2";
 import React from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -12,5 +12,5 @@ export function Results() {
     }
   }, [params]);
 
-  return <SearchResults isManaging={false} />;
+  return <SearchResultsV2 isManaging={false} />;
 }

@@ -1,19 +1,12 @@
-import { SearchResults } from "@/components/search/searchResults";
+import { SearchResultsV2 } from "@/components/search/searchResultsV2";
 import { Button } from "@/components/ui/button";
 import { Item, ItemActions, ItemContent, ItemDescription, ItemHeader } from "@/components/ui/item";
 import { Separator } from "@/components/ui/separator";
-import { Unauthorised } from "@/components/unauthorised";
-import { useAuthStore } from "@/context/authStoreV2";
 import { Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export function ManageListing() {
-  const token = useAuthStore((s) => s.token);
   const navigate = useNavigate();
-
-  if (!token) {
-    return <Unauthorised />;
-  }
 
   return (
     <div className="flex flex-col w-full h-full">
@@ -31,7 +24,7 @@ export function ManageListing() {
       </Item>
       <Separator />
       <div className="flex-1">
-        <SearchResults isManaging={true} />
+        <SearchResultsV2 isManaging={true} />
       </div>
     </div>
   );

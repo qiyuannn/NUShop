@@ -1,4 +1,4 @@
-import { SearchResults } from "@/components/search/searchResults";
+import { SearchResultsV2 } from "@/components/search/searchResultsV2";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@/components/ui/item";
 import { Separator } from "@/components/ui/separator";
@@ -61,7 +61,7 @@ export function ProfilePage() {
       </Item>
       <Separator />
       <div className="flex-1">
-        <SearchResults isManaging={false} />
+        <SearchResultsV2 isManaging={false} />
       </div>
     </div>
   );

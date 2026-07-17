@@ -1,4 +1,4 @@
-package recommendation
+package listings
 
 import (
 	db "backend/database"

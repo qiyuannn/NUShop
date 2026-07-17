@@ -33,7 +33,6 @@ import { API_URL } from "@/lib/api";
 import { AlertCircleIcon, DollarSign, Trash2 } from "lucide-react";
 import React, { type SetStateAction } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Unauthorised } from "./unauthorised";
 import { toast } from "sonner";
 
 type FormDataType = {
@@ -189,10 +188,6 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
       setLoading(false);
     }
   };
-
-  if (!typeCreate && listingOwner != userID) {
-    return <Unauthorised />;
-  }
 
   return (
     <Card className="ring-0">

@@ -1,14 +1,15 @@
-import React, { type SetStateAction, useState } from "react";
-import { API_URL } from "@/lib/api";
 import { Link, useNavigate } from "react-router-dom";
-import type { Listing } from "@/types";
-import { Item, ItemContent, ItemDescription, ItemHeader, ItemTitle } from "./ui/item";
-import { Separator } from "./ui/separator";
+import { Item, ItemContent, ItemDescription, ItemFooter, ItemHeader, ItemTitle } from "../ui/item";
+import { Badge } from "../ui/badge";
+import { Separator } from "../ui/separator";
+import React, { type SetStateAction } from "react";
+import { API_URL } from "@/lib/api";
+import { Package } from "lucide-react";
 import { timeAgo } from "@/lib/timeAgo";
-import { Badge } from "./ui/badge";
+import { Skeleton } from "../ui/skeleton";
+import { Button } from "../ui/button";
 import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
-import { Button } from "./ui/button";
-import { Package, Pencil, Trash } from "lucide-react";
+import type { Listing } from "@/types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,46 +20,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "./ui/alert-dialog";
+} from "../ui/alert-dialog";
 
-export function ListingsGalleryV2({
-  listings,
-  setListings,
-  isManaging,
-}: {
-  listings: Listing[];
-  setListings: React.Dispatch<SetStateAction<Listing[]>>;
-  isManaging: boolean;
-}) {
-  if (listings.length == 0) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <p className="text-center font-bold">No listings found</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid grid-cols-2 gap-2 p-3 md:grid-cols-3 lg:grid-cols-4">
-      {listings.map((listing) => (
-        <ListingItemV2
-          image={listing.images?.[0] ?? ""}
-          title={listing.title}
-          price={listing.price}
-          condition={listing.condition}
-          createdOn={listing.createdOn}
-          categoryName={listing.categoryName}
-          listingID={listing.id}
-          setListings={setListings}
-          isManaging={isManaging}
-          key={listing.id}
-        />
-      ))}
-    </div>
-  );
-}
-
-export function ListingItemV2({
+export function ListingItemV3({
   image,
   title,
   price,
@@ -66,8 +30,8 @@ export function ListingItemV2({
   createdOn,
   categoryName,
   listingID,
-  setListings,
   isManaging,
+  setListings,
 }: {
   image: string;
   title: string;
@@ -76,12 +40,12 @@ export function ListingItemV2({
   createdOn: string;
   categoryName: string;
   listingID: string;
-  setListings: React.Dispatch<SetStateAction<Listing[]>>;
   isManaging: boolean;
+  setListings: React.Dispatch<SetStateAction<Listing[]>>;
 }) {
-  const navigate = useNavigate();
+  const [imageError, setImageError] = React.useState(false);
   const authApiFetch = useAuthApiFetch();
-  const [imageError, setImageError] = useState(false);
+  const navigate = useNavigate();
 
   const handleDelete = async () => {
     const res = await authApiFetch(`${API_URL}/listings/${listingID}`, {
@@ -94,15 +58,11 @@ export function ListingItemV2({
 
   return (
     <div>
-      <Item
-        asChild
-        variant="outline"
-        className={isManaging ? "rounded-b-none p-0 pb-4 border-0" : "p-0 border-0 pb-3"}
-      >
+      <Item asChild className="rounded-none p-1">
         <Link to={`/listing/${listingID}`}>
           <ItemHeader className="aspect-square">
             {!image || imageError ? (
-              <div className="aspect-square border rounded-lg w-full flex items-center justify-center bg-muted">
+              <div className="aspect-square border w-full flex items-center justify-center bg-muted">
                 <div className="text-center">
                   <Package className="mx-auto h-10 w-10 opacity-50" />
                   <p className="text-sm text-muted-foreground mt-2">No image available</p>
@@ -111,7 +71,7 @@ export function ListingItemV2({
             ) : (
               <img
                 src={image.startsWith("http") ? image : `${API_URL}${image}`}
-                className="aspect square border object-cover rounded-lg w-full h-full"
+                className="aspect-square border object-cover w-full h-full"
                 onError={() => setImageError(true)}
               />
             )}
@@ -131,19 +91,17 @@ export function ListingItemV2({
         </Link>
       </Item>
       {isManaging && (
-        <div className="flex flex-row rounded-lg object-cover rounded-t-none">
+        <ItemFooter className="flex flex-row">
           <Button
-            className="flex-3 rounded-none rounded-bl-md"
+            className="flex-3"
             variant="secondary"
             onClick={() => navigate(`/listings/${listingID}/edit`)}
           >
-            <Pencil />
             Edit
           </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button className="flex-1 rounded-none rounded-br-md" variant="destructive">
-                <Trash />
+              <Button className="flex-1" variant="destructive">
                 Delete
               </Button>
             </AlertDialogTrigger>
@@ -161,8 +119,29 @@ export function ListingItemV2({
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-        </div>
+        </ItemFooter>
       )}
     </div>
+  );
+}
+
+export function ListingItemSkeleton({ isManaging }: { isManaging: boolean }) {
+  return (
+    <Item className="rounded-none p-1">
+      <ItemHeader className="border">
+        <Skeleton className="aspect-square w-full rounded-none" />
+      </ItemHeader>
+      <ItemContent className="gap-2">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-1/2" />
+        <Skeleton className="h-4 w-1/4" />
+      </ItemContent>
+      {isManaging && (
+        <ItemFooter>
+          <Skeleton className="w-3/5 h-8" />
+          <Skeleton className="w-2/5 h-8" />
+        </ItemFooter>
+      )}
+    </Item>
   );
 }

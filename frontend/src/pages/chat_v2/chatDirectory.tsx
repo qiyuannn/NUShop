@@ -51,17 +51,13 @@ export function ChatDirectory() {
     },
     onMessage: async (event: MessageEvent) => {
       const msg = JSON.parse(event.data) as WSMessage;
-
       if (msg.type !== "message") {
         return;
       }
-
       if (msg.message == undefined) {
         return;
       }
-
       const message = msg.message;
-
       var updated = false;
       setChats((p) => {
         const existing = p.find(
@@ -110,6 +106,7 @@ export function ChatDirectory() {
           method: "GET",
         });
         const json = await res.json();
+        console.log(json);
 
         if (!res.ok) {
           throw new Error(json?.error?.code ?? "INTERNAL_ERROR");

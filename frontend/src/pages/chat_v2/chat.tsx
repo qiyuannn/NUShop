@@ -1,6 +1,6 @@
 import { ChatHeader } from "@/components/chat/chatHeader";
 import { ChatInput } from "@/components/chat/chatInput";
-import { ChatMessages } from "@/components/chat/chatMessagesV2";
+import { ChatMessagesV3 } from "@/components/chat/chatMessagesV3";
 import { useAuthStore } from "@/context/authStoreV2";
 import { useParams } from "react-router-dom";
 
@@ -9,18 +9,17 @@ export function Chat() {
   const param = useParams();
 
   return (
-    <div className="flex flex-col h-[calc(100vh-3rem)]">
+    <div className="flex flex-col h-[calc(100vh-4rem)]">
       {userID == param.otherID && (
         <div className="h-12 flex items-center justify-center bg-yellow-50">
           <p className="text-muted-foreground">This is your own listing</p>
         </div>
       )}
-
       <div>
         <ChatHeader />
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto">
-        <ChatMessages />
+        <ChatMessagesV3 />
       </div>
       <div className="p-2">
         <ChatInput />

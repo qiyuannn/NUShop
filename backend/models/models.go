@@ -23,6 +23,8 @@ type Listing struct {
 	CategoryName string `json:"categoryName"`
 	CreatedOn    time.Time `json:"createdOn"`
 	Images       []string  `json:"images"`
+
+	Score *float64 `json:"score"`
 }
 
 type Image struct {
@@ -35,19 +37,4 @@ type Cart struct {
 	UserID string `json:"userID"`
 	ListingID string `json:"listingID"`
 	Quantity int `json:"quanitity"`
-}
-
-type SearchListing struct {
-	ID         string `json:"id"`
-	SellerID   string `json:"sellerID"`
-	Title        string    `json:"title"`
-	Description  string    `json:"description"`
-	Price        int64     `json:"price" binding:"gte=0"`
-	Quantity     int64     `json:"quantity" binding:"gte=0"`
-	Condition    string    `json:"condition"`
-	CategoryName string `json:"categoryName"`
-	CreatedOn    time.Time `json:"createdOn"`
-	Images       []string  `json:"images"`
-
-	Rank *float64
 }

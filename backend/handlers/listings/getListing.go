@@ -3,7 +3,6 @@ package listings
 import (
 	db "backend/database"
 	"backend/models"
-	"backend/recommendation"
 	"backend/response"
 	"errors"
 	"fmt"
@@ -85,7 +84,7 @@ func GetListing(c *gin.Context) { //single
 
 	if userID, exists := c.Get("userID"); exists && listing.SellerID != userID{
 		userIDstr := userID.(string)
-		go recommendation.TrackView(userIDstr, listing.ID)
+		go TrackView(userIDstr, listing.ID)
 	}
 
 	response.Success(c, http.StatusOK, gin.H{

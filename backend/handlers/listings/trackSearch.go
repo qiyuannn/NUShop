@@ -1,4 +1,4 @@
-package recommendation
+package listings
 
 import (
 	db "backend/database"
@@ -11,7 +11,7 @@ import (
 )
 
 // will be called as a go routine function
-func TrackSearch(userID string, searchlistings []models.SearchListing) {
+func TrackSearch(userID string, searchlistings []models.Listing) {
 	// need to check if user is in the manage page // done
 
 	if userID != "" {

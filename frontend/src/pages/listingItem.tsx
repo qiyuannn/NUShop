@@ -45,6 +45,8 @@ export function Listing() {
     categoryName: "",
     createdOn: "",
     images: [],
+
+    score: 0,
   });
   const [err, setErr] = React.useState(false);
   const [seller, setSeller] = React.useState({
@@ -70,7 +72,7 @@ export function Listing() {
     async function fetchData() {
       try {
         const res1 = await fetch(`${API_URL}/listings/${listingID}`, {
-          headers: { Authorization: `Bearer ${token}`}
+          headers: { Authorization: `Bearer ${token}` },
         });
         const json1 = await res1.json();
         if (!res1.ok) {

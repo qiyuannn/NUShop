@@ -1,6 +1,9 @@
 package recommendation
 
-import "time"
+import (
+	"backend/models"
+	"time"
+)
 
 type UserEvent struct {
 	ID string // auto filled
@@ -14,4 +17,9 @@ type UserEvent struct {
 type CategoryScore struct {
 	Category string 
 	Score int
+}
+
+type CategoryListing struct {
+	Category string `json:"category"`
+	Listings []models.Listing `json:"listings"`
 }

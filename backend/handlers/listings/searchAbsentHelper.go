@@ -16,7 +16,7 @@ func SearchAbsentHelper(
 	conditions []string, 
 	args []interface{},
 	limit int,
-) ([]models.SearchListing, *response.Cursor) {
+) ([]models.Listing, *response.Cursor) {
 	log.Print("Normal Query ran")
 	sqlQuery :=
 		`
@@ -48,10 +48,10 @@ func SearchAbsentHelper(
 
 	defer rows.Close()
 
-	listings := []models.SearchListing{}
+	listings := []models.Listing{}
 
 	for rows.Next() {
-		var l models.SearchListing
+		var l models.Listing
 		if err := rows.Scan(
 			&l.ID,
 			&l.SellerID,

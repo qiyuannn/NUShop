@@ -1,9 +1,7 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { LoginPage } from "./pages/login";
 import { SignupPage } from "./pages/signup";
-import { Layout } from "./components/layout";
 import { EditListingPage } from "./pages/editListing";
-import { HomePage } from "./pages/home";
 import { ManageListing } from "./pages/manageListing";
 import { CreateListingPage } from "./pages/createListing";
 import { Listing } from "./pages/listingItem";
@@ -18,7 +16,9 @@ import useWebSocket from "react-use-websocket";
 import { ChatDirectoryMain } from "./pages/chat_v2/chatDirectory";
 import { Chat } from "./pages/chat_v2/chat";
 import { useAuthStore } from "./context/authStoreV2";
-import { Results } from "./pages/results";
+import { HomePageV2 } from "./pages/homePage";
+import { LayoutV2 } from "./components/layout/layoutV2";
+import { Results } from "./pages/Results";
 
 export function App() {
   const initCart = useCartStore((state) => state.initCart);
@@ -64,24 +64,25 @@ export function App() {
 
   return (
     <Routes>
-      <Route path="/login" element={false ? <Navigate to="/" replace /> : <LoginPage />} />
+      <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
 
-      <Route element={<Layout />}>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/results" element={<Results />} />
+      <Route element={<LayoutV2 />}>
+        <Route path="/" element={<HomePageV2 />} />
 
         <Route path="/listings/manage" element={<ManageListing />} />
-
         <Route path="/listings/:listingID/edit" element={<EditListingPage />} />
         <Route path="/listings/create" element={<CreateListingPage />} />
         <Route path="/listing/:listingID" element={<Listing />} />
+
         <Route path="/user/:userID" element={<ProfilePage />} />
+
         <Route path="/cart" element={<CartPage />} />
+
         <Route path="/chat" element={<ChatDirectoryMain />} />
         <Route path="/chat/:listingID/:otherID" element={<Chat />} />
 
-        <Route path="/test" element={<CartPage />} />
+        <Route path="/results" element={<Results />} />
       </Route>
     </Routes>
   );

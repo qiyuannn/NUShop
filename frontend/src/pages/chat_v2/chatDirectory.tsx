@@ -74,14 +74,11 @@ export function ChatDirectory() {
         );
         if (existing) {
           updated = true;
-          const isIncoming = message.senderID === existing.otherID;
           const newChat: chat = {
             ...existing,
             content: msg?.message?.content ?? "",
             createdOn: msg?.message?.createdOn ?? "",
-            unreadCount: isIncoming
-              ? (existing.unreadCount ?? 0) + 1
-              : existing.unreadCount ?? 0,
+            unreadCount: existing.unreadCount ?? 0,
           };
           return [newChat, ...p.filter((chat) => chat.listingID !== message.listingID)];
         }
@@ -157,16 +154,8 @@ export function ChatDirectory() {
                 <ItemTitle className="font-bold text-xl">{chat.title}</ItemTitle>
                 <ItemDescription className="overflow-wrap break-all">{chat.content}</ItemDescription>
               </ItemContent>
-              <ItemActions className="self-start flex flex-col items-end gap-1">
-                <ItemDescription>
-                  {formatMessageTime(chat.createdOn)}
-                </ItemDescription>
-
-                {(chat.unreadCount ?? 0) > 0 && (
-                  <div className="min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-xs font-semibold flex items-center justify-center">
-                    {chat.unreadCount}
-                  </div>
-                )}
+              <ItemActions className="self-start">
+                <ItemDescription>{formatMessageTime(chat.createdOn)}</ItemDescription>
               </ItemActions>
             </Link>
           </Item>

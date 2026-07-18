@@ -45,9 +45,11 @@ export function AppSidebar() {
   React.useEffect(() => {
     if (!token) return;
 
+    let alive = true;
+
     async function loadChats() {
       const res = await authApiFetch(`${API_URL}/chat`);
-      if (!res.ok) return;
+      if (!res.ok || !alive) return;
 
       const json = await res.json();
       const chats: chat[] = json.data?.chats ?? [];
@@ -57,8 +59,18 @@ export function AppSidebar() {
       );
     }
 
-    loadChats();
-  }, [token]);
+    const refreshChats = () => {
+      void loadChats();
+    };
+
+    void loadChats();
+    window.addEventListener("chat-message-received", refreshChats);
+
+    return () => {
+      alive = false;
+      window.removeEventListener("chat-message-received", refreshChats);
+    };
+  }, [token, authApiFetch]);
 
   return (
     <Sidebar collapsible="icon" typeof="floating">

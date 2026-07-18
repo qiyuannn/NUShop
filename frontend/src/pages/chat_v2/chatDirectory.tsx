@@ -37,7 +37,7 @@ export function ChatDirectory() {
   const { token } = useAuth();
   const authApiFetch = useAuthApiFetch();
   const [chats, setChats] = React.useState<chat[]>([]);
-  const [_, setErr] = React.useState(false);
+  const [, setErr] = React.useState(false);
 
   useWebSocket(token ? `${WS_URL}/ws` : null, {
     queryParams: { token: token! },
@@ -100,7 +100,7 @@ export function ChatDirectory() {
           otherName: json?.data?.otherName ?? "Failed to load username",
           otherID: json?.data?.otherID ?? "Failed to load ID",
           image: json?.data?.image ?? "",
-          unreadCount: 0,
+          unreadCount: 1,
         };
 
         setChats((p) => [newChat, ...p]);

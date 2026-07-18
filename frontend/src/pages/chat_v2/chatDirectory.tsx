@@ -78,7 +78,7 @@ export function ChatDirectory() {
             ...existing,
             content: msg?.message?.content ?? "",
             createdOn: msg?.message?.createdOn ?? "",
-            unreadCount: existing.unreadCount ?? 0,
+            unreadCount: (existing.unreadCount ?? 0) + 1,
           };
           return [newChat, ...p.filter((chat) => chat.listingID !== message.listingID)];
         }
@@ -154,8 +154,14 @@ export function ChatDirectory() {
                 <ItemTitle className="font-bold text-xl">{chat.title}</ItemTitle>
                 <ItemDescription className="overflow-wrap break-all">{chat.content}</ItemDescription>
               </ItemContent>
-              <ItemActions className="self-start">
+              <ItemActions className="self-start flex flex-col items-end gap-1">
                 <ItemDescription>{formatMessageTime(chat.createdOn)}</ItemDescription>
+
+                {(chat.unreadCount ?? 0) > 0 && (
+                  <div className="rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
+                    {chat.unreadCount ?? 0}
+                  </div>
+                )}
               </ItemActions>
             </Link>
           </Item>

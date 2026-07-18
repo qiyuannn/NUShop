@@ -170,6 +170,7 @@ export function App() {
         }
 
         void playChatSound(audioContextRef);
+        window.dispatchEvent(new CustomEvent("chat-message-received", { detail: message }));
       } catch {
         return
       }

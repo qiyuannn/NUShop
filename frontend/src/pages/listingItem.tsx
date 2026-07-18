@@ -173,20 +173,27 @@ export function Listing() {
         </Item>
       </div>
 
-      <div className="shrink-0 flex h-10 w-full gap-0 bg-secondary">
+      <div className="shrink-0 flex h-10 w-full gap-0 bg-background">
         <Button
           size="default"
           className="h-full flex-[1.6] rounded-none"
-          onClick={() => nav(`/chat/${listing.id}/${listing.sellerID}`)}
-          disabled={!ready || isOwnListing}
+          onClick={() => {
+            if (!ready || isOwnListing) return;
+            nav(`/chat/${listing.id}/${listing.sellerID}`);
+          }}
+          disabled={isOwnListing}
         >
           {isOwnListing ? "Your listing" : "Chat with seller"}
         </Button>
+
         <Button
           size="default"
           className="h-full flex-[1.6] rounded-none"
-          onClick={handleAddToCart}
-          disabled={!ready || isOwnListing}
+          onClick={() => {
+            if (!ready || isOwnListing) return;
+            handleAddToCart();
+          }}
+          disabled={isOwnListing}
         >
           {isOwnListing ? "Your listing" : "Add to cart"}
         </Button>

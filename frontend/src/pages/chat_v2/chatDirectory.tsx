@@ -78,6 +78,7 @@ export function ChatDirectory() {
             ...existing,
             content: msg?.message?.content ?? "",
             createdOn: msg?.message?.createdOn ?? "",
+            unreadCount: existing.unreadCount ?? 0,
           };
           return [newChat, ...p.filter((chat) => chat.listingID !== message.listingID)];
         }
@@ -99,6 +100,7 @@ export function ChatDirectory() {
           otherName: json?.data?.otherName ?? "Failed to load username",
           otherID: json?.data?.otherID ?? "Failed to load ID",
           image: json?.data?.image ?? "",
+          unreadCount: 0,
         };
 
         setChats((p) => [newChat, ...p]);

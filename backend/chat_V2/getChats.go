@@ -19,6 +19,7 @@ type chat struct {
 	OtherID string `json:"otherID"`
 	Image *string `json:"image"`
 	Title string `json:"title"`
+	UnreadCount int `json:"unreadCount"`
 }
 
 func GetChats(c *gin.Context) {

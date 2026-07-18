@@ -32,6 +32,16 @@ func GetChatHistory(c *gin.Context) {
 	otherID := c.Param("otherID")
 	listingID := c.Param("listingID")
 
+	if _, err := uuid.Parse(otherID); err != nil {
+		c.Error(response.ErrBadRequest(err))
+		return
+	}
+
+	if otherID == userIDStr {
+		c.Error(response.ErrBadRequest(errors.New("cannot chat with yourself")))
+		return
+	}
+
 	rows, err := db.Pool.Query(
 		c.Request.Context(),
 		`SELECT 
@@ -62,7 +72,7 @@ func GetChatHistory(c *gin.Context) {
 			c.Error(response.ErrInternalServerError(err))
 			return
 		}
-		messages = append(messages,m)
+		messages = append(messages, m)
 	}
 
 	if err := rows.Err(); err != nil {
@@ -105,8 +115,8 @@ func GetChatHistory(c *gin.Context) {
 	}
 
 	response.Success(c, http.StatusOK, gin.H{
-		"messages": messages,
+		"messages":        messages,
 		"otherLastReadID": otherLastReadID,
-		"selfLastReadID": selfLastReadID,
+		"selfLastReadID":  selfLastReadID,
 	})
 }

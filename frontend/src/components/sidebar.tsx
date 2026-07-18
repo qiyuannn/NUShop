@@ -28,6 +28,10 @@ import { useLogout } from "@/hooks/use-logout";
 import { Badge } from "./ui/badge";
 import { useCartStore } from "@/context/cartStore";
 import { useTheme } from "./theme-provider";
+import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
+import { API_URL } from "@/lib/api";
+import React from "react";
+import type { chat } from "@/types";
 
 export function AppSidebar() {
   const navigate = useNavigate();
@@ -35,6 +39,26 @@ export function AppSidebar() {
   const logout = useLogout();
   const cartItems = useCartStore((state) => state.cartItems);
   const { theme, setTheme } = useTheme();
+  const authApiFetch = useAuthApiFetch();
+  const [unreadChats, setUnreadChats] = React.useState(0);
+
+  React.useEffect(() => {
+    if (!token) return;
+
+    async function loadChats() {
+      const res = await authApiFetch(`${API_URL}/chat`);
+      if (!res.ok) return;
+
+      const json = await res.json();
+      const chats: chat[] = json.data?.chats ?? [];
+
+      setUnreadChats(
+        chats.reduce((sum, chat) => sum + (chat.unreadCount ?? 0), 0),
+      );
+    }
+
+    loadChats();
+  }, [token]);
 
   return (
     <Sidebar collapsible="icon" typeof="floating">
@@ -69,10 +93,20 @@ export function AppSidebar() {
             <SidebarGroup>
               <SidebarGroupLabel>Cart</SidebarGroupLabel>
               <SidebarMenu>
-                <SidebarMenuButton onClick={() => navigate("/cart")} tooltip="Cart">
-                  <ShoppingCart />
-                  Cart
-                  <Badge>{cartItems.size}</Badge>
+                <SidebarMenuButton
+                  onClick={() => navigate("/cart")}
+                  tooltip="Cart"
+                  className="relative overflow-visible"
+                >
+                  <span className="relative inline-flex shrink-0">
+                    <ShoppingCart />
+                    {cartItems.size > 0 && (
+                      <Badge className="absolute -top-1 -right-1 h-3 min-w-3 px-0 text-[7px] leading-none flex items-center justify-center rounded-full">
+                        {cartItems.size}
+                      </Badge>
+                    )}
+                  </span>
+                  <span>Cart</span>
                 </SidebarMenuButton>
               </SidebarMenu>
             </SidebarGroup>
@@ -91,6 +125,7 @@ export function AppSidebar() {
                 <SidebarMenuButton onClick={() => navigate("/chat")} tooltip="Chat">
                   <MessageSquareMore />
                   Chat
+                  {unreadChats > 0 && <Badge>{unreadChats}</Badge>}
                 </SidebarMenuButton>
               </SidebarMenu>
             </SidebarGroup>

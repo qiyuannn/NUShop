@@ -178,8 +178,9 @@ export function Listing() {
           size="default"
           className="h-full flex-[1.6] rounded-none"
           onClick={() => nav(`/chat/${listing.id}/${listing.sellerID}`)}
+          disabled={!ready || isOwnListing}
         >
-          Chat with seller
+          {isOwnListing ? "Your listing" : "Chat with seller"}
         </Button>
         <Button
           size="default"

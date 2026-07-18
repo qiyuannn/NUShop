@@ -55,4 +55,5 @@ export type chat = {
   otherName: string;
   otherID: string;
   image: string;
+  unreadCount: number;
 };

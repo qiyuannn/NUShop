@@ -42,7 +42,7 @@ func GetChatInfo(c *gin.Context) {
 	}
 
 	id2 := c.Param("id2")
-	
+
 	var otherUserID string
 	if id2 == "" {
 		otherUserID = id1
@@ -60,6 +60,11 @@ func GetChatInfo(c *gin.Context) {
 		if userIDStr == id2 {
 			otherUserID = id1
 		}
+	}
+
+	if otherUserID == userIDStr {
+		c.Error(response.ErrBadRequest(errors.New("cannot chat with yourself")))
+		return
 	}
 
 	var title string
@@ -92,9 +97,9 @@ func GetChatInfo(c *gin.Context) {
 	}
 
 	response.Success(c, http.StatusOK, gin.H{
-		"title": title,
+		"title":     title,
 		"otherName": username,
-		"otherID": id,
-		"image": image,
+		"otherID":   id,
+		"image":     image,
 	})
 }

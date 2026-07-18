@@ -24,7 +24,12 @@ export const useCartStore = create<CartStore>((set) => ({
     const json = await res.json();
 
     if (!res.ok) {
-      throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
+      throw new Error(
+        json?.error?.message ??
+        json?.error?.code ??
+        json?.message ??
+        "INTERNAL_ERROR",
+      );
     }
 
     const cartItems = new Map<string, CartItem>();
@@ -45,7 +50,11 @@ export const useCartStore = create<CartStore>((set) => ({
     const json = await res.json();
 
     if (!res.ok) {
-      throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
+      throw new Error(
+        json?.error?.code ??
+        json?.error?.message ??
+        "INTERNAL_ERROR",
+      );
     }
 
     set((state) => {
@@ -67,7 +76,11 @@ export const useCartStore = create<CartStore>((set) => ({
     const json = await res.json();
 
     if (!res.ok) {
-      throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
+      throw new Error(
+        json?.error?.code ??
+        json?.error?.message ??
+        "INTERNAL_ERROR",
+      );
     }
 
     set((state) => {

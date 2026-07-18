@@ -24,14 +24,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           method: "POST",
           credentials: "include",
         });
+
         if (res.ok) {
           const json = await res.json();
           setToken(json.data.token ?? null);
+
+          const userRes = await fetch(`${API_URL}/auth/me`, {
+            method: "GET",
+            credentials: "include",
+          });
+
+          if (userRes.ok) {
+            const userJson = await userRes.json();
+            setUser(userJson.data.user ?? null);
+          }
         }
       } finally {
         setReady(true);
       }
     }
+
     refresh();
   }, []);
 

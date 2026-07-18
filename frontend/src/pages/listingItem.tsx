@@ -26,12 +26,27 @@ import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
 import { toast } from "sonner";
 import { useAuth } from "@/context/auth";
 
+function getUserIdFromToken(token: string | null): string | null {
+  if (!token) return null;
+
+  try {
+    const payload = token.split(".")[1];
+    if (!payload) return null;
+
+    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const decoded = JSON.parse(atob(normalized));
+    return typeof decoded.sub === "string" ? decoded.sub : null;
+  } catch {
+    return null;
+  }
+}
+
 export function Listing() {
   const { listingID } = useParams();
   const addToCart = useCartStore((state) => state.addToCart);
   const authApiFetch = useAuthApiFetch();
   const nav = useNavigate();
-  const { token } = useAuth();
+  const { token, ready } = useAuth();
 
   const [listing, setListing] = React.useState<Listing>({
     id: "",
@@ -45,6 +60,8 @@ export function Listing() {
     createdOn: "",
     images: [],
   });
+  const currentUserID = getUserIdFromToken(token);
+  const isOwnListing = currentUserID === listing.sellerID;
   const [err, setErr] = React.useState(false);
   const [seller, setSeller] = React.useState({
     username: "",
@@ -56,10 +73,22 @@ export function Listing() {
       return;
     }
 
+    if (isOwnListing) {
+      toast.error("You cannot add your own listing to the cart.");
+      return;
+    }
+
     try {
       await addToCart(authApiFetch, listing.id, 1, false);
       toast.success("Item added into cart");
     } catch (error) {
+      const message = error instanceof Error ? error.message : "INTERNAL_ERROR";
+
+      if (message.toLowerCase().includes("own listing")) {
+        toast.error("You cannot add your own listing to the cart.");
+        return;
+      }
+
       toast.error("Failed to add item into cart, try again later.");
     }
   };
@@ -152,8 +181,13 @@ export function Listing() {
         >
           Chat with seller
         </Button>
-        <Button size="default" className="h-full flex-[1.6] rounded-none" onClick={handleAddToCart}>
-          Add to cart
+        <Button
+          size="default"
+          className="h-full flex-[1.6] rounded-none"
+          onClick={handleAddToCart}
+          disabled={!ready || isOwnListing}
+        >
+          {isOwnListing ? "Your listing" : "Add to cart"}
         </Button>
         <Button size="default" className="h-full flex-[1.6] rounded-none" variant="destructive">
           Buy now

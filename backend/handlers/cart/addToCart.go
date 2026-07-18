@@ -14,11 +14,11 @@ import (
 
 type AddToCartRequest struct {
 	ListingID string `json:"listingID"`
-	Quantity int `json:"quantity" binding:"gt=0"`
-	Replace bool `json:"replace"`
+	Quantity  int    `json:"quantity" binding:"gt=0"`
+	Replace   bool   `json:"replace"`
 }
 
-func AddToCart(c *gin.Context){
+func AddToCart(c *gin.Context) {
 	userIdValue, ok := c.Get("userID")
 	if !ok {
 		c.Error(response.ErrUnauthorised(errors.New("user not logged in")))
@@ -39,6 +39,27 @@ func AddToCart(c *gin.Context){
 	var addToCartRequest AddToCartRequest
 	if err := c.ShouldBindJSON(&addToCartRequest); err != nil {
 		c.Error(response.ErrBadRequest(err))
+		return
+	}
+
+	var sellerID string
+	if err := db.Pool.QueryRow(
+		c.Request.Context(),
+		`SELECT seller_id
+     FROM listings
+     WHERE id = $1`,
+		addToCartRequest.ListingID,
+	).Scan(&sellerID); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			c.Error(response.ErrNotFound(err))
+			return
+		}
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+
+	if sellerID == userIdStr {
+		c.Error(response.ErrBadRequest(errors.New("you cannot add your own listing to the cart")))
 		return
 	}
 
@@ -124,12 +145,12 @@ func AddToCart(c *gin.Context){
 		return
 	}
 
-	listing.Images = images 
+	listing.Images = images
 
 	response.Success(c, http.StatusOK, gin.H{
-		"cartItem" : gin.H{
-			"listing" : listing,
-			"quantity" : cart.Quantity,
+		"cartItem": gin.H{
+			"listing":  listing,
+			"quantity": cart.Quantity,
 		},
 	})
 }

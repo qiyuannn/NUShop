@@ -149,6 +149,8 @@ export function App() {
         const isCurrentChat =
           !!match && match[1] === message.listingID && match[2] === message.senderID;
 
+        console.log("WS message received:", msg);
+        console.log("sender:", message.senderID, "user:", userId, "current chat:", isCurrentChat);
 
         if (document.visibilityState === "visible" && isCurrentChat) {
           return;

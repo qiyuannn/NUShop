@@ -12,14 +12,14 @@ import (
 )
 
 type chat struct {
-	ListingID string `json:"listingID"`
-	Content string `json:"content"`
-	Created_On time.Time `json:"createdOn"`
-	Username string `json:"otherName"`
-	OtherID string `json:"otherID"`
-	Image *string `json:"image"`
-	Title string `json:"title"`
-	UnreadCount int `json:"unreadCount"`
+	ListingID   string    `json:"listingID"`
+	Content     string    `json:"content"`
+	Created_On  time.Time `json:"createdOn"`
+	Username    string    `json:"otherName"`
+	OtherID     string    `json:"otherID"`
+	Image       *string   `json:"image"`
+	Title       string    `json:"title"`
+	UnreadCount int       `json:"unreadCount"`
 }
 
 func GetChats(c *gin.Context) {
@@ -51,6 +51,13 @@ func GetChats(c *gin.Context) {
 				u.id,
 				i.file_url,
 				l.title
+				COALESCE((
+            SELECT COUNT(*)
+            FROM messages mm
+            WHERE mm.listing_id = m.listing_id
+              AND mm.receiver_id = ?
+              AND mm.is_read = FALSE
+        ), 0) AS unread_count
 			FROM messages m
 			JOIN users u
 				ON u.id = CASE
@@ -77,14 +84,14 @@ func GetChats(c *gin.Context) {
 
 	for rows.Next() {
 		var ch chat
-		if err := rows.Scan(&ch.ListingID, &ch.Content, &ch.Created_On, &ch.Username, &ch.OtherID, &ch.Image, &ch.Title); err != nil {
+		if err := rows.Scan(&ch.ListingID, &ch.Content, &ch.Created_On, &ch.Username, &ch.OtherID, &ch.Image, &ch.Title, &ch.UnreadCount); err != nil {
 			c.Error(response.ErrInternalServerError(err))
 			return
 		}
 		chats = append(chats, ch)
 	}
 
-	if err := rows.Err(); err != nil  {
+	if err := rows.Err(); err != nil {
 		c.Error(response.ErrInternalServerError(err))
 		return
 	}

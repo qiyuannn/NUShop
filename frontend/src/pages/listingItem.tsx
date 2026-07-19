@@ -63,6 +63,7 @@ export function Listing() {
   const currentUserID = getUserIdFromToken(token);
   const isOwnListing = currentUserID === listing.sellerID;
   const [err, setErr] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
   const [seller, setSeller] = React.useState({
     username: "",
     createdOn: "",
@@ -95,6 +96,8 @@ export function Listing() {
 
   React.useEffect(() => {
     setErr(false);
+    setIsLoading(true);
+
     async function fetchData() {
       try {
         const res1 = await fetch(`${API_URL}/listings/${listingID}`, {
@@ -116,8 +119,11 @@ export function Listing() {
         setSeller(json2.data.user);
       } catch {
         setErr(true);
+      } finally {
+        setIsLoading(false);
       }
     }
+
     fetchData();
   }, []);
 
@@ -178,7 +184,7 @@ export function Listing() {
           size="default"
           className="h-full flex-[1.6] rounded-none"
           onClick={() => nav(`/chat/${listing.id}/${listing.sellerID}`)}
-          disabled={!ready || isOwnListing}
+          disabled={!ready || isLoading || isOwnListing}
         >
           {isOwnListing ? "Your listing" : "Chat with seller"}
         </Button>

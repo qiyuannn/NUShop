@@ -45,6 +45,7 @@ async function playChatSound(audioContextRef: React.MutableRefObject<AudioContex
   }
 
   const ctx = audioContextRef.current;
+  console.log("Audio state:", ctx?.state);
 
   try {
     if (ctx.state === "suspended") {
@@ -168,7 +169,7 @@ export function App() {
             void Notification.requestPermission();
           }
         }
-
+        console.log("Playing notification sound");
         void playChatSound(audioContextRef);
         window.dispatchEvent(new CustomEvent("chat-message-received", { detail: message }));
       } catch {

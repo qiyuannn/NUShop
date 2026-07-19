@@ -73,8 +73,8 @@ async function playChatSound(audioContextRef: React.MutableRefObject<AudioContex
     osc2.connect(gain);
     osc2.start(now + 0.05);
     osc2.stop(now + 0.27);
-  } catch {
-    return;
+  } catch (error) {
+    console.error("playChatSound failed:", error);
   }
 }
 
@@ -133,16 +133,30 @@ export function App() {
       console.log("conn closed");
     },
     onMessage: (event: MessageEvent) => {
+      console.log("RAW WS EVENT", event.data);
       try {
         const msg = JSON.parse(event.data) as WSMessage;
+        console.log("Parsed WS message:", msg);
 
-        if (msg.type !== "message" || !msg.message || !userId) {
+        if (msg.type !== "message") {
+          console.log("Ignoring WS type:", msg.type);
+          return;
+        }
+
+        if (!msg.message) {
+          console.log("No message payload");
+          return;
+        }
+
+        if (!userId) {
+          console.log("No userId");
           return;
         }
 
         const message: Message = msg.message;
 
         if (message.senderID === userId) {
+          console.log("Ignoring own message");
           return;
         }
 
@@ -154,6 +168,7 @@ export function App() {
         console.log("sender:", message.senderID, "user:", userId, "current chat:", isCurrentChat);
 
         if (document.visibilityState === "visible" && isCurrentChat) {
+          console.log("Suppressing notification for active chat");
           return;
         }
 
@@ -170,6 +185,7 @@ export function App() {
           }
         }
         console.log("Playing notification sound");
+        console.log("AudioContext ref:", audioContextRef.current);
         void playChatSound(audioContextRef);
         window.dispatchEvent(new CustomEvent("chat-message-received", { detail: message }));
       } catch {

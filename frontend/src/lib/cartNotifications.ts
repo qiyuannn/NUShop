@@ -80,7 +80,7 @@ export function syncCartSnapshot(cartItems: Map<string, CartItem>) {
 
     useNotificationStore.getState().addNotification({
       type: "cart_deleted",
-      title: "Cart item removed",
+      title: "Cart item deleted",
       message: `${removed.title} was removed from your cart.`,
     });
 

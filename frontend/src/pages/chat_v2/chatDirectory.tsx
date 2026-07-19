@@ -16,6 +16,7 @@ import { Package } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
 import useWebSocket from "react-use-websocket";
+import { useNotificationStore } from "@/context/notificationStore";
 
 export function ChatDirectoryMain() {
   return (
@@ -55,48 +56,63 @@ export function ChatDirectory() {
     onMessage: async (event: MessageEvent) => {
       const msg = JSON.parse(event.data) as WSMessage;
 
-      if (msg.type !== "message") {
-        return;
-      }
-
-      if (msg.message == undefined) {
+      if (msg.type !== "message" || msg.message == undefined) {
         return;
       }
 
       const message = msg.message;
 
-      var updated = false;
+      let updated = false;
+
       setChats((p) => {
         const existing = p.find(
           (chat) =>
             chat.listingID == message.listingID &&
             (chat.otherID == message.senderID || chat.otherID == message.receiverID),
         );
-        if (existing) {
-          updated = true;
-          const newChat: chat = {
-            ...existing,
-            content: msg?.message?.content ?? "",
-            createdOn: msg?.message?.createdOn ?? "",
-            unreadCount: (existing.unreadCount ?? 0) + 1,
-          };
-          return [newChat, ...p.filter((chat) => chat.listingID !== message.listingID)];
+
+        if (!existing) {
+          return p;
         }
-        return p;
+
+        updated = true;
+
+        useNotificationStore.getState().addNotification({
+          type: "message",
+          title: "New message",
+          message: `${existing.otherName ?? "Someone"}: ${message.content}`,
+        });
+
+        const newChat: chat = {
+          ...existing,
+          content: message.content ?? "",
+          createdOn: message.createdOn ?? "",
+          unreadCount: (existing.unreadCount ?? 0) + 1,
+        };
+
+        return [newChat, ...p.filter((chat) => chat.listingID !== message.listingID)];
       });
 
       if (!updated) {
         const res = await authApiFetch(
-          `${API_URL}/chat/info/${msg.message.listingID}/${msg.message.senderID}/${msg.message.receiverID}`,
+          `${API_URL}/chat/info/${message.listingID}/${message.senderID}/${message.receiverID}`,
         );
         const json = await res.json();
+
+        const otherName = json?.data?.otherName ?? "Someone";
+
+        useNotificationStore.getState().addNotification({
+          type: "message",
+          title: "New message",
+          message: `${otherName}: ${message.content}`,
+        });
 
         const newChat: chat = {
           listingID: message.listingID,
           title: json?.data?.title ?? "Failed to load title",
           content: message.content,
           createdOn: message.createdOn,
-          otherName: json?.data?.otherName ?? "Failed to load username",
+          otherName,
           otherID: json?.data?.otherID ?? "Failed to load ID",
           image: json?.data?.image ?? "",
           unreadCount: 1,

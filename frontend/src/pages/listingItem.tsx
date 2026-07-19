@@ -192,11 +192,16 @@ export function Listing() {
           size="default"
           className="h-full flex-[1.6] rounded-none"
           onClick={handleAddToCart}
-          disabled={!ready || isOwnListing}
+          disabled={!ready || isLoading || isOwnListing}
         >
           {isOwnListing ? "Your listing" : "Add to cart"}
         </Button>
-        <Button size="default" className="h-full flex-[1.6] rounded-none" variant="destructive">
+        <Button
+          size="default"
+          className="h-full flex-[1.6] rounded-none"
+          variant="destructive"
+          disabled={!ready || isLoading || isOwnListing}
+        >
           Buy now
         </Button>
       </div>

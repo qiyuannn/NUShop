@@ -38,6 +38,8 @@ export type Message = {
   listingID: string;
   content: string;
   createdOn: string;
+  senderUsername: string;
+  listingTitle: string;
 };
 
 export type Read = {

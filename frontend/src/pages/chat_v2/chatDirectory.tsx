@@ -16,7 +16,6 @@ import { Package } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
 import useWebSocket from "react-use-websocket";
-import { useNotificationStore } from "@/context/notificationStore";
 
 export function ChatDirectoryMain() {
   return (

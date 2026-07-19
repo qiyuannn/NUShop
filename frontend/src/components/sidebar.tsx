@@ -134,10 +134,20 @@ export function AppSidebar() {
             <SidebarGroup>
               <SidebarGroupLabel>Chat</SidebarGroupLabel>
               <SidebarMenu>
-                <SidebarMenuButton onClick={() => navigate("/chat")} tooltip="Chat">
-                  <MessageSquareMore />
-                  Chat
-                  {unreadChats > 0 && <Badge>{unreadChats}</Badge>}
+                <SidebarMenuButton
+                  onClick={() => navigate("/chat")}
+                  tooltip="Chat"
+                  className="relative overflow-visible"
+                >
+                  <span className="relative inline-flex shrink-0">
+                    <MessageSquareMore />
+                    {unreadChats > 0 && (
+                      <Badge className="absolute -top-1 -right-1 h-3 min-w-3 px-0 text-[7px] leading-none flex items-center justify-center rounded-full">
+                        {unreadChats}
+                      </Badge>
+                    )}
+                  </span>
+                  <span>Chat</span>
                 </SidebarMenuButton>
               </SidebarMenu>
             </SidebarGroup>

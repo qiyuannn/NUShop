@@ -73,6 +73,21 @@ export function syncCartSnapshot(cartItems: Map<string, CartItem>) {
     }
   }
 
+  for (const listingID of Object.keys(snapshot)) {
+    if (cartItems.has(listingID)) continue;
+
+    const removed = snapshot[listingID];
+
+    useNotificationStore.getState().addNotification({
+      type: "cart_deleted",
+      title: "Cart item removed",
+      message: `${removed.title} was removed from your cart.`,
+    });
+
+    delete snapshot[listingID];
+    changed = true;
+  }
+
   if (changed) writeRawSnapshot(snapshot);
 }
 

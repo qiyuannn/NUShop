@@ -31,12 +31,20 @@ func DeleteListing(c *gin.Context) {
 		return
 
 	}
-	rows, err := db.Pool.Query(
+	
+	tx, err := db.Pool.Begin(c.Request.Context())
+	if err != nil {
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+	defer tx.Rollback(c.Request.Context())
+
+	rows, err := tx.Query(
 		c.Request.Context(),
 		`SELECT i.public_id
-                 FROM images i
-                 JOIN listings l ON l.id = i.listing_id
-                 WHERE i.listing_id = $1 AND l.seller_id = $2`,
+	 FROM images i
+	 JOIN listings l ON l.id = i.listing_id
+	 WHERE i.listing_id = $1 AND l.seller_id = $2`,
 		listingID,
 		userID,
 	)
@@ -45,6 +53,7 @@ func DeleteListing(c *gin.Context) {
 		return
 	}
 	defer rows.Close()
+
 	publicIDs := []string{}
 	for rows.Next() {
 		var publicID *string
@@ -60,15 +69,18 @@ func DeleteListing(c *gin.Context) {
 		c.Error(response.ErrInternalServerError(err))
 		return
 	}
-	for _, publicID := range publicIDs {
-		if err := cloudinary.DeleteImage(publicID); err != nil {
-			c.Error(response.ErrInternalServerError(err))
-			return
-		}
+
+	if _, err := tx.Exec(
+		c.Request.Context(),
+		`DELETE FROM messages WHERE listing_id = $1`,
+		listingID,
+	); err != nil {
+		c.Error(response.ErrInternalServerError(err))
+		return
 	}
 
 	var deletedID uuid.UUID
-	if err := db.Pool.QueryRow(
+	if err := tx.QueryRow(
 		c.Request.Context(),
 		`DELETE FROM listings WHERE id = $1 AND seller_id = $2 RETURNING id`,
 		listingID,
@@ -80,6 +92,18 @@ func DeleteListing(c *gin.Context) {
 		}
 		c.Error(response.ErrInternalServerError(err))
 		return
+	}
+
+	if err := tx.Commit(c.Request.Context()); err != nil {
+		c.Error(response.ErrInternalServerError(err))
+		return
+	}
+
+	for _, publicID := range publicIDs {
+		if err := cloudinary.DeleteImage(publicID); err != nil {
+			c.Error(response.ErrInternalServerError(err))
+			return
+		}
 	}
 
 	response.Success(c, http.StatusOK, gin.H{

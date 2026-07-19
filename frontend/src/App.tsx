@@ -119,7 +119,7 @@ export function App() {
     };
   }, [token]);
 
-  const { lastMessage, readyState } = useWebSocket(token ? `${WS_URL}/ws` : null, {
+  useWebSocket(token ? `${WS_URL}/ws` : null, {
     queryParams: { token: token! },
     share: true,
     shouldReconnect: () => true,
@@ -193,14 +193,6 @@ export function App() {
       }
     },
   });
-
-  React.useEffect(() => {
-    console.log("WS readyState:", readyState);
-  }, [readyState]);
-
-  React.useEffect(() => {
-    console.log("lastMessage:", lastMessage?.data);
-  }, [lastMessage]);
 
   React.useEffect(() => {
     if (!token) {

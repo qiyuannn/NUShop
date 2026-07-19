@@ -16,13 +16,6 @@ import type { chat } from "@/types";
 import { useCartStore } from "@/context/cartStore";
 import { readCartSnapshot } from "@/lib/cartNotifications";
 
-const formatMoney = (value: number) =>
-  new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(value);
-
 export function AppHeader() {
   const authApiFetch = useAuthApiFetch();
   const cartItems = useCartStore((state) => state.cartItems);

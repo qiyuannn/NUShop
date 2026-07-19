@@ -1,5 +1,5 @@
 import { API_URL } from "@/lib/api";
-import { forgetCartItem, rememberCartItem, seedCartSnapshot } from "@/lib/cartNotifications";
+import { forgetCartItem, rememberCartItem, syncCartSnapshot } from "@/lib/cartNotifications";
 import { useNotificationStore } from "@/context/notificationStore";
 import type { AuthApiFetch, CartItem } from "@/types";
 import { create } from "zustand";
@@ -41,7 +41,7 @@ export const useCartStore = create<CartStore>((set) => ({
     });
 
     set({ cartItems });
-    seedCartSnapshot(cartItems);
+    syncCartSnapshot(cartItems);
   },
 
   addToCart: async (authApiFetch, listingID, quantity, replace) => {

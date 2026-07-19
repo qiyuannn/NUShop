@@ -1,3 +1,4 @@
+import { useNotificationStore } from "@/context/notificationStore";
 import type { CartItem } from "@/types";
 
 const CART_SNAPSHOT_KEY = "orbital:cart-snapshot-v1";
@@ -43,15 +44,31 @@ export function readCartSnapshot() {
   return readRawSnapshot();
 }
 
-export function seedCartSnapshot(cartItems: Map<string, CartItem>) {
+export function syncCartSnapshot(cartItems: Map<string, CartItem>) {
   if (!canUseStorage()) return;
 
   const snapshot = readRawSnapshot();
   let changed = false;
 
   for (const [listingID, cartItem] of cartItems.entries()) {
-    if (!snapshot[listingID]) {
-      snapshot[listingID] = toEntry(cartItem);
+    const previous = snapshot[listingID];
+    const current = toEntry(cartItem);
+
+    if (previous && cartItem.listing.price < previous.price) {
+      useNotificationStore.getState().addNotification({
+        type: "price_drop",
+        title: "Price drop detected",
+        message: `${cartItem.listing.title} dropped from $${previous.price} to $${cartItem.listing.price}.`,
+      });
+    }
+
+    if (
+      !previous ||
+      previous.price !== current.price ||
+      previous.quantity !== current.quantity ||
+      previous.title !== current.title
+    ) {
+      snapshot[listingID] = current;
       changed = true;
     }
   }

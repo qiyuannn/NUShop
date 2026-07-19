@@ -69,7 +69,6 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
         setErr(true);
         return;
       }
-      console.log("category from API:", json.data.listing.categoryName);
       setFormData({
         title: json.data.listing.title ?? "",
         category: (json.data.listing.categoryName ?? "").trim(),

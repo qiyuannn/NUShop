@@ -45,7 +45,6 @@ async function playChatSound(audioContextRef: React.MutableRefObject<AudioContex
   }
 
   const ctx = audioContextRef.current;
-  console.log("Audio state:", ctx?.state);
 
   try {
     if (ctx.state === "suspended") {
@@ -127,10 +126,8 @@ export function App() {
     reconnectInterval: (attemptNumber) =>
       Math.min(Math.pow(2, attemptNumber) * 1000, 10000),
     onOpen: () => {
-      console.log("conn open");
     },
     onClose: () => {
-      console.log("conn closed");
     },
     onMessage: (event: MessageEvent) => {
       try {
@@ -150,9 +147,6 @@ export function App() {
         const isCurrentChat =
           !!match && match[1] === message.listingID && match[2] === message.senderID;
 
-        console.log("WS message received:", msg);
-        console.log("sender:", message.senderID, "user:", userId, "current chat:", isCurrentChat);
-
         if (document.visibilityState === "visible" && isCurrentChat) {
           return;
         }
@@ -169,7 +163,6 @@ export function App() {
             void Notification.requestPermission();
           }
         }
-        console.log("Playing notification sound");
         void playChatSound(audioContextRef);
         window.dispatchEvent(new CustomEvent("chat-message-received", { detail: message }));
       } catch {

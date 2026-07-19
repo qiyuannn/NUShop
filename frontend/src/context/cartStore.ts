@@ -1,4 +1,5 @@
 import { API_URL } from "@/lib/api";
+import { forgetCartItem, rememberCartItem, seedCartSnapshot } from "@/lib/cartNotifications";
 import type { AuthApiFetch, CartItem } from "@/types";
 import { create } from "zustand";
 
@@ -38,7 +39,8 @@ export const useCartStore = create<CartStore>((set) => ({
       cartItems.set(cartItem.listing.id, cartItem);
     });
 
-    set({ cartItems: cartItems });
+    set({ cartItems });
+    seedCartSnapshot(cartItems);
   },
 
   addToCart: async (authApiFetch, listingID, quantity, replace) => {
@@ -62,9 +64,11 @@ export const useCartStore = create<CartStore>((set) => ({
       cartItems.set(listingID, json.data.cartItem);
 
       return {
-        cartItems: cartItems,
+        cartItems,
       };
     });
+
+    rememberCartItem(json.data.cartItem);
   },
 
   deleteFromCart: async (authApiFetch, listingID) => {
@@ -88,8 +92,10 @@ export const useCartStore = create<CartStore>((set) => ({
       cartItems.delete(listingID);
 
       return {
-        cartItems: cartItems,
+        cartItems,
       };
     });
+
+    forgetCartItem(listingID);
   },
 }));

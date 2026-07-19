@@ -154,20 +154,20 @@ export function App() {
 
         useNotificationStore.getState().addNotification({
           type: "message",
-          title: `New message for "${message.listingTitle}"`,
-          message: `${message.senderUsername}: ${message.content.length > 120
-            ? `${message.content.slice(0, 117)}...`
-            : message.content
-            }`,
+          title: "New message",
+          message:
+            message.content.length > 120
+              ? `${message.content.slice(0, 117)}...`
+              : message.content,
         });
 
         if ("Notification" in window) {
           if (Notification.permission === "granted") {
-            new Notification(`New message for "${message.listingTitle}"`, {
-              body: `${message.senderUsername}: ${message.content.length > 120
+            new Notification("New chat message", {
+              body:
+                message.content.length > 120
                   ? `${message.content.slice(0, 117)}...`
-                  : message.content
-                }`,
+                  : message.content,
             });
           } else if (Notification.permission === "default") {
             void Notification.requestPermission();

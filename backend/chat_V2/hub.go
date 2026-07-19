@@ -22,6 +22,7 @@ func NewHub() *Hub{
 }
 
 func (h *Hub) Run() {
+	log.Println("HUB RUNNING - DEBUG BUILD")
 	for{
 		select{
 		case client := <- h.register:

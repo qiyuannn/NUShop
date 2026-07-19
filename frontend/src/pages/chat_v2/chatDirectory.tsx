@@ -77,12 +77,6 @@ export function ChatDirectory() {
 
         updated = true;
 
-        useNotificationStore.getState().addNotification({
-          type: "message",
-          title: "New message",
-          message: `${existing.otherName ?? "Someone"}: ${message.content}`,
-        });
-
         const newChat: chat = {
           ...existing,
           content: message.content ?? "",
@@ -100,12 +94,6 @@ export function ChatDirectory() {
         const json = await res.json();
 
         const otherName = json?.data?.otherName ?? "Someone";
-
-        useNotificationStore.getState().addNotification({
-          type: "message",
-          title: "New message",
-          message: `${otherName}: ${message.content}`,
-        });
 
         const newChat: chat = {
           listingID: message.listingID,

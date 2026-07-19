@@ -12,6 +12,7 @@ import { Listing } from "./pages/listingItem";
 import { ProfilePage } from "./pages/profile";
 import React from "react";
 import { useCartStore } from "./context/cartStore";
+import { useNotificationStore } from "./context/notificationStore";
 import { useAuthApiFetch } from "./hooks/use-authApiFetch";
 import { useAuth } from "./context/auth";
 import { toast } from "sonner";
@@ -150,6 +151,15 @@ export function App() {
         if (document.visibilityState === "visible" && isCurrentChat) {
           return;
         }
+
+        useNotificationStore.getState().addNotification({
+          type: "message",
+          title: "New message",
+          message:
+            message.content.length > 120
+              ? `${message.content.slice(0, 117)}...`
+              : message.content,
+        });
 
         if ("Notification" in window) {
           if (Notification.permission === "granted") {

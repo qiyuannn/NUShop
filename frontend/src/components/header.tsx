@@ -1,4 +1,5 @@
-import { SearchIcon } from "lucide-react";
+import { SearchIcon, Bell } from "lucide-react";
+import { useNotificationStore } from "@/context/notificationStore";
 import { Button } from "./ui/button";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ButtonGroup } from "./ui/button-group";
@@ -15,6 +16,11 @@ export function AppHeader() {
   const navigate = useNavigate();
   const [search, setSearch] = React.useState("");
   const location = useLocation();
+  const {
+    notifications,
+    unreadCount,
+    markAllRead,
+  } = useNotificationStore();
 
   const q = new URLSearchParams(location.search);
   q.set("search", search);
@@ -60,7 +66,49 @@ export function AppHeader() {
         </div>
       )}
       {token && (
-        <div className="flex gap-3">
+        <div className="flex items-center gap-3">
+          <div className="relative group">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative rounded-full"
+              onClick={markAllRead}
+            >
+              <Bell className="h-5 w-5" />
+
+              {unreadCount > 0 && (
+                <span className="absolute top-1 right-1 h-2.5 w-2.5 rounded-full bg-red-500" />
+              )}
+            </Button>
+
+            <div className="absolute right-0 mt-2 w-80 rounded-lg border bg-background shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+              <div className="px-4 py-3 border-b font-semibold">
+                Notifications
+              </div>
+
+              {notifications.length === 0 ? (
+                <div className="px-4 py-6 text-sm text-muted-foreground text-center">
+                  No notifications
+                </div>
+              ) : (
+                notifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    className="border-b last:border-0 px-4 py-3 hover:bg-accent"
+                  >
+                    <p className="text-sm font-medium">
+                      {notification.title}
+                    </p>
+
+                    <p className="text-xs text-muted-foreground">
+                      {notification.message}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
           <Link to="" className="hover:bg-sidebar-ring rounded-sm">
             <Avatar>
               <AvatarImage src="https://github.com/evilrabbit.png" />

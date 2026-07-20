@@ -64,7 +64,6 @@ func AddToCart(c *gin.Context) {
 	}
 
 	var cart models.Cart
-
 	if err := db.Pool.QueryRow(
 		c.Request.Context(),
 		`INSERT INTO cart 

@@ -24,29 +24,15 @@ import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/context/cartStore";
 import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
 import { toast } from "sonner";
-import { useAuth } from "@/context/auth";
-
-function getUserIdFromToken(token: string | null): string | null {
-  if (!token) return null;
-
-  try {
-    const payload = token.split(".")[1];
-    if (!payload) return null;
-
-    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
-    const decoded = JSON.parse(atob(normalized));
-    return typeof decoded.sub === "string" ? decoded.sub : null;
-  } catch {
-    return null;
-  }
-}
+import { useAuthStore } from "@/context/authStoreV2";
 
 export function Listing() {
   const { listingID } = useParams();
   const addToCart = useCartStore((state) => state.addToCart);
   const authApiFetch = useAuthApiFetch();
   const nav = useNavigate();
-  const { token, ready } = useAuth();
+  const token = useAuthStore((s) => s.token);
+  const userID = useAuthStore.getState().userID;
 
   const [listing, setListing] = React.useState<Listing>({
     id: "",
@@ -59,6 +45,8 @@ export function Listing() {
     categoryName: "",
     createdOn: "",
     images: [],
+
+    score: 0,
   });
   const currentUserID = getUserIdFromToken(token);
   const isOwnListing = currentUserID === listing.sellerID;
@@ -145,7 +133,7 @@ export function Listing() {
     async function fetchData() {
       try {
         const res1 = await fetch(`${API_URL}/listings/${listingID}`, {
-          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
         });
         const json1 = await res1.json();
         if (!res1.ok) {
@@ -181,6 +169,12 @@ export function Listing() {
 
   return (
     <div className="flex h-[calc(100dvh-3.5rem)] flex-col overflow-hidden">
+      {userID == listing.sellerID && (
+        <div className="h-12 flex items-center justify-center bg-yellow-50">
+          <p className="text-muted-foreground">You are viewing your own listing</p>
+        </div>
+      )}
+
       <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
         <Item className="pb-0">
           <ItemHeader className="sm:pl-16 sm:pr-16">
@@ -228,7 +222,7 @@ export function Listing() {
           size="default"
           className="h-full flex-[1.6] rounded-none"
           onClick={() => nav(`/chat/${listing.id}/${listing.sellerID}`)}
-          disabled={!ready || isLoading || isOwnListing}
+          
         >
           {isOwnListing ? "Your listing" : "Chat with seller"}
         </Button>
@@ -236,9 +230,9 @@ export function Listing() {
           size="default"
           className="h-full flex-[1.6] rounded-none"
           onClick={handleAddToCart}
-          disabled={!ready || isLoading || isOwnListing}
+          disabled={userID == listing.sellerID}
         >
-          {isOwnListing ? "Your listing" : "Add to cart"}
+          Add to cart
         </Button>
         <Button
           size="default"
@@ -292,7 +286,7 @@ export function ItemCarousel({ files }: { files: string[] }) {
           {files.length === 0 && (
             <CarouselItem className="basis-4/5 md:basis-1/2 lg:basis-2/7 pl-0">
               <Item>
-                <ItemContent className="flex h-56 items-center justify-center border rounded-sm">
+                <ItemContent className="aspect-square flex items-center justify-center border rounded-sm">
                   <ItemDescription>Listing have no images</ItemDescription>
                 </ItemContent>
               </Item>

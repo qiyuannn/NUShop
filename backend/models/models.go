@@ -23,6 +23,8 @@ type Listing struct {
 	CategoryName string `json:"categoryName"`
 	CreatedOn    time.Time `json:"createdOn"`
 	Images       []string  `json:"images"`
+
+	Score *float64 `json:"score"`
 }
 
 type Image struct {

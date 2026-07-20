@@ -2,11 +2,12 @@ package main
 
 import (
 	"backend/auth"
-	chatv2 "backend/chat_V2"
 	"backend/database"
 	"backend/handlers/cart"
 	"backend/handlers/categories"
+	chatv2 "backend/handlers/chat_V2"
 	"backend/handlers/listings"
+	"backend/handlers/recommendation"
 	"backend/handlers/payments"
 	"backend/handlers/users"
 	"backend/response"
@@ -45,6 +46,9 @@ func main() {
 	private := router.Group("/")
 	private.Use(auth.AuthHandler())
 
+	optionalAuth := router.Group("/")
+	optionalAuth.Use(auth.OptionalAuthHandler())
+
 	//Auth
 	router.POST("/auth/refresh", auth.RefreshToken)
 	router.PUT("/auth/logout", auth.Logout)
@@ -62,12 +66,20 @@ func main() {
 	router.GET("/categories", categories.GetCategories)
 
 	//listing handlers
-	router.GET("/listings/:listingID", listings.GetListing)
-	router.GET("/listings", listings.GetListings)
-	private.GET("/listings/me", listings.GetListings)
+	optionalAuth.GET("/listings/:listingID", listings.GetListing)
+
+	optionalAuth.GET("/listings", listings.GetListingsV3)
+	private.GET("/listings/manage", listings.GetListingsV3)
+
 	private.POST("/listings", listings.CreateListing)
 	private.PUT("/listings/:id", listings.UpdateListing)
 	private.DELETE("/listings/:id", listings.DeleteListing)
+
+	// Reccomendations handlers
+	private.GET("/reccomendations/personalised", recommendation.PersonalisedReccsV2)
+	router.GET("/reccomendations/categories", recommendation.CategoriesReccs)
+	router.GET("/reccomendations/recents", recommendation.RecentListings)
+
 
 	//cart handlers
 	private.GET("/cart", cart.GetCart)

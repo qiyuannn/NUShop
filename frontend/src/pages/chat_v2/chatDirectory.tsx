@@ -1,3 +1,4 @@
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import {
   Item,
   ItemActions,
@@ -7,7 +8,7 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item";
-import { useAuth } from "@/context/auth";
+import { useAuthStore } from "@/context/authStoreV2";
 import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
 import { API_URL, WS_URL } from "@/lib/api";
 import { formatMessageTime } from "@/lib/fomatTime";
@@ -34,7 +35,7 @@ export function ChatDirectoryMain() {
 }
 
 export function ChatDirectory() {
-  const { token } = useAuth();
+  const token = useAuthStore((s) => s.token);
   const authApiFetch = useAuthApiFetch();
   const [chats, setChats] = React.useState<chat[]>([]);
   const [, setErr] = React.useState(false);
@@ -58,7 +59,6 @@ export function ChatDirectory() {
       if (msg.type !== "message" || msg.message == undefined) {
         return;
       }
-
       const message = msg.message;
 
       let updated = false;
@@ -92,14 +92,12 @@ export function ChatDirectory() {
         );
         const json = await res.json();
 
-        const otherName = json?.data?.otherName ?? "Someone";
-
         const newChat: chat = {
           listingID: message.listingID,
           title: json?.data?.title ?? "Failed to load title",
           content: message.content,
           createdOn: message.createdOn,
-          otherName,
+          otherName: json?.data?.otherName ?? "Failed to load username",
           otherID: json?.data?.otherID ?? "Failed to load ID",
           image: json?.data?.image ?? "",
           unreadCount: 1,
@@ -130,6 +128,17 @@ export function ChatDirectory() {
     getChats();
   }, []);
 
+  if (chats.length == 0) {
+    return (
+      <Empty className="h-full w-full items-center justify-center">
+        <EmptyHeader>
+          <EmptyTitle>No chats yet</EmptyTitle>
+          <EmptyDescription>Start a chat by clicking "Chat with Seller" on a listing.</EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+    )
+  }
+
   return (
     <div>
       <ItemGroup>
@@ -153,7 +162,9 @@ export function ChatDirectory() {
               <ItemContent className="gap-0">
                 <ItemDescription>{chat.otherName}</ItemDescription>
                 <ItemTitle className="font-bold text-xl">{chat.title}</ItemTitle>
-                <ItemDescription className="overflow-wrap break-all">{chat.content}</ItemDescription>
+                <ItemDescription className="overflow-wrap break-all">
+                  {chat.content}
+                </ItemDescription>
               </ItemContent>
               <ItemActions className="self-start flex flex-col items-end gap-1">
                 <ItemDescription>{formatMessageTime(chat.createdOn)}</ItemDescription>

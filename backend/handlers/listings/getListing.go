@@ -82,6 +82,11 @@ func GetListing(c *gin.Context) { //single
 
 	listing.Images = images
 
+	if userID, exists := c.Get("userID"); exists && listing.SellerID != userID{
+		userIDstr := userID.(string)
+		go TrackView(userIDstr, listing.ID)
+	}
+
 	response.Success(c, http.StatusOK, gin.H{
 		"listing": listing,
 	})

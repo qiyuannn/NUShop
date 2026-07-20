@@ -1,14 +1,14 @@
-import { useAuth } from "@/context/auth";
 import { API_URL } from "@/lib/api";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "@/context/authStoreV2";
 
 export function useLogout() {
-  const { setToken } = useAuth();
+  const setAuth = useAuthStore((s) => s.setAuth);
   const nav = useNavigate();
 
   async function logout() {
-    setToken(null);
+    setAuth(null, null);
 
     toast.success("Logged out", {
       duration: 3000,

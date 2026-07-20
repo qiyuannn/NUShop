@@ -29,7 +29,6 @@ func DeleteListing(c *gin.Context) {
 	if err != nil {
 		c.Error(response.ErrBadRequest(err))
 		return
-
 	}
 	
 	tx, err := db.Pool.Begin(c.Request.Context())

@@ -1,19 +1,19 @@
 import { useFilterStore } from "@/context/filterStore";
-import { Button } from "./ui/button";
-import { Checkbox } from "./ui/checkbox";
-import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSeparator, FieldSet } from "./ui/field";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Button } from "../ui/button";
+import { Checkbox } from "../ui/checkbox";
+import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSeparator, FieldSet } from "../ui/field";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import React from "react";
 import { API_URL } from "@/lib/api";
-import { Separator } from "./ui/separator";
-import { Item, ItemContent, ItemTitle } from "./ui/item";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group";
+import { Separator } from "../ui/separator";
+import { Item, ItemContent, ItemTitle } from "../ui/item";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "../ui/input-group";
 import { useLocation, useNavigate } from "react-router-dom";
 import { RefreshCcw } from "lucide-react";
 
 export function FilterBar() {
   return (
-    <div className="flex flex-row gap-2 items-center h-12 p-2 pl-4 pr-4 w-full overflow-x-auto">
+    <div className="flex flex-row gap-2 items-center h-12 p-2 pl-2 pr-4 w-full overflow-x-auto">
       <span className="text-muted-foreground text-sm">Filters:</span>
       <CategoryFilter />
       <Separator orientation="vertical" />
@@ -164,7 +164,11 @@ export function CategoryFilter() {
       q.set("category", e.currentTarget.value);
     }
 
-    navigate(`${location.pathname}?${q}`);
+    if (location.pathname.includes("manage") || location.pathname.includes("user")) {
+      navigate(`${location.pathname}?${q}`);
+    } else {
+      navigate(`/results?${q}`);
+    }
   };
 
   React.useEffect(() => {

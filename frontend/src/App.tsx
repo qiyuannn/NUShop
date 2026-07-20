@@ -1,11 +1,9 @@
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
-import type { Message, WSMessage } from "./types";
+import { Route, Routes, useLocation } from "react-router-dom";
+import type { TypeMessage, WSMessage } from "./types";
 import { LoginPage } from "./pages/login";
 import { SignupPage } from "./pages/signup";
 import { ForgotPasswordPage } from "./pages/forgotPassword";
-import { Layout } from "./components/layout";
 import { EditListingPage } from "./pages/editListing";
-import { HomePage } from "./pages/home";
 import { ManageListing } from "./pages/manageListing";
 import { CreateListingPage } from "./pages/createListing";
 import { Listing } from "./pages/listingItem";
@@ -14,29 +12,16 @@ import React from "react";
 import { useCartStore } from "./context/cartStore";
 import { useNotificationStore } from "./context/notificationStore";
 import { useAuthApiFetch } from "./hooks/use-authApiFetch";
-import { useAuth } from "./context/auth";
 import { toast } from "sonner";
 import { CartPage } from "./pages/cart";
 import { WS_URL } from "./lib/api";
 import useWebSocket from "react-use-websocket";
 import { ChatDirectoryMain } from "./pages/chat_v2/chatDirectory";
 import { Chat } from "./pages/chat_v2/chat";
-
-function getUserIdFromToken(token: string | null): string | null {
-  if (!token) return null;
-
-  const payload = token.split(".")[1];
-  if (!payload) return null;
-
-  try {
-    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
-    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
-    const claims = JSON.parse(atob(padded)) as { sub?: string };
-    return typeof claims.sub === "string" ? claims.sub : null;
-  } catch {
-    return null;
-  }
-}
+import { useAuthStore } from "./context/authStoreV2";
+import { HomePageV2 } from "./pages/homePage";
+import { LayoutV2 } from "./components/layout/layoutV2";
+import { Results } from "./pages/Results";
 
 async function playChatSound(audioContextRef: React.MutableRefObject<AudioContext | null>) {
   if (typeof window === "undefined") return;
@@ -81,10 +66,11 @@ async function playChatSound(audioContextRef: React.MutableRefObject<AudioContex
 export function App() {
   const initCart = useCartStore((state) => state.initCart);
   const authApiFetch = useAuthApiFetch();
-  const { token } = useAuth();
+  const token = useAuthStore((s) => s.token);
+  const refreshToken = useAuthStore((s) => s.refreshToken);
   const location = useLocation();
   const audioContextRef = React.useRef<AudioContext | null>(null);
-  const userId = React.useMemo(() => getUserIdFromToken(token), [token]);
+  const userID = useAuthStore((s) => s.token)
 
   React.useEffect(() => {
     if (!token || !("Notification" in window)) return;
@@ -134,13 +120,13 @@ export function App() {
       try {
         const msg = JSON.parse(event.data) as WSMessage;
 
-        if (msg.type !== "message" || !msg.message || !userId) {
+        if (msg.type !== "message" || !msg.message || !userID) {
           return;
         }
 
-        const message: Message = msg.message;
+        const message: TypeMessage = msg.message;
 
-        if (message.senderID === userId) {
+        if (message.senderID === userID) {
           return;
         }
 
@@ -195,28 +181,38 @@ export function App() {
         }
       }
     }
-
     initcart();
   }, [token]);
 
+  React.useEffect(() => {
+    async function refresh() {
+      await refreshToken();
+    }
+    refresh();
+  }, []);
+
   return (
     <Routes>
-      <Route path="/login" element={false ? <Navigate to="/" replace /> : <LoginPage />} />
+      <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-      <Route element={<Layout />}>
-        <Route path="/" element={<HomePage />} />
+      <Route element={<LayoutV2 />}>
+        <Route path="/" element={<HomePageV2 />} />
+
+        <Route path="/listings/manage" element={<ManageListing />} />
         <Route path="/listings/:listingID/edit" element={<EditListingPage />} />
         <Route path="/listings/create" element={<CreateListingPage />} />
-        <Route path="/listings/manage" element={<ManageListing />} />
         <Route path="/listing/:listingID" element={<Listing />} />
+
         <Route path="/user/:userID" element={<ProfilePage />} />
+
         <Route path="/cart" element={<CartPage />} />
+
         <Route path="/chat" element={<ChatDirectoryMain />} />
         <Route path="/chat/:listingID/:otherID" element={<Chat />} />
 
-        <Route path="/test" element={<CartPage />} />
+        <Route path="/results" element={<Results />} />
       </Route>
     </Routes>
   );

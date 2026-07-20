@@ -27,11 +27,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAuthStore } from "@/context/authStoreV2";
 import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
 import { API_URL } from "@/lib/api";
 import { AlertCircleIcon, DollarSign, Trash2 } from "lucide-react";
 import React, { type SetStateAction } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
 
 type FormDataType = {
   title: string;
@@ -59,6 +61,8 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
   });
   const [err, setErr] = React.useState(false);
   const apiFetch = useAuthApiFetch();
+  const [listingOwner, setListingOwner] = React.useState("");
+  const userID = useAuthStore.getState().userID;
 
   React.useEffect(() => {
     if (!listingID) return;
@@ -78,6 +82,7 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
         condition: json.data.listing.condition ?? "",
         files: json.data.listing.images ?? [],
       });
+      setListingOwner(json?.data?.listing?.sellerID ?? "");
     }
     fetchListing();
   }, [listingID]);
@@ -128,6 +133,16 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
 
   const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (!formData.category) {
+      toast.error("Category cannot be empty");
+      return;
+    }
+
+    if (!formData.condition) {
+      toast.error("Condition cannot be empty");
+      return;
+    }
 
     if (loading) return;
     setLoading(true);

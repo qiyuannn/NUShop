@@ -16,6 +16,8 @@ export type Listing = {
   categoryName: string;
   createdOn: string;
   images: string[];
+
+  score: number;
 };
 
 export type CartItem = {
@@ -27,11 +29,11 @@ export type AuthApiFetch = (url: string, options?: RequestInit) => Promise<Respo
 
 export type WSMessage = {
   type: string;
-  message?: Message;
+  message?: TypeMessage;
   read?: Read;
 };
 
-export type Message = {
+export type TypeMessage = {
   id: string;
   senderID: string;
   receiverID: string;

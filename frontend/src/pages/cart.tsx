@@ -9,6 +9,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { Input } from "@/components/ui/input";
 import {
   Item,
@@ -19,8 +20,7 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import { Separator } from "@/components/ui/separator";
-import { Unauthorised } from "@/components/unauthorised";
-import { useAuth } from "@/context/auth";
+import { useAuthStore } from "@/context/authStoreV2";
 import { useCartStore } from "@/context/cartStore";
 import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
 import { API_URL } from "@/lib/api";
@@ -36,7 +36,7 @@ export function CartPage() {
   const [total, setTotal] = React.useState(0);
   const [checkoutLoading, setCheckoutLoading] = React.useState(false);
   const [checkoutError, setCheckoutError] = React.useState<string | null>(null);
-  const { token, ready } = useAuth();
+  const [token] = useAuthStore((s) => s.token)
 
   const paymentStatus = searchParams.get("payment");
 
@@ -83,14 +83,6 @@ export function CartPage() {
     setTotal(total);
   }, [cartItems]);
 
-  if (!ready) {
-    return <div>Loading...</div>;
-  }
-
-  if (!token) {
-    return <Unauthorised />;
-  }
-
   return (
     <div>
       <Item>
@@ -136,9 +128,8 @@ export function CartPage() {
   );
 }
 
-export function CartList() {
+function CartList() {
   const cartItems = useCartStore((state) => state.cartItems);
-
   return (
     <div>
       <Item className="flex">
@@ -151,11 +142,15 @@ export function CartList() {
         <div className="w-10" />
       </Item>
       <Separator />
-      <div>
-        {Array.from(cartItems.entries()).map(([id, cartItem]) => (
-          <CartItemCard listing={cartItem.listing} quantity={cartItem.quantity} key={id} />
-        ))}
-      </div>
+      {cartItems.size == 0 ? (
+        <EmptyCart />
+      ) : (
+        <div>
+          {Array.from(cartItems.entries()).map(([id, cartItem]) => (
+            <CartItemCard listing={cartItem.listing} quantity={cartItem.quantity} key={id} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -246,5 +241,18 @@ export function CartItemCard({ listing, quantity }: { listing: Listing; quantity
         </AlertDialogContent>
       </AlertDialog>
     </Item>
+  );
+}
+
+function EmptyCart() {
+  return (
+    <Empty>
+      <EmptyHeader>
+        <EmptyTitle>Cart empty</EmptyTitle>
+        <EmptyDescription>
+          You're all caught up. New items added to cart will appear here.
+        </EmptyDescription>
+      </EmptyHeader>
+    </Empty>
   );
 }

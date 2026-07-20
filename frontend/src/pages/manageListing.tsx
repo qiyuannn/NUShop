@@ -1,22 +1,15 @@
-import { ListingGallery } from "@/components/listingsGallery";
+import { SearchResultsV2 } from "@/components/search/searchResultsV2";
 import { Button } from "@/components/ui/button";
 import { Item, ItemActions, ItemContent, ItemDescription, ItemHeader } from "@/components/ui/item";
 import { Separator } from "@/components/ui/separator";
-import { Unauthorised } from "@/components/unauthorised";
-import { useAuth } from "@/context/auth";
 import { Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export function ManageListing() {
-  const { token } = useAuth();
   const navigate = useNavigate();
 
-  if (!token) {
-    return <Unauthorised />;
-  }
-
   return (
-    <div className="w-full h-full">
+    <div className="flex flex-col w-full h-full">
       <Item>
         <ItemContent>
           <ItemHeader className="text-2xl font-bold">My Listings</ItemHeader>
@@ -30,7 +23,9 @@ export function ManageListing() {
         </ItemActions>
       </Item>
       <Separator />
-      <ListingGallery isManaging={true} />
+      <div className="flex-1">
+        <SearchResultsV2 isManaging={true} />
+      </div>
     </div>
   );
 }

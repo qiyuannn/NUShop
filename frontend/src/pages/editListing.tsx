@@ -1,11 +1,5 @@
-import { ListingForm } from "@/components/listingForm";
-import { Unauthorised } from "@/components/unauthorised";
-import { useAuth } from "@/context/auth";
+import { ListingForm } from "@/components/listings/listingForm";
 
 export function EditListingPage() {
-  const { token } = useAuth();
-  if (!token) {
-    return <Unauthorised />;
-  }
   return <ListingForm typeCreate={false} />;
 }

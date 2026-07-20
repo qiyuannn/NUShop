@@ -162,7 +162,7 @@ func GoogleLogin(c *gin.Context) {
 	user.PasswordHash = ""
 
 	response.Success(c, http.StatusOK, gin.H{
-		"user":  user,
+		"userID":  user.ID,
 		"token": token,
 	})
 }

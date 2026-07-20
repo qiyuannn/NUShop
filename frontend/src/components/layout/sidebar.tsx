@@ -8,7 +8,7 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
-} from "./ui/sidebar";
+} from "../ui/sidebar";
 import {
   CopyPlus,
   LogIn,
@@ -17,17 +17,17 @@ import {
   Package,
   Plus,
   ShoppingBag,
-  ShoppingCart,
   SquareChartGantt,
   Sun,
   Moon,
   User,
+  ShoppingBasket,
 } from "lucide-react";
-import { useAuth } from "@/context/auth";
 import { useLogout } from "@/hooks/use-logout";
-import { Badge } from "./ui/badge";
+import { Badge } from "../ui/badge";
 import { useCartStore } from "@/context/cartStore";
-import { useTheme } from "./theme-provider";
+import { useTheme } from "../theme-provider";
+import { useAuthStore } from "@/context/authStoreV2";
 import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
 import { API_URL } from "@/lib/api";
 import React from "react";
@@ -35,7 +35,7 @@ import type { chat } from "@/types";
 
 export function AppSidebar() {
   const navigate = useNavigate();
-  const { token } = useAuth();
+  const token = useAuthStore((state) => state.token);
   const logout = useLogout();
   const cartItems = useCartStore((state) => state.cartItems);
   const { theme, setTheme } = useTheme();
@@ -73,7 +73,7 @@ export function AppSidebar() {
   }, [token, authApiFetch]);
 
   return (
-    <Sidebar collapsible="icon" typeof="floating">
+    <Sidebar collapsible="icon" typeof="floating" variant="floating">
       <SidebarHeader>
         <SidebarMenuButton onClick={() => navigate("/")} tooltip="Home">
           <ShoppingBag />

@@ -36,7 +36,7 @@ export function CartPage() {
   const [total, setTotal] = React.useState(0);
   const [checkoutLoading, setCheckoutLoading] = React.useState(false);
   const [checkoutError, setCheckoutError] = React.useState<string | null>(null);
-  const { token } = useAuth();
+  const { token, ready } = useAuth();
 
   const paymentStatus = searchParams.get("payment");
 
@@ -82,6 +82,10 @@ export function CartPage() {
     }
     setTotal(total);
   }, [cartItems]);
+
+  if (!ready) {
+    return <div>Loading...</div>;
+  }
 
   if (!token) {
     return <Unauthorised />;

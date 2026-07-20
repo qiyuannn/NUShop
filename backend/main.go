@@ -7,6 +7,7 @@ import (
 	"backend/handlers/cart"
 	"backend/handlers/categories"
 	"backend/handlers/listings"
+	"backend/handlers/payments"
 	"backend/handlers/users"
 	"backend/response"
 	"log"
@@ -72,6 +73,10 @@ func main() {
 	private.GET("/cart", cart.GetCart)
 	private.POST("/cart", cart.AddToCart)
 	private.DELETE("/cart", cart.DeleteFromCart)
+
+	//payments handlers
+	router.POST("/webhooks/stripe", payments.HandleStripeWebhook)
+	private.POST("/payments/stripe/checkout", payments.CreateStripeCheckoutSession)
 
 	//chat handlers
 	private.GET("/chat", chatv2.GetChats)

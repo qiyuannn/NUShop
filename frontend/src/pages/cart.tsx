@@ -27,12 +27,53 @@ import { API_URL } from "@/lib/api";
 import type { Listing } from "@/types";
 import { Trash } from "lucide-react";
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export function CartPage() {
   const cartItems = useCartStore((state) => state.cartItems);
+  const authApiFetch = useAuthApiFetch();
+  const [searchParams] = useSearchParams();
   const [total, setTotal] = React.useState(0);
+  const [checkoutLoading, setCheckoutLoading] = React.useState(false);
+  const [checkoutError, setCheckoutError] = React.useState<string | null>(null);
   const { token } = useAuth();
+
+  const paymentStatus = searchParams.get("payment");
+
+  const handleCheckout = async () => {
+    setCheckoutError(null);
+
+    if (cartItems.size === 0) {
+      setCheckoutError("Your cart is empty.");
+      return;
+    }
+
+    try {
+      setCheckoutLoading(true);
+
+      const res = await authApiFetch(`${API_URL}/payments/stripe/checkout`, {
+        method: "POST",
+      });
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        throw new Error(json?.error?.message ?? "Failed to start Stripe checkout");
+      }
+
+      if (!json?.data?.url) {
+        throw new Error("Stripe did not return a checkout URL");
+      }
+
+      window.location.assign(json.data.url);
+    } catch (error) {
+      setCheckoutError(
+        error instanceof Error ? error.message : "Failed to start Stripe checkout",
+      );
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
 
   React.useEffect(() => {
     var total = 0;
@@ -59,11 +100,32 @@ export function CartPage() {
       <div className="sm:pl-16 sm:pr-16">
         <CartList />
         <Separator />
-        <div className="flex flex-rows items-center gap-5 pt-2 justify-end">
-          <p>Total: ${total}</p>
-          <Button className="rounded-none" size="lg">
-            Checkout
-          </Button>
+        <div className="flex flex-col gap-3 pt-2">
+          {paymentStatus === "success" && (
+            <p className="rounded-md border border-green-500/30 bg-green-500/10 px-3 py-2 text-sm text-green-700">
+              Payment completed.
+            </p>
+          )}
+
+          {paymentStatus === "canceled" && (
+            <p className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700">
+              Checkout was canceled.
+            </p>
+          )}
+
+          {checkoutError && <p className="text-sm text-red-500">{checkoutError}</p>}
+
+          <div className="flex flex-rows items-center gap-5 justify-end">
+            <p>Total: ${total}</p>
+            <Button
+              className="rounded-none"
+              size="lg"
+              onClick={handleCheckout}
+              disabled={checkoutLoading || cartItems.size === 0}
+            >
+              {checkoutLoading ? "Redirecting..." : "Checkout"}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

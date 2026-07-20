@@ -68,6 +68,7 @@ export function Listing() {
     username: "",
     createdOn: "",
   });
+  const [buyNowLoading, setBuyNowLoading] = React.useState(false);
   const handleAddToCart = async () => {
     if (!token) {
       toast.message("Log in to add item to cart.");
@@ -91,6 +92,49 @@ export function Listing() {
       }
 
       toast.error("Failed to add item into cart, try again later.");
+    }
+  };
+
+  const handleBuyNow = async () => {
+    if (!token) {
+      toast.message("Log in to buy this item.");
+      return;
+    }
+
+    if (isOwnListing) {
+      toast.error("You cannot purchase your own listing.");
+      return;
+    }
+
+    try {
+      setBuyNowLoading(true);
+
+      // Replace the cart with only this item
+      await addToCart(authApiFetch, listing.id, 1, true);
+
+      const res = await authApiFetch(`${API_URL}/payments/stripe/checkout`, {
+        method: "POST",
+      });
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        throw new Error(json?.error?.message ?? "Failed to start Stripe checkout");
+      }
+
+      if (!json?.data?.url) {
+        throw new Error("Stripe did not return a checkout URL");
+      }
+
+      window.location.assign(json.data.url);
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to start checkout",
+      );
+    } finally {
+      setBuyNowLoading(false);
     }
   };
 
@@ -200,9 +244,10 @@ export function Listing() {
           size="default"
           className="h-full flex-[1.6] rounded-none"
           variant="destructive"
-          disabled={!ready || isLoading || isOwnListing}
+          onClick={handleBuyNow}
+          disabled={!ready || isLoading || isOwnListing || buyNowLoading}
         >
-          Buy now
+          {buyNowLoading ? "Redirecting..." : "Buy now"}
         </Button>
       </div>
     </div>

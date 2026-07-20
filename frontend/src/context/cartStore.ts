@@ -61,8 +61,13 @@ export const useCartStore = create<CartStore>((set) => ({
     }
 
     set((state) => {
-      const cartItems = new Map(state.cartItems);
+      const cartItems = replace
+        ? new Map<string, CartItem>()
+        : new Map(state.cartItems);
+
       cartItems.set(listingID, json.data.cartItem);
+
+      syncCartSnapshot(cartItems);
 
       return {
         cartItems,

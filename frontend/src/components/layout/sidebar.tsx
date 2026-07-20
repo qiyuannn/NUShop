@@ -17,11 +17,11 @@ import {
   Package,
   Plus,
   ShoppingBag,
+  ShoppingCart,
   SquareChartGantt,
   Sun,
   Moon,
   User,
-  ShoppingBasket,
 } from "lucide-react";
 import { useLogout } from "@/hooks/use-logout";
 import { Badge } from "../ui/badge";

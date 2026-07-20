@@ -7,8 +7,8 @@ import (
 	"backend/handlers/categories"
 	chatv2 "backend/handlers/chat_V2"
 	"backend/handlers/listings"
-	"backend/handlers/recommendation"
 	"backend/handlers/payments"
+	"backend/handlers/recommendation"
 	"backend/handlers/users"
 	"backend/response"
 	"log"
@@ -80,14 +80,13 @@ func main() {
 	router.GET("/reccomendations/categories", recommendation.CategoriesReccs)
 	router.GET("/reccomendations/recents", recommendation.RecentListings)
 
-
 	//cart handlers
 	private.GET("/cart", cart.GetCart)
 	private.POST("/cart", cart.AddToCart)
 	private.DELETE("/cart", cart.DeleteFromCart)
 
 	//payments handlers
-	router.POST("/webhooks/stripe", payments.HandleStripeWebhook)
+	router.POST("/payments/stripe/webhook", payments.HandleStripeWebhook)
 	private.POST("/payments/stripe/checkout", payments.CreateStripeCheckoutSession)
 
 	//chat handlers

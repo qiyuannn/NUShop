@@ -20,7 +20,6 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import { Separator } from "@/components/ui/separator";
-import { useAuthStore } from "@/context/authStoreV2";
 import { useCartStore } from "@/context/cartStore";
 import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
 import { API_URL } from "@/lib/api";
@@ -36,7 +35,6 @@ export function CartPage() {
   const [total, setTotal] = React.useState(0);
   const [checkoutLoading, setCheckoutLoading] = React.useState(false);
   const [checkoutError, setCheckoutError] = React.useState<string | null>(null);
-  const [token] = useAuthStore((s) => s.token)
 
   const paymentStatus = searchParams.get("payment");
 
@@ -99,7 +97,7 @@ export function CartPage() {
         <div className="flex flex-col gap-3 pt-2">
           {paymentStatus === "success" && (
             <p className="rounded-md border border-green-500/30 bg-green-500/10 px-3 py-2 text-sm text-green-700">
-              Payment completed.
+              Payment completed. Please wait for the seller to ship your items.
             </p>
           )}
 

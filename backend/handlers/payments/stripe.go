@@ -1,6 +1,7 @@
 package payments
 
 import (
+	"backend/auth"
 	db "backend/database"
 	"backend/response"
 	"context"
@@ -11,6 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -65,7 +67,7 @@ func CreateStripeCheckoutSession(c *gin.Context) {
 		c.Error(appErr)
 		return
 	}
-	
+
 	if len(items) == 0 {
 		c.Error(response.ErrBadRequest(errors.New("cart is empty")))
 		return
@@ -194,13 +196,66 @@ func HandleStripeWebhook(c *gin.Context) {
 			return
 		}
 
+		items, appErr := getCheckoutItems(c.Request.Context(), userID)
+		if appErr != nil {
+			c.Error(appErr)
+			return
+		}
+
 		if _, err := db.Pool.Exec(c.Request.Context(), `DELETE FROM cart WHERE user_id = $1`, userID); err != nil {
 			c.Error(response.ErrInternalServerError(err))
 			return
 		}
+
+		if len(items) > 0 {
+			email, err := getUserEmail(c.Request.Context(), userID)
+			if err != nil {
+				log.Printf("payment confirmation email skipped for user %s: %v", userID, err)
+			} else {
+				go func(to string, purchasedItems []checkoutItem) {
+					if err := sendPaymentConfirmationEmail(to, purchasedItems); err != nil {
+						log.Printf("payment confirmation email failed for %s: %v", to, err)
+					}
+				}(email, items)
+			}
+		}
 	}
 
 	c.Status(http.StatusOK)
+}
+
+func getUserEmail(ctx context.Context, userID string) (string, error) {
+	var email string
+	if err := db.Pool.QueryRow(
+		ctx,
+		`SELECT email
+		 FROM users
+		 WHERE id = $1`,
+		userID,
+	).Scan(&email); err != nil {
+		return "", err
+	}
+
+	return email, nil
+}
+
+func sendPaymentConfirmationEmail(to string, items []checkoutItem) error {
+	total := int64(0)
+	lines := make([]string, 0, len(items))
+
+	for _, item := range items {
+		subtotal := item.Price * int64(item.Quantity)
+		total += subtotal
+		lines = append(lines, fmt.Sprintf("- %s x%d: $%d", item.Title, item.Quantity, subtotal))
+	}
+
+	body := "Hello,\r\n\r\nWe received your payment successfully.\r\n\r\nOrder summary:\r\n"
+	if len(lines) > 0 {
+		body += strings.Join(lines, "\r\n") + "\r\n"
+	}
+	body += fmt.Sprintf("\r\nTotal: $%d\r\n\r\nYour cart has been cleared after checkout.\r\n\r\nNUShop Team", total)
+
+	return auth.SendEmail(to, "Payment successful on NUShop", body)
 }
 
 func getCheckoutItems(ctx context.Context, userID string) ([]checkoutItem, *response.AppError) {

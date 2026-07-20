@@ -48,14 +48,14 @@ export function Listing() {
 
     score: 0,
   });
-  const currentUserID = getUserIdFromToken(token);
-  const isOwnListing = currentUserID === listing.sellerID;
+  const isOwnListing = userID === listing.sellerID;
   const [err, setErr] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(true);
   const [seller, setSeller] = React.useState({
     username: "",
     createdOn: "",
   });
+  const ready = !isLoading && !!listing.id;
   const [buyNowLoading, setBuyNowLoading] = React.useState(false);
   const handleAddToCart = async () => {
     if (!token) {
@@ -97,7 +97,7 @@ export function Listing() {
     try {
       setBuyNowLoading(true);
 
-      // Replace the cart with only this item
+      
       await addToCart(authApiFetch, listing.id, 1, true);
 
       const res = await authApiFetch(`${API_URL}/payments/stripe/checkout`, {

@@ -72,10 +72,9 @@ func GetReccomendationsListings(c *gin.Context, userID string) ([]models.Listing
 				l.condition,
 				l.category_name,
 				l.created_on,
-				( 0.25 * COALESCE(p.score, 0) +
-					0.25 * EXP(-LN(2) * EXTRACT(EPOCH FROM (NOW() - l.created_on)) / (7 * 86400.0)) + 
-					0.5 * ((hashtext(l.id::text || $2)::float8 / 2147483647.0 + 1) / 2)
-				) AS score
+				( 0.25 * (COALESCE(p.score, 0) / (COALESCE(p.score, 0) + 10)) +
+					0.25 * EXP(-LN(2) * EXTRACT(EPOCH FROM (NOW() - l.created_on)) / (7 * 86400)) + 
+					0.5 * ((hashtext(l.id::text || $2)::float8 / 2147483647.0 + 1) / 2)) AS score
 			FROM listings l
 			LEFT JOIN listing_popularity p
 				ON p.id = l.id

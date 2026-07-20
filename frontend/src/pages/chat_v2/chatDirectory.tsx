@@ -1,3 +1,4 @@
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import {
   Item,
   ItemActions,
@@ -106,7 +107,6 @@ export function ChatDirectory() {
           method: "GET",
         });
         const json = await res.json();
-        console.log(json);
 
         if (!res.ok) {
           throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
@@ -118,6 +118,17 @@ export function ChatDirectory() {
     }
     getChats();
   }, []);
+
+  if (chats.length == 0) {
+    return (
+      <Empty className="h-full w-full items-center justify-center">
+        <EmptyHeader>
+          <EmptyTitle>No chats yet</EmptyTitle>
+          <EmptyDescription>Start a chat by clicking "Chat with Seller" on a listing.</EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+    )
+  }
 
   return (
     <div>

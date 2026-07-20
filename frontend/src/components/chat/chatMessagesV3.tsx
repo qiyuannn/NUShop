@@ -19,6 +19,7 @@ import useWebSocket from "react-use-websocket";
 import throttle from "lodash.throttle";
 import { formatMessageTime } from "@/lib/fomatTime";
 import { CheckCheck } from "lucide-react";
+import { Empty, EmptyDescription, EmptyHeader } from "../ui/empty";
 
 const MessageRowMemo = React.memo(function MessageRow({
   msg,
@@ -174,6 +175,15 @@ function ChatMessagesComponenet() {
     fetchMessages();
   }, []);
 
+  if (messages.length == 0) {
+    return (
+      <Empty className="h-full w-full items-center justify-center">
+        <EmptyHeader>No messages yet</EmptyHeader>
+        <EmptyDescription>Start a conversation by sending your first message.</EmptyDescription>
+      </Empty>
+    )
+  }
+
   return (
     <MessageScrollerContent className="gap-1 p-1">
       {messages.map((msg, i) => (
@@ -189,6 +199,18 @@ function ChatMessagesComponenet() {
 }
 
 export function ChatMessagesV3() {
+  const otherID = useParams().otherID
+  const userID = useAuthStore((s) => s.userID)
+
+  if (otherID == userID) {
+    return (
+      <Empty className="h-full w-full items-center justify-center">
+        <EmptyHeader>This is your own listing</EmptyHeader>
+        <EmptyDescription>Since you are the owner of this listing, messaging is not available.</EmptyDescription>
+      </Empty>
+    )
+  }
+
   return (
     <MessageScrollerProvider autoScroll>
       <MessageScroller>

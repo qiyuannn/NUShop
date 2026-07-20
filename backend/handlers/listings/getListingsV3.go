@@ -21,9 +21,9 @@ type getListingsV3Query struct {
 	Condition []string `form:"condition" collection_format:"multi"`
 	Limit    int       `form:"limit,default=20" binding:"gte=1,lte=100"`
 
-	CursorRank *float64 `form:"cursorRank"`
+	CursorScore *float64 `form:"cursorScore"`
 	CursorID *string `form:"cursorID"`
-	CursorTime *time.Time `form:"cursorTime"`
+	CursorSeed *string `form:"cursorSeed"`
 }
 
 func GetListingsV3(c * gin.Context) {
@@ -91,23 +91,30 @@ func GetListingsV3(c * gin.Context) {
 	var cursor *response.Cursor
 	if query.Search != nil { // search query present
 
-		listings, cursor = SearchPresentHelper(c, conditions, args, argsIndex, query.Search, query.Limit, query.CursorRank, query.CursorID)
+		listings, cursor = SearchPresentHelper(
+			c, 
+			conditions, 
+			args, 
+			argsIndex, 
+			query.Search, 
+			query.Limit, 
+			query.CursorScore, 
+			query.CursorID,
+		)
 
 	} else { // search query absent
 
-		hasCursorID := query.CursorID != nil
-		hasCursorTime := query.CursorTime != nil
-		if hasCursorID != hasCursorTime {
-			c.Error(response.ErrBadRequest(errors.New("invalid cursor")))
-			return
-		}
-		if hasCursorID && hasCursorTime {
-			conditions = append(conditions, "(created_on, id) < ($"+strconv.Itoa(argsIndex)+",$"+strconv.Itoa(argsIndex+1)+")")
-			args = append(args, query.CursorTime, query.CursorID)
-			argsIndex += 2
-		}
-
-		listings, cursor = SearchAbsentHelper(c, conditions, args, query.Limit)
+		listings, cursor = SearchAbsentHelperV2(
+			c, 
+			conditions, 
+			args, 
+			argsIndex,
+			query.Limit, 
+			query.CursorScore, 
+			query.CursorID, 
+			query.CursorSeed,
+			query.SellerID,
+		)
 	}
 
 	if (listings == nil || cursor == nil) {

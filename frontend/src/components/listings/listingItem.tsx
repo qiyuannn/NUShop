@@ -132,9 +132,9 @@ export function ListingItemSkeleton({ isManaging }: { isManaging: boolean }) {
         <Skeleton className="aspect-square w-full rounded-none" />
       </ItemHeader>
       <ItemContent className="gap-2">
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-1/2" />
-        <Skeleton className="h-4 w-1/4" />
+        <Skeleton className="h-4.5 w-full" />
+        <Skeleton className="h-4.5 w-1/2" />
+        <Skeleton className="h-4.5 w-1/4" />
       </ItemContent>
       {isManaging && (
         <ItemFooter>

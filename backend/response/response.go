@@ -4,7 +4,6 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,10 +19,9 @@ type ErrorInfo struct {
 }
 
 type Cursor struct {
-	CursorTime *time.Time `json:"cursorTime,omitempty"`
 	CursorID   *string    `json:"cursorID,omitempty"`
-	CursorScore *float64 `json:"cursorRank,omitempty"`
-	Seed *string `json:"seed,omitempty"`
+	CursorScore *float64 `json:"cursorScore,omitempty"`
+	CursorSeed *string `json:"cursorSeed,omitempty"`
 	HasMore    bool      `json:"hasMore"`
 }
 

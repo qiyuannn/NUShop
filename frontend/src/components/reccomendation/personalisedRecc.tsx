@@ -27,7 +27,6 @@ export function PersonalisedRecc() {
         if (!res.ok) {
           throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
         }
-        console.log(json?.error?.code);
         setListings(json?.data?.listings ?? []);
       } catch (error) {
         setErr(error instanceof Error ? error.message : "INTERNAL_ERROR");

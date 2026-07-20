@@ -5,6 +5,7 @@ CREATE MATERIALIZED VIEW listing_popularity AS
       SUM(
         CASE e.event_type
           WHEN 'view' THEN 1
+          WHEN 'purchase' THEN 25
           ELSE 0
         END
         * EXP( -LN(2) * EXTRACT(EPOCH FROM (NOW() - e.created_on)) / (7 * 86400.0) )

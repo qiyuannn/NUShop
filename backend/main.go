@@ -77,7 +77,6 @@ func main() {
 	private.GET("/reccomendations/personalised", recommendation.PersonalisedReccsV2)
 	router.GET("/reccomendations/categories", recommendation.CategoriesReccs)
 	router.GET("/reccomendations/recents", recommendation.RecentListings)
-	router.GET("/reccomendations/explore", recommendation.ExploreListings)
 
 
 	//cart handlers

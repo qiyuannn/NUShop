@@ -124,13 +124,13 @@ func SearchPresentHelper(
 		category_name,
 		created_on,
 		GREATEST (
-			similarity(title, $` + strconv.Itoa(argsIndex) +`),
+			word_similarity(title, $` + strconv.Itoa(argsIndex) +`),
 			word_similarity(description, $` + strconv.Itoa(argsIndex) +`),
-			similarity(category_name, $` + strconv.Itoa(argsIndex) +`)
+			word_similarity(category_name, $` + strconv.Itoa(argsIndex) +`)
 			) as rank
 		FROM listings
 		`
-		conditions = append(conditions, `(title % $` + strconv.Itoa(argsIndex) +` OR category_name <% $` + strconv.Itoa(argsIndex) +` OR description % $` + strconv.Itoa(argsIndex) + ")")
+		conditions = append(conditions, `(title <% $` + strconv.Itoa(argsIndex) +` OR category_name <% $` + strconv.Itoa(argsIndex) +` OR description <% $` + strconv.Itoa(argsIndex) + ")")
 		args = append(args, search)
 		argsIndex ++
 
@@ -149,7 +149,7 @@ func SearchPresentHelper(
 		newFinalQuery += " ORDER BY rank DESC, id DESC"
 		newFinalQuery += " LIMIT " + strconv.Itoa(limit+1)
 
-		rows, err := db.Pool.Query(c.Request.Context(), newQuery, args...)
+		rows, err := db.Pool.Query(c.Request.Context(), newFinalQuery, args...)
 		if err != nil {
 			c.Error(response.ErrInternalServerError(err))
 			return nil, nil

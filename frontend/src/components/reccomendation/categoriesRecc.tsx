@@ -100,13 +100,13 @@ function CategoriesReccSkeleton() {
     <Tabs defaultValue="0">
       <TabsList variant="line">
         {Array.from({ length: 3 }).map((_, index) => (
-          <TabsTrigger value={`${index}`}>
+          <TabsTrigger value={`${index}`} key={index}>
             <Skeleton className="h-4 w-32" />
           </TabsTrigger>
         ))}
       </TabsList>
       {Array.from({ length: 3 }).map((_, index) => (
-        <TabsContent value={`${index}`}>
+        <TabsContent value={`${index}`} key={index}>
           <ListingGridSkeleton isManaging={false} />
         </TabsContent>
       ))}

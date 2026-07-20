@@ -158,7 +158,7 @@ export function Listing() {
           size="default"
           className="h-full flex-[1.6] rounded-none"
           onClick={() => nav(`/chat/${listing.id}/${listing.sellerID}`)}
-          disabled={userID == listing.sellerID}
+          
         >
           Chat with seller
         </Button>
@@ -221,7 +221,7 @@ export function ItemCarousel({ files }: { files: string[] }) {
           {files.length === 0 && (
             <CarouselItem className="basis-4/5 md:basis-1/2 lg:basis-2/7 pl-0">
               <Item>
-                <ItemContent className="flex h-56 items-center justify-center border rounded-sm">
+                <ItemContent className="aspect-square flex items-center justify-center border rounded-sm">
                   <ItemDescription>Listing have no images</ItemDescription>
                 </ItemContent>
               </Item>

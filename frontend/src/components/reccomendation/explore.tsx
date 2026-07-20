@@ -12,7 +12,7 @@ export function Explore() {
     hasMore: boolean;
     cursorID: string;
     cursorScore: number;
-    seed: string;
+    cursorSeed: string;
   } | null>(null);
 
   const [loading, setLoading] = React.useState(false);
@@ -25,11 +25,11 @@ export function Explore() {
     }
 
     const q = new URLSearchParams();
-    q.set("seed", cursor.seed);
-    q.set("score", cursor.cursorScore.toString());
-    q.set("id", cursor.cursorID);
+    q.set("cursorSeed", cursor.cursorSeed);
+    q.set("cursorScore", cursor.cursorScore.toString());
+    q.set("cursorID", cursor.cursorID);
 
-    const res = await fetch(`${API_URL}/reccomendations/explore?${q}`);
+    const res = await fetch(`${API_URL}/listings?${q}`);
     const json = await res.json();
 
     if (!res.ok) {
@@ -46,9 +46,8 @@ export function Explore() {
     setErr(null);
     async function fetchListings() {
       try {
-        const res = await fetch(`${API_URL}/reccomendations/explore`);
+        const res = await fetch(`${API_URL}/listings`);
         const json = await res.json();
-        console.log(json);
         if (!res.ok) {
           throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
         }

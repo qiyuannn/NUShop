@@ -42,3 +42,5 @@ CREATE INDEX idx_trigram_search_category
 
 CREATE INDEX idx_trigram_search_description
   ON listings using GIN(description gin_trgm_ops);
+
+  

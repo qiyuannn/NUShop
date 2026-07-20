@@ -25,6 +25,7 @@ export function SearchResultsV2({ isManaging }: { isManaging: boolean }) {
     hasMore: boolean;
     cursorID: string;
     cursorScore: number;
+    cursorSeed: string;
   } | null>(null);
   const [listings, setListings] = React.useState<Listing[]>([]);
   const [err, setErr] = React.useState<string | null>(null);
@@ -32,7 +33,7 @@ export function SearchResultsV2({ isManaging }: { isManaging: boolean }) {
   const [refresh, setRefresh] = React.useState(false);
 
   const handleLoadMore = async () => {
-    if (!cursor) {
+    if (!cursor || !cursor.hasMore) {
       return;
     }
     const searchParams = new URLSearchParams();

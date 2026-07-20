@@ -18,6 +18,7 @@ func GetCategoryScoresV2(c *gin.Context, userID string) ([]CategoryScore, error)
 			FLOOR (
 				SUM (
 					CASE event_type 
+						WHEN 'purchase' THEN 10
 						WHEN 'view' THEN 2
 						WHEN 'search' THEN 1
 					END * EXP( -LN(2) * EXTRACT(EPOCH FROM (NOW() - created_on)) / (7 * 86400.0) )
@@ -61,7 +62,8 @@ func GetCategoryScoresV2(c *gin.Context, userID string) ([]CategoryScore, error)
 
 	if totalScore > 0 {
 		for i := range categoryScores {
-			categoryScores[i].Score = int(math.Floor(float64((categoryScores[i].Score / totalScore) * listingsCount)))
+			categoryScores[i].Score = int(math.Floor(float64(categoryScores[i].Score) / float64(totalScore) * float64(listingsCount),
+))
 		}
 	}
 

@@ -58,8 +58,8 @@ function ChatMessagesComponenet() {
   const [messages, setMessages] = React.useState<TypeMessage[]>([]);
   const [otherLastReadID, setOtherLastReadID] = React.useState("");
   const [selfLastReadID, setSelfLastReadID] = React.useState("");
-  const [err, setErr] = React.useState<string | null>(null);
-  const [loading, setLoading] = React.useState(false);
+  const [, setErr] = React.useState<string | null>(null);
+  const [, setLoading] = React.useState(false);
 
   const seenRef = React.useRef<Set<string>>(new Set());
   const pendingReadRef = React.useRef<string>("");
@@ -169,7 +169,7 @@ function ChatMessagesComponenet() {
       } catch (error) {
         setErr(error instanceof Error ? error.message : "INTERNAL_ERROR");
       } finally {
-        setLoading(true);
+        setLoading(false);
       }
     }
     fetchMessages();

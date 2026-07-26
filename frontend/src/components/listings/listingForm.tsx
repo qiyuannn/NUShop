@@ -27,7 +27,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAuthStore } from "@/context/authStoreV2";
 import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
 import { API_URL } from "@/lib/api";
 import { AlertCircleIcon, DollarSign, Trash2 } from "lucide-react";
@@ -61,8 +60,7 @@ export function ListingForm({ typeCreate }: { typeCreate: boolean }) {
   });
   const [err, setErr] = React.useState(false);
   const apiFetch = useAuthApiFetch();
-  const [listingOwner, setListingOwner] = React.useState("");
-  const userID = useAuthStore.getState().userID;
+  const [, setListingOwner] = React.useState("");
 
   React.useEffect(() => {
     if (!listingID) return;

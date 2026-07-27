@@ -1,10 +1,18 @@
-import { ShoppingBasket, UserRound } from "lucide-react";
+import { Bell, ShoppingBasket, UserRound } from "lucide-react";
 import { Button } from "../ui/button";
 import { useLocation, useNavigate } from "react-router-dom";
 import { SidebarTrigger, useSidebar } from "../ui/sidebar";
 import { Separator } from "../ui/separator";
 import React from "react";
 import { useAuthStore } from "@/context/authStoreV2";
+import { useNotificationStore } from "@/context/notificationStore";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "../ui/input-group";
 
 export function AppHeaderV2() {
@@ -13,6 +21,9 @@ export function AppHeaderV2() {
   const navigate = useNavigate();
   const [search, setSearch] = React.useState("");
   const location = useLocation();
+  const unreadCount = useNotificationStore((state) => state.unreadCount);
+  const notifications = useNotificationStore((state) => state.notifications);
+  const markAllRead = useNotificationStore((state) => state.markAllRead);
 
   const q = new URLSearchParams(location.search);
   if (search.trim()) {
@@ -52,9 +63,47 @@ export function AppHeaderV2() {
           </InputGroupButton>
         </InputGroupAddon>
       </InputGroup>
-      <div className="flex flex-row">
+      <div className="flex flex-row items-center gap-1">
         {token && (
           <>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="icon-lg" variant="ghost" className="relative">
+                  <Bell />
+                  {unreadCount > 0 && (
+                    <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
+                      {unreadCount}
+                    </span>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-80">
+                <div className="px-2 py-1.5 text-sm font-semibold">Notifications</div>
+                <DropdownMenuSeparator />
+
+                {notifications.length === 0 ? (
+                  <DropdownMenuItem disabled>No notifications yet</DropdownMenuItem>
+                ) : (
+                  notifications.slice(0, 6).map((n) => (
+                    <DropdownMenuItem key={n.id} className="flex flex-col items-start gap-1">
+                      <span className="font-medium">{n.title}</span>
+                      <span className="text-xs text-muted-foreground">{n.message}</span>
+                    </DropdownMenuItem>
+                  ))
+                )}
+
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => {
+                    markAllRead();
+                    navigate("/chat");
+                  }}
+                >
+                  Mark all as read
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <Button size="icon-lg" variant="ghost" onClick={() => navigate("/cart")}>
               <ShoppingBasket />
             </Button>
@@ -63,6 +112,7 @@ export function AppHeaderV2() {
             </Button>
           </>
         )}
+
         {!token && (
           <>
             <Button variant="link" onClick={() => navigate("/login")}>

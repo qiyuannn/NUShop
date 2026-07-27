@@ -70,7 +70,7 @@ export function App() {
   const refreshToken = useAuthStore((s) => s.refreshToken);
   const location = useLocation();
   const audioContextRef = React.useRef<AudioContext | null>(null);
-  const userID = useAuthStore((s) => s.token)
+  const userID = useAuthStore((s) => s.userID);
 
   React.useEffect(() => {
     if (!token || !("Notification" in window)) return;

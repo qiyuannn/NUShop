@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -14,15 +13,7 @@ var Pool *pgxpool.Pool
 func Connect() {
 	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
-		log.Fatal("DATABASE_URL not found")
-	}
-
-	if !strings.Contains(dbURL, "sslmode=") {
-		if strings.Contains(dbURL, "?") {
-			dbURL += "&sslmode=require"
-		} else {
-			dbURL += "?sslmode=require"
-		}
+		log.Fatal("Database_Url not found")
 	}
 
 	var err error
@@ -35,5 +26,5 @@ func Connect() {
 		log.Fatal(err)
 	}
 
-	log.Println("Connected to PostgreSQL")
+	log.Println("Connected to postgreSQL")
 }

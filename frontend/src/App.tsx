@@ -1,4 +1,4 @@
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import type { TypeMessage, WSMessage } from "./types";
 import { LoginPage } from "./pages/login";
 import { SignupPage } from "./pages/signup";
@@ -61,6 +61,16 @@ async function playChatSound(audioContextRef: React.MutableRefObject<AudioContex
   } catch {
     return;
   }
+}
+
+function ProfileRouteRedirect() {
+  const userID = useAuthStore((s) => s.userID);
+
+  if (!userID) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Navigate to={`/user/${userID}`} replace />;
 }
 
 export function App() {
@@ -206,6 +216,7 @@ export function App() {
         <Route path="/listing/:listingID" element={<Listing />} />
 
         <Route path="/user/:userID" element={<ProfilePage />} />
+        <Route path="/profile" element={<ProfileRouteRedirect />} />
 
         <Route path="/cart" element={<CartPage />} />
 

@@ -36,6 +36,7 @@ import type { chat } from "@/types";
 export function AppSidebar() {
   const navigate = useNavigate();
   const token = useAuthStore((state) => state.token);
+  const userID = useAuthStore((state) => state.userID);
   const logout = useLogout();
   const cartItems = useCartStore((state) => state.cartItems);
   const { theme, setTheme } = useTheme();
@@ -181,7 +182,11 @@ export function AppSidebar() {
           )}
           {token && (
             <SidebarMenu className="flex items-center">
-              <SidebarMenuButton onClick={() => navigate("")} tooltip="Account" disabled>
+              <SidebarMenuButton
+                onClick={() => userID && navigate("/profile")}
+                tooltip="Account"
+                disabled={!userID}
+              >
                 <User />
                 Account
               </SidebarMenuButton>

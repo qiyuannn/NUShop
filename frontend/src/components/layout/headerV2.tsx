@@ -18,6 +18,7 @@ import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "
 export function AppHeaderV2() {
   const { toggleSidebar } = useSidebar();
   const token = useAuthStore((state) => state.token);
+  const userID = useAuthStore((state) => state.userID);
   const navigate = useNavigate();
   const [search, setSearch] = React.useState("");
   const location = useLocation();
@@ -107,7 +108,7 @@ export function AppHeaderV2() {
             <Button size="icon-lg" variant="ghost" onClick={() => navigate("/cart")}>
               <ShoppingBasket />
             </Button>
-            <Button size="icon-lg" variant="ghost" disabled>
+            <Button size="icon-lg" variant="ghost" onClick={() => userID && navigate("/profile")} disabled={!userID}>
               <UserRound />
             </Button>
           </>

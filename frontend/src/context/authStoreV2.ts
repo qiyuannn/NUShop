@@ -8,6 +8,7 @@ type authStoreType = {
   refreshToken: () => Promise<void>;
 };
 
+
 export const useAuthStore = create<authStoreType>((set) => ({
   token: null,
   userID: null,

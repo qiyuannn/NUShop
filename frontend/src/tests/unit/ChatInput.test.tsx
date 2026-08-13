@@ -1,5 +1,5 @@
 import {} from "@testing-library/jest-dom/vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import userEvent from "@testing-library/user-event";
 import { useAuthStore } from "@/context/authStoreV2";

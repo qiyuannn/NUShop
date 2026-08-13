@@ -1,7 +1,6 @@
 import {} from "@testing-library/jest-dom/vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
-import userEvent from "@testing-library/user-event";
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { ListingItemV3 } from "@/components/listings/listingItem";
 import type { Listing } from "@/types";
 import { ListingGrid } from "@/components/listings/listingGrid";

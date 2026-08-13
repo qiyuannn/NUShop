@@ -1,7 +1,6 @@
 import {} from "@testing-library/jest-dom/vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
-import userEvent from "@testing-library/user-event";
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAuthApiFetch } from "@/hooks/use-authApiFetch";
 import { ChatHeader } from "@/components/chat/chatHeader";
 import { MemoryRouter, Route, Routes } from "react-router-dom";

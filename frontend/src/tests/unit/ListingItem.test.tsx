@@ -1,8 +1,8 @@
 import {} from "@testing-library/jest-dom/vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter, useLocation, useNavigate } from "react-router-dom";
+import { MemoryRouter, useNavigate } from "react-router-dom";
 import type { Listing } from "@/types";
 import type React from "react";
 import type { SetStateAction } from "react";

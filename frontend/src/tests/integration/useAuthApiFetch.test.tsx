@@ -1,6 +1,6 @@
 import {} from "@testing-library/jest-dom/vitest";
-import { cleanup, fireEvent, render, renderHook, screen } from "@testing-library/react";
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, test, vi, type Mock } from "vitest";
+import { renderHook } from "@testing-library/react";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { server } from "./server";
 import { http, HttpResponse } from "msw";
 import { useAuthStore } from "@/context/authStoreV2";

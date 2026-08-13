@@ -1,6 +1,6 @@
 import {} from "@testing-library/jest-dom/vitest";
-import { cleanup, fireEvent, render, renderHook, screen, waitFor } from "@testing-library/react";
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { server } from "./server";
 import { useCartStore } from "@/context/cartStore";
 import type { CartItem, Listing } from "@/types";

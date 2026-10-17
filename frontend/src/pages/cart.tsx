@@ -224,7 +224,7 @@ export function CartItemCard({ listing, quantity }: { listing: Listing; quantity
       </ItemContent>
       <AlertDialog>
         <AlertDialogTrigger asChild>
-          <Button variant="ghost" className="w-10 h-10">
+          <Button variant="ghost" className="w-10 h-10" aria-label={`${listing.id} delete listing`}>
             <Trash />
           </Button>
         </AlertDialogTrigger>

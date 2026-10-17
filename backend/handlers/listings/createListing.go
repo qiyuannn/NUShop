@@ -6,6 +6,7 @@ import (
 	"backend/models"
 	"backend/response"
 	"errors"
+	"log"
 	"mime/multipart"
 	"net/http"
 
@@ -38,7 +39,7 @@ func CreateListing(c *gin.Context) {
 		c.Error(response.ErrBadRequest(err))
 		return
 	}
-
+	
 	form, err := c.MultipartForm()
 	if err != nil {
 		c.Error(response.ErrBadRequest(err))
@@ -51,7 +52,8 @@ func CreateListing(c *gin.Context) {
 	}
 
 	uploadedImages := make([]cloudinary.UploadResult, 0, len(files))
-	for _, file := range files {
+	for i, file := range files {
+		log.Print(i)
 		openedFile, err := file.Open()
 		if err != nil {
 			c.Error(response.ErrInternalServerError(err))
@@ -71,6 +73,7 @@ func CreateListing(c *gin.Context) {
 
 		uploadedImages = append(uploadedImages, *uploadResult)
 	}
+
 
 	tx, err := db.Pool.Begin(c.Request.Context())
 	if err != nil {

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -27,8 +26,6 @@ type getListingsV3Query struct {
 }
 
 func GetListingsV3(c * gin.Context) {
-	time.Sleep(1 *time.Second)
-
 	var query getListingsV3Query
 	if err := c.ShouldBindQuery(&query); err != nil {
 		c.Error(response.ErrBadRequest(err))

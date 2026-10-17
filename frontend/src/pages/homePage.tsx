@@ -6,12 +6,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function HomePageV2() {
   return (
-    <Tabs defaultValue="featured">
+    <Tabs defaultValue="featured" className="w-full min-w-0">
       <TabsList variant="line" className="w-full sticky top-12 z-50 bg-background">
         <TabsTrigger value="featured">Featured</TabsTrigger>
         <TabsTrigger value="explore">Explore</TabsTrigger>
       </TabsList>
-      <TabsContent value="featured">
+      <TabsContent value="featured"> 
         <PersonalisedRecc />
         <CategoriesRecc />
         <RecentListings />

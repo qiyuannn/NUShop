@@ -111,7 +111,7 @@ export function PriceFilter() {
     if (/^[0-9]*$/.test(e.target.value)) {
       //const normalized = value.replace(/^0+(?=\d)/, "");
       setMaxPrice(e.target.value);
-      if (e.target.value < maxPrice) {
+      if (minPrice && Number(e.target.value) < Number(minPrice)) {
         setMinPrice(e.target.value);
       }
       if (Number(minPrice) == 0) {
@@ -130,18 +130,18 @@ export function PriceFilter() {
           <FieldLegend variant="label">Select a range</FieldLegend>
           <FieldGroup className="flex flex-row items-center">
             <Field>
-              <FieldLabel>Min</FieldLabel>
+              <FieldLabel htmlFor="min-price">Min</FieldLabel>
               <InputGroup>
                 <InputGroupAddon>S$</InputGroupAddon>
-                <InputGroupInput value={minPrice} onChange={handleChangeMin} />
+                <InputGroupInput id="min-price" value={minPrice} onChange={handleChangeMin} />
               </InputGroup>
             </Field>
             <span>-</span>
             <Field>
-              <FieldLabel>Max</FieldLabel>
+              <FieldLabel htmlFor="max-price">Max</FieldLabel>
               <InputGroup>
                 <InputGroupAddon>S$</InputGroupAddon>
-                <InputGroupInput value={maxPrice} onChange={handleChangeMax} />
+                <InputGroupInput id="max-price" value={maxPrice} onChange={handleChangeMax} />
               </InputGroup>
             </Field>
           </FieldGroup>

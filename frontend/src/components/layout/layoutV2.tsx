@@ -9,7 +9,7 @@ export function LayoutV2() {
       <AppSidebar />
       <SidebarInset className="flex flex-col">
         <AppHeaderV2 />
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <Outlet />
         </div>
       </SidebarInset>

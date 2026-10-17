@@ -7,14 +7,11 @@ import (
 	"backend/response"
 
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 func CategoriesReccs(c *gin.Context) {
-	time.Sleep(1 *time.Second)
-
 	rows, err := db.Pool.Query(
 		c.Request.Context(),
 		`SELECT name 

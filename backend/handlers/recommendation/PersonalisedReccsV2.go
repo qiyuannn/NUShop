@@ -7,7 +7,6 @@ import (
 	"backend/response"
 	"errors"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -16,8 +15,6 @@ import (
 
 
 func PersonalisedReccsV2(c *gin.Context) {
-	time.Sleep(1 *time.Second)
-
 	userIDValue, ok := c.Get("userID")
 	if !ok {
 		c.Error(response.ErrUnauthorised(errors.New("user not logged in")))

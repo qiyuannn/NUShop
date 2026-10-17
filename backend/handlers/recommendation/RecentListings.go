@@ -6,14 +6,11 @@ import (
 	"backend/models"
 	"backend/response"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 func RecentListings(c *gin.Context) {
-	time.Sleep(1 *time.Second)
-
 	l := []models.Listing{}
 
 	rows, err := db.Pool.Query(

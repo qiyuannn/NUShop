@@ -29,7 +29,7 @@ export function ListingCarousel({
 
   return (
     <div className="sm:pl-16 sm:pr-16">
-      <Carousel>
+      <Carousel opts={{ loop: true, containScroll: false }}>
         <CarouselContent className="-ml-0.5">
           {listings.map((listing) => (
             <CarouselItem

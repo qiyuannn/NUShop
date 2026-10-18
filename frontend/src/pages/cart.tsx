@@ -175,7 +175,7 @@ export function CartItemCard({ listing, quantity }: { listing: Listing; quantity
     }
     try {
       await addToCart(authApiFetch, listing.id, qty, true);
-    } catch (error) {
+    } catch {
       setErr("Failed to update quantity");
     }
   };
@@ -183,7 +183,7 @@ export function CartItemCard({ listing, quantity }: { listing: Listing; quantity
   const handleDelete = async () => {
     try {
       await deleteFromCart(authApiFetch, listing.id);
-    } catch (error) {
+    } catch {
       setErr("Failed to delete from cart");
     }
   };

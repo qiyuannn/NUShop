@@ -30,7 +30,7 @@ export function ProfilePage() {
           throw new Error(json?.error?.code ?? "INTERNAL_ERROR");
         }
         setUser(json.data.user);
-      } catch (error) {
+      } catch {
         setErr(true);
       }
     }

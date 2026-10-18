@@ -28,12 +28,12 @@ export function ListingCarousel({
   }
 
   return (
-    <div className="sm:pl-16 sm:pr-16">
-      <Carousel opts={{ loop: true, containScroll: false }}>
+    <div className="w-full min-w-0 sm:px-10">
+      <Carousel className="w-full min-w-0" opts={{ align: "start", loop: true }}>
         <CarouselContent className="-ml-0.5">
           {listings.map((listing) => (
             <CarouselItem
-              className="basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5 pl-0.5"
+              className="basis-1/2 sm:basis-48 lg:basis-56 pl-0.5"
               key={listing.id}
             >
               <ListingItemV3
@@ -50,8 +50,8 @@ export function ListingCarousel({
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
+        <CarouselPrevious className="hidden sm:inline-flex sm:-left-9" />
+        <CarouselNext className="hidden sm:inline-flex sm:-right-9" />
       </Carousel>
     </div>
   );
@@ -59,20 +59,20 @@ export function ListingCarousel({
 
 export function ListingCarouselSkeleton({ isManaging }: { isManaging: boolean }) {
   return (
-    <div className="sm:pl-16 sm:pr-16">
-      <Carousel>
+    <div className="w-full min-w-0 sm:px-10">
+      <Carousel className="w-full min-w-0">
         <CarouselContent className="-ml-0.5">
           {Array.from({ length: 5 }).map((_, index) => (
             <CarouselItem
               key={index}
-              className="basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5 pl-0.5"
+              className="basis-1/2 sm:basis-48 lg:basis-56 pl-0.5"
             >
               <ListingItemSkeleton isManaging={isManaging} />
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
+        <CarouselPrevious className="hidden sm:inline-flex sm:-left-9" />
+        <CarouselNext className="hidden sm:inline-flex sm:-right-9" />
       </Carousel>
     </div>
   );

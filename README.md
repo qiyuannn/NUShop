@@ -3,20 +3,16 @@
 > A specialized e-commerce platform built specifically for NUS students and campus merchants setting up physical booths or selling items around campus.  
 > Developed as part of the **NUS Orbital Programme** at the **Apollo 11** level.
 
-[![Live Demo](https://img.shields.io/badge/Demo-nushop--dusky.vercel.app-brightgreen)](https://nushop-dusky.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Demo-nushop--tod5.onrender.com-brightgreen)](https://nushop-tod5.onrender.com)
 [![Extended ReadMe / Report](https://img.shields.io/badge/Documentation-Google%20Doc-blue)](https://docs.google.com/document/d/1i_aN_R50m9WxeioYb7ps4PHqel8dD_b_NyIXqX_v8bw/edit?usp=sharing)
-
 ---
-
 ## 👥 Authors & Mentorship
 - **Developers:** Austin Chia & Kong Qi Yuan
 - **Advisor:** Eugene
 - **Achievement Level:** Apollo 11
-
 ---
-
 ## 📌 Quick Links & Demo Credentials
-- **Live Deployment:** [nushop-dusky.vercel.app](https://nushop-dusky.vercel.app) *(Recommended browser: Google Chrome)*
+- **Live Deployment:** [nushop-tod5.onrender.com](https://nushop-tod5.onrender.com) *(Recommended browser: Google Chrome)*
 - **Stripe Test Payment Card:** `4242 4242 4242 4242` (Expiry: any future date, CVC: any 3 digits)
 - **Multi-user Testing (Live Chat):** Open two separate browser instances or incognito windows to test buyer & seller interactions.
 - **Account Verification:** Due to NUS firewalls blocking external SMTP verification emails to `@u.nus.edu`, please sign up using a standard personal email (e.g. Gmail).
